@@ -1,0 +1,26 @@
+{
+  "projectName": "onboard-pro-refactor",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "bun",
+  "includeExamples": false,
+  "tailwind": true,
+  "projectPreset": "default",
+  "addOnOptions": {},
+  "git": false,
+  "install": true,
+  "intent": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "biome",
+    "vercel",
+    "form",
+    "paraglide",
+    "shadcn",
+    "table",
+    "tanstack-query",
+    "storybook"
+  ]
+}
