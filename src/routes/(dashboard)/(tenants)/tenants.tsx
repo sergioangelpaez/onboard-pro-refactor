@@ -3,7 +3,7 @@ import { useAllOrganizations } from "#/hooks/tenants/tenants";
 import { CreateTenantFormDialog } from "@/components/tenants/create-tenant-form";
 import { type Column, GenericTable } from "@/components/tenants/tenants-table";
 
-export const Route = createFileRoute("/(dashboard)/(organizations)/tenants")({
+export const Route = createFileRoute("/(dashboard)/(tenants)/tenants")({
 	component: RouteComponent,
 });
 
@@ -50,7 +50,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="p-6 w-full">
+		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Organizaciones</h1>
 				<CreateTenantFormDialog />

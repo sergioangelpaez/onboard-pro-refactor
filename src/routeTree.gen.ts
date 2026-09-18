@@ -14,7 +14,8 @@ import { Route as dashboardRouteRouteImport } from './routes/(dashboard)/route'
 import { Route as authAuthRouteImport } from './routes/(auth)/auth'
 import { Route as dashboardHomeRouteImport } from './routes/(dashboard)/home'
 import { Route as dashboardProfileRouteImport } from './routes/(dashboard)/profile'
-import { Route as dashboardorganizationsTenantsRouteImport } from './routes/(dashboard)/(organizations)/tenants'
+import { Route as dashboardcoursesCoursesRouteImport } from './routes/(dashboard)/(courses)/courses'
+import { Route as dashboardtenantsTenantsRouteImport } from './routes/(dashboard)/(tenants)/tenants'
 import { Route as dashboardusersUsersRouteImport } from './routes/(dashboard)/(users)/users'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,12 +42,16 @@ const dashboardProfileRoute = dashboardProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => dashboardRouteRoute,
 } as any)
-const dashboardorganizationsTenantsRoute =
-  dashboardorganizationsTenantsRouteImport.update({
-    id: '/(organizations)/tenants',
-    path: '/tenants',
-    getParentRoute: () => dashboardRouteRoute,
-  } as any)
+const dashboardcoursesCoursesRoute = dashboardcoursesCoursesRouteImport.update({
+  id: '/(courses)/courses',
+  path: '/courses',
+  getParentRoute: () => dashboardRouteRoute,
+} as any)
+const dashboardtenantsTenantsRoute = dashboardtenantsTenantsRouteImport.update({
+  id: '/(tenants)/tenants',
+  path: '/tenants',
+  getParentRoute: () => dashboardRouteRoute,
+} as any)
 const dashboardusersUsersRoute = dashboardusersUsersRouteImport.update({
   id: '/(users)/users',
   path: '/users',
@@ -58,7 +63,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof authAuthRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
-  '/tenants': typeof dashboardorganizationsTenantsRoute
+  '/courses': typeof dashboardcoursesCoursesRoute
+  '/tenants': typeof dashboardtenantsTenantsRoute
   '/users': typeof dashboardusersUsersRoute
 }
 export interface FileRoutesByTo {
@@ -66,7 +72,8 @@ export interface FileRoutesByTo {
   '/auth': typeof authAuthRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
-  '/tenants': typeof dashboardorganizationsTenantsRoute
+  '/courses': typeof dashboardcoursesCoursesRoute
+  '/tenants': typeof dashboardtenantsTenantsRoute
   '/users': typeof dashboardusersUsersRoute
 }
 export interface FileRoutesById {
@@ -76,14 +83,16 @@ export interface FileRoutesById {
   '/(auth)/auth': typeof authAuthRoute
   '/(dashboard)/home': typeof dashboardHomeRoute
   '/(dashboard)/profile': typeof dashboardProfileRoute
-  '/(dashboard)/(organizations)/tenants': typeof dashboardorganizationsTenantsRoute
+  '/(dashboard)/(courses)/courses': typeof dashboardcoursesCoursesRoute
+  '/(dashboard)/(tenants)/tenants': typeof dashboardtenantsTenantsRoute
   '/(dashboard)/(users)/users': typeof dashboardusersUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/home' | '/profile' | '/tenants' | '/users'
+  fullPaths:
+    '/' | '/auth' | '/home' | '/profile' | '/courses' | '/tenants' | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/home' | '/profile' | '/tenants' | '/users'
+  to: '/' | '/auth' | '/home' | '/profile' | '/courses' | '/tenants' | '/users'
   id:
     | '__root__'
     | '/'
@@ -91,7 +100,8 @@ export interface FileRouteTypes {
     | '/(auth)/auth'
     | '/(dashboard)/home'
     | '/(dashboard)/profile'
-    | '/(dashboard)/(organizations)/tenants'
+    | '/(dashboard)/(courses)/courses'
+    | '/(dashboard)/(tenants)/tenants'
     | '/(dashboard)/(users)/users'
   fileRoutesById: FileRoutesById
 }
@@ -138,11 +148,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardProfileRouteImport
       parentRoute: typeof dashboardRouteRoute
     }
-    '/(dashboard)/(organizations)/tenants': {
-      id: '/(dashboard)/(organizations)/tenants'
+    '/(dashboard)/(courses)/courses': {
+      id: '/(dashboard)/(courses)/courses'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof dashboardcoursesCoursesRouteImport
+      parentRoute: typeof dashboardRouteRoute
+    }
+    '/(dashboard)/(tenants)/tenants': {
+      id: '/(dashboard)/(tenants)/tenants'
       path: '/tenants'
       fullPath: '/tenants'
-      preLoaderRoute: typeof dashboardorganizationsTenantsRouteImport
+      preLoaderRoute: typeof dashboardtenantsTenantsRouteImport
       parentRoute: typeof dashboardRouteRoute
     }
     '/(dashboard)/(users)/users': {
@@ -158,14 +175,16 @@ declare module '@tanstack/react-router' {
 interface dashboardRouteRouteChildren {
   dashboardHomeRoute: typeof dashboardHomeRoute
   dashboardProfileRoute: typeof dashboardProfileRoute
-  dashboardorganizationsTenantsRoute: typeof dashboardorganizationsTenantsRoute
+  dashboardcoursesCoursesRoute: typeof dashboardcoursesCoursesRoute
+  dashboardtenantsTenantsRoute: typeof dashboardtenantsTenantsRoute
   dashboardusersUsersRoute: typeof dashboardusersUsersRoute
 }
 
 const dashboardRouteRouteChildren: dashboardRouteRouteChildren = {
   dashboardHomeRoute: dashboardHomeRoute,
   dashboardProfileRoute: dashboardProfileRoute,
-  dashboardorganizationsTenantsRoute: dashboardorganizationsTenantsRoute,
+  dashboardcoursesCoursesRoute: dashboardcoursesCoursesRoute,
+  dashboardtenantsTenantsRoute: dashboardtenantsTenantsRoute,
   dashboardusersUsersRoute: dashboardusersUsersRoute,
 }
 
