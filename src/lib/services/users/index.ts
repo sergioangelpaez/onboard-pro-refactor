@@ -7,4 +7,10 @@ export const usersService = {
 			body: JSON.stringify(payload),
 		});
 	},
+
+	async getAllUsers() {
+		return await apiFetch<User[]>("/users/get/all", {
+			method: "GET",
+		});
+	},
 };

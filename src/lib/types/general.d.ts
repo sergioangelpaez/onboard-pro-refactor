@@ -1,0 +1,3 @@
+interface GeneralAPIResponse {
+	message: string;
+}
