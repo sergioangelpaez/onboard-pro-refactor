@@ -6,3 +6,24 @@ export const loginFormSchema = z.object({
 });
 
 export type loginFormValues = z.infer<typeof loginFormSchema>;
+
+export const changePasswordSchema = z
+	.object({
+		actual: z.string().min(1, "Ingresa tu contraseña actual"),
+		nueva: z.string().min(8, "Debe tener al menos 8 caracteres"),
+		confirmar: z.string(),
+	})
+	.refine((data) => data.nueva !== data.actual, {
+		path: ["nueva"],
+		message: "La nueva contraseña debe ser distinta a la actual",
+	})
+	.refine((data) => data.nueva === data.confirmar, {
+		path: ["confirmar"],
+		message: "Las contraseñas no coinciden",
+	});
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
+export type ChangePasswordPayload = Pick<
+	ChangePasswordFormValues,
+	"actual" | "nueva"
+>;

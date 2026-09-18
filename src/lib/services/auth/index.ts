@@ -1,3 +1,4 @@
+import type { ChangePasswordPayload } from "#/lib/schemas/auth";
 import { apiFetch } from "../api-fetch";
 import { tokenStorage } from "../token-storage";
 
@@ -33,8 +34,17 @@ export const authService = {
 		return `${import.meta.env.VITE_API_URL}/auth/microsoft`;
 	},
 
+	/** Logs out the current user by removing the token and redirecting to the auth page. */
 	logOut() {
 		tokenStorage.remove();
 		window.location.href = "/auth";
+	},
+
+	/** Changes the password for the current authenticated user. */
+	async changePassword(values: ChangePasswordPayload) {
+		return await apiFetch<GeneralAPIResponse>("/auth/change-password", {
+			method: "POST",
+			body: JSON.stringify(values),
+		});
 	},
 };
