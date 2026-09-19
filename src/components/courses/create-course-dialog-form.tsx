@@ -2,9 +2,12 @@ import { useForm } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useForgotPassword } from "#/hooks/auth/use-forgot-password";
-import { forgotPasswordSchema } from "#/lib/schemas/auth";
-import { Button } from "@/components/ui/button";
+import { useCreateCourse } from "#/hooks/courses/use-create-course";
+import {
+	type CreateCoursePayload,
+	createCourseSchema,
+} from "@/lib/schemas/courses";
+import { Button } from "../ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -13,28 +16,27 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+} from "../ui/dialog";
+import { Field, FieldError, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
 
-export function ForgotPasswordDialog() {
+export function CreateCourseDialogForm() {
 	const [open, setOpen] = useState(false);
-	const { mutate, isPending } = useForgotPassword();
+	const { mutate, isPending } = useCreateCourse();
 
 	const form = useForm({
-		defaultValues: { email: "" },
-		validators: { onChange: forgotPasswordSchema },
+		defaultValues: { name: "", description: "" } satisfies CreateCoursePayload,
+		validators: { onChange: createCourseSchema },
 		onSubmit: ({ value }) =>
 			mutate(value, {
 				onSuccess: () => {
-					toast.success("Revisa tu correo", {
-						description:
-							"Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña. Vence en 60 minutos.",
+					toast.success("Curso creado", {
+						description: `Se creó el curso "${value.name}".`,
 					});
 					handleOpenChange(false);
 				},
 				onError: (error) => {
-					toast.error("No se pudo enviar la solicitud", {
+					toast.error("Error al crear el curso", {
 						description: error.message,
 					});
 				},
@@ -47,47 +49,55 @@ export function ForgotPasswordDialog() {
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={handleOpenChange}>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button
-					type="button"
-					variant="link"
-					className="h-auto p-0 text-xs font-normal"
-				>
-					¿Olvidaste tu contraseña?
-				</Button>
+				<Button>Crear Curso</Button>
 			</DialogTrigger>
 
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Recuperar contraseña</DialogTitle>
+					<DialogTitle>Crear curso</DialogTitle>
 					<DialogDescription>
-						Ingresa tu correo y te enviaremos un enlace para restablecerla.
+						Completa los datos para registrar un nuevo curso.
 					</DialogDescription>
 				</DialogHeader>
-
 				<form
-					id="forgot-password-form"
+					id="course-form"
 					onSubmit={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
 						form.handleSubmit();
 					}}
+					className="flex flex-col gap-4"
 				>
-					<form.Field name="email">
+					<form.Field name="name">
 						{(field) => {
 							const isInvalid =
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>
-										Correo electrónico
-									</FieldLabel>
+									<FieldLabel htmlFor="name">Nombre</FieldLabel>
 									<Input
 										id={field.name}
-										type="email"
-										autoComplete="email"
-										placeholder="correo@ejemplo.com"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
+					</form.Field>
+
+					<form.Field name="description">
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor="description">Descripción</FieldLabel>
+									<Input
+										id={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
@@ -112,11 +122,11 @@ export function ForgotPasswordDialog() {
 						{(canSubmit) => (
 							<Button
 								type="submit"
-								form="forgot-password-form"
+								form="course-form"
 								disabled={!canSubmit || isPending}
 							>
 								{isPending && <LoaderCircle className="animate-spin" />}
-								Enviar enlace
+								Crear curso
 							</Button>
 						)}
 					</form.Subscribe>

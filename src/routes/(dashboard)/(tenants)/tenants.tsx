@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useAllOrganizations } from "#/hooks/tenants/tenants";
-import { CreateTenantFormDialog } from "@/components/tenants/create-tenant-form";
+import { CreateTenantDialogForm } from "#/components/tenants/create-tenant-dialog-form";
+import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
 import { type Column, GenericTable } from "@/components/tenants/tenants-table";
 
 export const Route = createFileRoute("/(dashboard)/(tenants)/tenants")({
-	component: RouteComponent,
+	component: TenantsRoute,
 });
 
 const columns: Column<Tenant>[] = [
@@ -38,8 +38,8 @@ const columns: Column<Tenant>[] = [
 	},
 ];
 
-function RouteComponent() {
-	const { data, isLoading, isError, error } = useAllOrganizations();
+function TenantsRoute() {
+	const { data, isLoading, isError, error } = useAllTenants();
 
 	if (isError) {
 		return (
@@ -53,7 +53,7 @@ function RouteComponent() {
 		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Organizaciones</h1>
-				<CreateTenantFormDialog />
+				<CreateTenantDialogForm />
 			</div>
 
 			<GenericTable

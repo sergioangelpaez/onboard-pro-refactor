@@ -1,11 +1,11 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { getMeFn } from "#/lib/services/auth/functions";
+import { authService } from "#/lib/services/auth";
 import { queryKeys } from "#/lib/utils/query-keys";
 
 export function useCurrentUser() {
 	const { data, error, isError, isLoading } = useSuspenseQuery({
 		queryKey: queryKeys.users.me,
-		queryFn: getMeFn,
+		queryFn: authService.getMe,
 		staleTime: 1000 * 60 * 5,
 	});
 

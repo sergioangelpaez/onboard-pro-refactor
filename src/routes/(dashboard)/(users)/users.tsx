@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreateUserDialog } from "#/components/users/create-user-dialog";
+import { CreateUserDialogForm } from "#/components/users/create-user-dialog-form";
 
 export const Route = createFileRoute("/(dashboard)/(users)/users")({
-	component: RouteComponent,
+	component: UsersRoute,
 });
 
-function RouteComponent() {
+function UsersRoute() {
 	return (
 		<div className="p-6">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Usuarios</h1>
-				<CreateUserDialog />
+				<CreateUserDialogForm />
 			</div>
 		</div>
 	);

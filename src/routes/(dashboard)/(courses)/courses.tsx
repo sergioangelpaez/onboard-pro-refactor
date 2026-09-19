@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreateCourseForm } from "#/components/courses/create-course-form";
+import { CreateCourseDialogForm } from "#/components/courses/create-course-dialog-form";
 
 export const Route = createFileRoute("/(dashboard)/(courses)/courses")({
-	component: RouteComponent,
+	component: CoursesRoute,
 });
 
-function RouteComponent() {
+function CoursesRoute() {
 	return (
 		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Cursos</h1>
-				<CreateCourseForm />
+				<CreateCourseDialogForm />
 			</div>
 		</div>
 	);

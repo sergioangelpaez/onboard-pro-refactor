@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { PasswordField } from "../shared/form/password-field";
 
-export function ChangePasswordDialog() {
+export function ChangePasswordDialogForm() {
 	const [open, setOpen] = useState(false);
 	const { mutate, isPending } = useChangePassword();
 
@@ -28,7 +28,7 @@ export function ChangePasswordDialog() {
 			actual: "",
 			nueva: "",
 			confirmar: "",
-		} satisfies ChangePasswordFormValues,
+		} as ChangePasswordFormValues,
 		validators: { onChange: changePasswordSchema },
 		onSubmit: ({ value }) =>
 			mutate(

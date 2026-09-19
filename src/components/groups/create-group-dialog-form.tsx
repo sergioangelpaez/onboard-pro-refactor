@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { Check, ChevronsUpDown, LoaderCircle, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCreateGroup } from "#/hooks/groups";
+import { useCreateGroup } from "#/hooks/groups/use-create-groups";
 import {
 	type CreateGroupPayload,
 	createGroupSchema,
@@ -32,7 +32,7 @@ import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
-export function CreateGroupForm() {
+export function CreateGroupDialogForm() {
 	const [open, setOpen] = useState(false);
 	const { mutate, isPending } = useCreateGroup();
 	const { data: users = [] } = useUsers();

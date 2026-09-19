@@ -1,17 +1,12 @@
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
-import { Separator } from "#/components/ui/separator";
-import { loginFormSchema } from "#/lib/schemas/auth";
+import { useLogin } from "#/hooks/auth/use-login";
 import { authService } from "#/lib/services/auth";
-import type { ApiError } from "#/lib/services/errors";
-import { queryKeys } from "#/lib/utils/query-keys";
 import GoogleLogo from "@/assets/google-logo.svg";
 import MicrosoftLogo from "@/assets/microsoft-logo.svg";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -21,58 +16,33 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import type { loginFormValues } from "@/lib/schemas/auth";
-import { ForgotPasswordDialog } from "./forgot-password-dialog";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { type LoginFormValues, loginFormSchema } from "@/lib/schemas/auth";
+import { PasswordField } from "../shared/form/password-field";
+import { ForgotPasswordDialogForm } from "./forgot-password-dialog-form";
 
 export function LoginForm() {
 	const router = useRouter();
-	const queryClient = useQueryClient();
+	const { mutate, isPending } = useLogin();
 
 	const form = useForm({
-		defaultValues: {
-			email: "",
-			password: "",
-		},
-		validators: {
-			onChange: loginFormSchema,
-		},
-		onSubmit: async ({ value }) => {
-			await loginFormMutation.mutateAsync(value);
-		},
+		defaultValues: { email: "", password: "" } satisfies LoginFormValues,
+		validators: { onChange: loginFormSchema },
+		onSubmit: ({ value }) =>
+			mutate(value, {
+				onSuccess: () => {
+					toast.success("¡Bienvenido de nuevo!");
+					router.navigate({ to: "/home" });
+				},
+				onError: (error) => {
+					toast.error("Error al iniciar sesión", {
+						description:
+							error.message || "Ocurrió un error. Intenta nuevamente.",
+					});
+				},
+			}),
 	});
-
-	const loginFormMutation = useMutation({
-		mutationFn: async (values: loginFormValues) => {
-			return await authService.logIn(values);
-		},
-		onMutate: () => {
-			const toastId = toast.loading("Iniciando sesión...");
-			return { toastId };
-		},
-		onSuccess: async (_data, _variables, mutationContext) => {
-			form.reset();
-			toast.success("¡Bienvenido de nuevo!", { id: mutationContext?.toastId });
-
-			await queryClient.invalidateQueries({ queryKey: queryKeys.users.me });
-
-			router.navigate({ to: "/home" });
-		},
-		onError: (error: ApiError, _variables, mutationContext) => {
-			toast.error(
-				error?.message ||
-					"Ocurrió un error al iniciar sesión. Intenta nuevamente.",
-				{ id: mutationContext?.toastId },
-			);
-		},
-	});
-
-	const handleGoogleLogin = () => {
-		window.location.href = authService.googleLogin();
-	};
-
-	const handleMicrosoftLogin = () => {
-		window.location.href = authService.microsoftLogin();
-	};
 
 	return (
 		<Card className="w-full max-w-sm border-none shadow-2xl">
@@ -82,6 +52,7 @@ export function LoginForm() {
 					Ingresa tu correo electrónico y contraseña para acceder a tu cuenta.
 				</CardDescription>
 			</CardHeader>
+
 			<CardContent>
 				<form
 					id="login-form"
@@ -90,71 +61,57 @@ export function LoginForm() {
 						e.stopPropagation();
 						form.handleSubmit();
 					}}
+					className="flex flex-col gap-6"
 				>
-					<div className="flex flex-col gap-6">
-						<form.Field name="email">
-							{(field) => {
-								return (
-									<Field data-invalid={!field.state.meta.isValid}>
-										<FieldLabel htmlFor={field.name}>
-											Correo Electrónico
-										</FieldLabel>
-										<Input
-											id={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="correo@ejemplo.com"
-											autoComplete="off"
-										/>
-										{!field.state.meta.isValid && (
-											<FieldError errors={field.state.meta.errors} />
-										)}
-									</Field>
-								);
-							}}
-						</form.Field>
+					<form.Field name="email">
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>
+										Correo electrónico
+									</FieldLabel>
+									<Input
+										id={field.name}
+										type="email"
+										autoComplete="email"
+										placeholder="correo@ejemplo.com"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
+					</form.Field>
 
-						<form.Field name="password">
-							{(field) => {
-								return (
-									<Field data-invalid={!field.state.meta.isValid}>
-										<div className="flex justify-between items-end">
-											<FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>
-											<ForgotPasswordDialog />
-										</div>
-										<Input
-											id={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											type="password"
-											autoComplete="off"
-										/>
-										{!field.state.meta.isValid && (
-											<FieldError errors={field.state.meta.errors} />
-										)}
-									</Field>
-								);
-							}}
-						</form.Field>
-					</div>
+					<form.Field name="password">
+						{(field) => (
+							<PasswordField
+								field={field}
+								label="Contraseña"
+								autoComplete="current-password"
+								labelAction={<ForgotPasswordDialogForm />}
+							/>
+						)}
+					</form.Field>
 				</form>
 			</CardContent>
+
 			<CardFooter className="w-full flex-col gap-2">
-				<form.Subscribe
-					selector={(state) => [state.canSubmit, state.isSubmitting]}
-				>
-					{([canSubmit, isSubmitting]) => (
+				<form.Subscribe selector={(s) => s.canSubmit}>
+					{(canSubmit) => (
 						<Button
 							type="submit"
-							className="w-full"
-							disabled={!canSubmit}
 							form="login-form"
+							className="w-full"
+							disabled={!canSubmit || isPending}
 						>
-							{isSubmitting ? (
+							{isPending ? (
 								<>
-									<LoaderCircle className="animate-spin" />{" "}
+									<LoaderCircle className="animate-spin" />
 									<span>Ingresando...</span>
 								</>
 							) : (
@@ -163,35 +120,35 @@ export function LoginForm() {
 						</Button>
 					)}
 				</form.Subscribe>
+
 				<div className="my-2 grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4">
-					<Separator orientation="horizontal" />
+					<Separator />
 					<p>o</p>
 					<Separator />
 				</div>
+
 				<Button
+					type="button"
 					variant="outline"
 					className="w-full"
-					onClick={handleGoogleLogin}
+					disabled={isPending}
+					onClick={() => {
+						window.location.href = authService.googleLogin();
+					}}
 				>
-					<img
-						src={GoogleLogo}
-						alt=""
-						className="h-5 w-5"
-						fetchPriority="high"
-					/>
+					<img src={GoogleLogo} alt="" className="h-5 w-5" />
 					Ingresar con Google
 				</Button>
 				<Button
+					type="button"
 					variant="outline"
 					className="w-full"
-					onClick={handleMicrosoftLogin}
+					disabled={isPending}
+					onClick={() => {
+						window.location.href = authService.microsoftLogin();
+					}}
 				>
-					<img
-						src={MicrosoftLogo}
-						alt=""
-						className="h-5 w-5"
-						fetchPriority="high"
-					/>
+					<img src={MicrosoftLogo} alt="" className="h-5 w-5" />
 					Ingresar con Microsoft
 				</Button>
 			</CardFooter>

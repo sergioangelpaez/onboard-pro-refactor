@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreateGroupForm } from "#/components/groups/create-group-form";
+import { CreateGroupDialogForm } from "#/components/groups/create-group-dialog-form";
 
 export const Route = createFileRoute("/(dashboard)/(groups)/groups")({
-	component: RouteComponent,
+	component: GroupsRoute,
 });
 
-function RouteComponent() {
+function GroupsRoute() {
 	return (
 		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Grupos</h1>
-				<CreateGroupForm />
+				<CreateGroupDialogForm />
 			</div>
 		</div>
 	);

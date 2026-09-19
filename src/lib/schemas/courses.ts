@@ -7,10 +7,10 @@ export const courseSchema = z.object({
 	userIds: z.array(z.uuid()).default([]),
 });
 
-export type Course = z.infer<typeof courseSchema>;
-
 export const createCourseSchema = courseSchema.omit({
 	id: true,
 	userIds: true,
 });
+
+export type Course = z.infer<typeof courseSchema>;
 export type CreateCoursePayload = z.infer<typeof createCourseSchema>;

@@ -2,12 +2,12 @@ import { useForm } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCreateCourse } from "#/hooks/courses";
 import {
-	type CreateCoursePayload,
-	createCourseSchema,
-} from "@/lib/schemas/courses";
-import { Button } from "../ui/button";
+	type CreateTenantPayload,
+	createTenantSchema,
+} from "#/lib/schemas/tenants";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -16,27 +16,32 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
-import { Field, FieldError, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
+} from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useCreateTenant } from "@/hooks/tenants/use-create-tenant";
 
-export function CreateCourseForm() {
+export function CreateTenantDialogForm() {
 	const [open, setOpen] = useState(false);
-	const { mutate, isPending } = useCreateCourse();
+	const { mutate, isPending } = useCreateTenant();
 
 	const form = useForm({
-		defaultValues: { name: "", description: "" } satisfies CreateCoursePayload,
-		validators: { onChange: createCourseSchema },
+		defaultValues: {
+			name: "",
+			domain: "",
+			active: true,
+		} as CreateTenantPayload,
+		validators: { onChange: createTenantSchema },
 		onSubmit: ({ value }) =>
 			mutate(value, {
 				onSuccess: () => {
-					toast.success("Curso creado", {
-						description: `Se creó el curso "${value.name}".`,
+					toast.success("Organización creada", {
+						description: `Se creó la organización "${value.name}".`,
 					});
 					handleOpenChange(false);
 				},
 				onError: (error) => {
-					toast.error("Error al crear el curso", {
+					toast.error("Error al crear la organización", {
 						description: error.message,
 					});
 				},
@@ -49,20 +54,21 @@ export function CreateCourseForm() {
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
-				<Button>Crear Curso</Button>
+				<Button>Nueva organización</Button>
 			</DialogTrigger>
 
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Crear curso</DialogTitle>
+					<DialogTitle>Crear organización</DialogTitle>
 					<DialogDescription>
-						Completa los datos para registrar un nuevo curso.
+						Completa los datos para registrar una nueva organización.
 					</DialogDescription>
 				</DialogHeader>
+
 				<form
-					id="course-form"
+					id="create-organization-form"
 					onSubmit={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
@@ -76,9 +82,10 @@ export function CreateCourseForm() {
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor="name">Nombre</FieldLabel>
+									<FieldLabel htmlFor={field.name}>Nombre</FieldLabel>
 									<Input
 										id={field.name}
+										placeholder="Acme Corp"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
@@ -89,15 +96,16 @@ export function CreateCourseForm() {
 						}}
 					</form.Field>
 
-					<form.Field name="description">
+					<form.Field name="domain">
 						{(field) => {
 							const isInvalid =
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor="description">Descripción</FieldLabel>
+									<FieldLabel htmlFor={field.name}>Dominio</FieldLabel>
 									<Input
 										id={field.name}
+										placeholder="acme.com"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
@@ -106,6 +114,21 @@ export function CreateCourseForm() {
 								</Field>
 							);
 						}}
+					</form.Field>
+
+					<form.Field name="active">
+						{(field) => (
+							<Field orientation="horizontal">
+								<Checkbox
+									id={field.name}
+									checked={field.state.value}
+									onCheckedChange={(checked) =>
+										field.handleChange(checked === true)
+									}
+								/>
+								<FieldLabel htmlFor={field.name}>Activa</FieldLabel>
+							</Field>
+						)}
 					</form.Field>
 				</form>
 
@@ -122,11 +145,11 @@ export function CreateCourseForm() {
 						{(canSubmit) => (
 							<Button
 								type="submit"
-								form="course-form"
+								form="create-organization-form"
 								disabled={!canSubmit || isPending}
 							>
 								{isPending && <LoaderCircle className="animate-spin" />}
-								Crear curso
+								{isPending ? "Creando..." : "Crear organización"}
 							</Button>
 						)}
 					</form.Subscribe>

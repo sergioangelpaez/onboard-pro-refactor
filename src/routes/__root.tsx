@@ -6,10 +6,8 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { Toaster } from "#/components/ui/sonner";
-import { getMeFn } from "#/lib/services/auth/functions";
-import { queryKeys } from "#/lib/utils/query-keys";
-import { getLocale } from "#/paraglide/runtime";
+import { Toaster } from "@/components/ui/sonner";
+import { getLocale } from "@/paraglide/runtime";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
@@ -18,19 +16,6 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-	beforeLoad: async ({ context }) => {
-		if (typeof document !== "undefined") {
-			document.documentElement.setAttribute("lang", getLocale());
-		}
-
-		const user = await context.queryClient.query({
-			queryKey: queryKeys.users.me,
-			queryFn: getMeFn,
-		});
-
-		return { user };
-	},
-
 	head: () => ({
 		meta: [
 			{

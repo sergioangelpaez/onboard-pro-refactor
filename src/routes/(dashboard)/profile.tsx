@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ChangePasswordDialog } from "#/components/auth/change-password-dialog";
+import { ChangePasswordDialogForm } from "#/components/auth/change-password-dialog-form";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +13,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/(dashboard)/profile")({
-	component: RouteComponent,
+	component: ProfileRoute,
 });
 
-function RouteComponent() {
+function ProfileRoute() {
 	const { user } = useCurrentUser();
 
 	if (!user) return null;
@@ -29,7 +29,7 @@ function RouteComponent() {
 			<div className="flex w-full flex-col ">
 				<div className="mb-4 flex items-center justify-between">
 					<h1>Perfil</h1>
-					<ChangePasswordDialog />
+					<ChangePasswordDialogForm />
 				</div>
 				<Card>
 					<CardHeader className="flex flex-row items-center gap-4">

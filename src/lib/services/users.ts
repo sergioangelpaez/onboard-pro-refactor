@@ -1,4 +1,5 @@
-import { apiFetch } from "../api-fetch";
+import type { CreateUserPayload, User } from "../schemas/users";
+import { apiFetch } from "./api-fetch";
 
 export const usersService = {
 	async createUser(payload: CreateUserPayload) {

@@ -1,5 +1,5 @@
 import type { CreateCoursePayload } from "#/lib/schemas/courses";
-import { apiFetch } from "../api-fetch";
+import { apiFetch } from "./api-fetch";
 
 export const coursesService = {
 	async createCourse(values: CreateCoursePayload) {
