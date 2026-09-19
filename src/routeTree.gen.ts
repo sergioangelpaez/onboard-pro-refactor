@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as dashboardRouteRouteImport } from './routes/(dashboard)/route'
 import { Route as authAuthRouteImport } from './routes/(auth)/auth'
+import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as dashboardHomeRouteImport } from './routes/(dashboard)/home'
 import { Route as dashboardProfileRouteImport } from './routes/(dashboard)/profile'
 import { Route as dashboardcoursesCoursesRouteImport } from './routes/(dashboard)/(courses)/courses'
@@ -31,6 +32,11 @@ const dashboardRouteRoute = dashboardRouteRouteImport.update({
 const authAuthRoute = authAuthRouteImport.update({
   id: '/(auth)/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authResetPasswordRoute = authResetPasswordRouteImport.update({
+  id: '/(auth)/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const dashboardHomeRoute = dashboardHomeRouteImport.update({
@@ -67,6 +73,7 @@ const dashboardusersUsersRoute = dashboardusersUsersRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof authAuthRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
   '/courses': typeof dashboardcoursesCoursesRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof authAuthRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
   '/courses': typeof dashboardcoursesCoursesRoute
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(dashboard)': typeof dashboardRouteRouteWithChildren
   '/(auth)/auth': typeof authAuthRoute
+  '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(dashboard)/home': typeof dashboardHomeRoute
   '/(dashboard)/profile': typeof dashboardProfileRoute
   '/(dashboard)/(courses)/courses': typeof dashboardcoursesCoursesRoute
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/home'
     | '/profile'
     | '/courses'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/home'
     | '/profile'
     | '/courses'
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/'
     | '/(dashboard)'
     | '/(auth)/auth'
+    | '/(auth)/reset-password'
     | '/(dashboard)/home'
     | '/(dashboard)/profile'
     | '/(dashboard)/(courses)/courses'
@@ -134,6 +146,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   dashboardRouteRoute: typeof dashboardRouteRouteWithChildren
   authAuthRoute: typeof authAuthRoute
+  authResetPasswordRoute: typeof authResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -157,6 +170,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof authAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/reset-password': {
+      id: '/(auth)/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof authResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(dashboard)/home': {
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   dashboardRouteRoute: dashboardRouteRouteWithChildren,
   authAuthRoute: authAuthRoute,
+  authResetPasswordRoute: authResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

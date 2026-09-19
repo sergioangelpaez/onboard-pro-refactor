@@ -1,5 +1,4 @@
-// components/profile/change-password-dialog.tsx
-import { type AnyFieldApi, useForm } from "@tanstack/react-form";
+import { useForm } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,8 +17,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordField } from "../shared/form/password-field";
 
 export function ChangePasswordDialog() {
 	const [open, setOpen] = useState(false);
@@ -132,31 +130,5 @@ export function ChangePasswordDialog() {
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
-	);
-}
-
-function PasswordField({
-	field,
-	label,
-	autoComplete,
-}: {
-	field: AnyFieldApi;
-	label: string;
-	autoComplete: string;
-}) {
-	const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-	return (
-		<Field data-invalid={isInvalid}>
-			<FieldLabel htmlFor={field.name}>{label}</FieldLabel>
-			<Input
-				id={field.name}
-				type="password"
-				autoComplete={autoComplete}
-				value={field.state.value}
-				onBlur={field.handleBlur}
-				onChange={(e) => field.handleChange(e.target.value)}
-			/>
-			{isInvalid && <FieldError errors={field.state.meta.errors} />}
-		</Field>
 	);
 }

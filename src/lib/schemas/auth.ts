@@ -27,3 +27,23 @@ export type ChangePasswordPayload = Pick<
 	ChangePasswordFormValues,
 	"actual" | "nueva"
 >;
+
+const newPasswordRule = z.string().min(8, "Debe tener al menos 8 caracteres");
+
+export const forgotPasswordSchema = z.object({
+	email: z.email("Ingresa un correo válido"),
+});
+export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+	.object({
+		nueva: newPasswordRule,
+		confirmar: z.string(),
+	})
+	.refine((data) => data.nueva === data.confirmar, {
+		path: ["confirmar"],
+		message: "Las contraseñas no coinciden",
+	});
+
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+export type ResetPasswordPayload = { token: string; nueva: string };

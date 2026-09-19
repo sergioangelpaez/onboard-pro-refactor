@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import type { loginFormValues } from "@/lib/schemas/auth";
+import { ForgotPasswordDialog } from "./forgot-password-dialog";
 
 export function LoginForm() {
 	const router = useRouter();
@@ -118,7 +119,10 @@ export function LoginForm() {
 							{(field) => {
 								return (
 									<Field data-invalid={!field.state.meta.isValid}>
-										<FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>
+										<div className="flex justify-between items-end">
+											<FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>
+											<ForgotPasswordDialog />
+										</div>
 										<Input
 											id={field.name}
 											value={field.state.value}
