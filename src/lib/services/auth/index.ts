@@ -1,3 +1,8 @@
+import type {
+	ChangePasswordPayload,
+	ForgotPasswordValues,
+	ResetPasswordPayload,
+} from "#/lib/schemas/auth";
 import { apiFetch } from "../api-fetch";
 import { tokenStorage } from "../token-storage";
 
@@ -33,8 +38,33 @@ export const authService = {
 		return `${import.meta.env.VITE_API_URL}/auth/microsoft`;
 	},
 
+	/** Logs out the current user by removing the token and redirecting to the auth page. */
 	logOut() {
 		tokenStorage.remove();
 		window.location.href = "/auth";
+	},
+
+	/** Changes the password for the current authenticated user. */
+	async changePassword(values: ChangePasswordPayload) {
+		return await apiFetch<GeneralAPIResponse>("/auth/change-password", {
+			method: "POST",
+			body: JSON.stringify(values),
+		});
+	},
+
+	/** Initiates the forgot password process by sending a reset link to the user's email. */
+	async forgotPassword(values: ForgotPasswordValues) {
+		return await apiFetch<GeneralAPIResponse>("/auth/forgot-password", {
+			method: "POST",
+			body: JSON.stringify(values),
+		});
+	},
+
+	/** Resets the user's password using the provided token and new password. */
+	async resetPassword(values: ResetPasswordPayload) {
+		return await apiFetch<GeneralAPIResponse>("/auth/reset-password", {
+			method: "POST",
+			body: JSON.stringify(values),
+		});
 	},
 };

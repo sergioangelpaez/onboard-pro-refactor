@@ -1,6 +1,12 @@
 "use client";
 
-import { BuildingComplex, GalleryVerticalEnd, Users } from "lucide-react";
+import {
+	BuildingComplex,
+	GalleryVerticalEnd,
+	LibraryBig,
+	UserGroup,
+	Users,
+} from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import {
@@ -34,6 +40,21 @@ const data = {
 			title: "Usuarios",
 			url: "/users",
 			icon: Users,
+			isActive: false,
+			isCollapsible: false,
+		},
+		{
+			title: "Cursos",
+			url: "/courses",
+			icon: LibraryBig,
+			isActive: false,
+			isCollapsible: false,
+		},
+
+		{
+			title: "Grupos",
+			url: "/groups",
+			icon: UserGroup,
 			isActive: false,
 			isCollapsible: false,
 		},

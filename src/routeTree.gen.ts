@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as dashboardRouteRouteImport } from './routes/(dashboard)/route'
 import { Route as authAuthRouteImport } from './routes/(auth)/auth'
+import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as dashboardHomeRouteImport } from './routes/(dashboard)/home'
 import { Route as dashboardProfileRouteImport } from './routes/(dashboard)/profile'
-import { Route as dashboardorganizationsTenantsRouteImport } from './routes/(dashboard)/(organizations)/tenants'
+import { Route as dashboardcoursesCoursesRouteImport } from './routes/(dashboard)/(courses)/courses'
+import { Route as dashboardgroupsGroupsRouteImport } from './routes/(dashboard)/(groups)/groups'
+import { Route as dashboardtenantsTenantsRouteImport } from './routes/(dashboard)/(tenants)/tenants'
 import { Route as dashboardusersUsersRouteImport } from './routes/(dashboard)/(users)/users'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,6 +34,11 @@ const authAuthRoute = authAuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authResetPasswordRoute = authResetPasswordRouteImport.update({
+  id: '/(auth)/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const dashboardHomeRoute = dashboardHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -41,12 +49,21 @@ const dashboardProfileRoute = dashboardProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => dashboardRouteRoute,
 } as any)
-const dashboardorganizationsTenantsRoute =
-  dashboardorganizationsTenantsRouteImport.update({
-    id: '/(organizations)/tenants',
-    path: '/tenants',
-    getParentRoute: () => dashboardRouteRoute,
-  } as any)
+const dashboardcoursesCoursesRoute = dashboardcoursesCoursesRouteImport.update({
+  id: '/(courses)/courses',
+  path: '/courses',
+  getParentRoute: () => dashboardRouteRoute,
+} as any)
+const dashboardgroupsGroupsRoute = dashboardgroupsGroupsRouteImport.update({
+  id: '/(groups)/groups',
+  path: '/groups',
+  getParentRoute: () => dashboardRouteRoute,
+} as any)
+const dashboardtenantsTenantsRoute = dashboardtenantsTenantsRouteImport.update({
+  id: '/(tenants)/tenants',
+  path: '/tenants',
+  getParentRoute: () => dashboardRouteRoute,
+} as any)
 const dashboardusersUsersRoute = dashboardusersUsersRouteImport.update({
   id: '/(users)/users',
   path: '/users',
@@ -56,17 +73,23 @@ const dashboardusersUsersRoute = dashboardusersUsersRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof authAuthRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
-  '/tenants': typeof dashboardorganizationsTenantsRoute
+  '/courses': typeof dashboardcoursesCoursesRoute
+  '/groups': typeof dashboardgroupsGroupsRoute
+  '/tenants': typeof dashboardtenantsTenantsRoute
   '/users': typeof dashboardusersUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof authAuthRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
-  '/tenants': typeof dashboardorganizationsTenantsRoute
+  '/courses': typeof dashboardcoursesCoursesRoute
+  '/groups': typeof dashboardgroupsGroupsRoute
+  '/tenants': typeof dashboardtenantsTenantsRoute
   '/users': typeof dashboardusersUsersRoute
 }
 export interface FileRoutesById {
@@ -74,24 +97,48 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(dashboard)': typeof dashboardRouteRouteWithChildren
   '/(auth)/auth': typeof authAuthRoute
+  '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(dashboard)/home': typeof dashboardHomeRoute
   '/(dashboard)/profile': typeof dashboardProfileRoute
-  '/(dashboard)/(organizations)/tenants': typeof dashboardorganizationsTenantsRoute
+  '/(dashboard)/(courses)/courses': typeof dashboardcoursesCoursesRoute
+  '/(dashboard)/(groups)/groups': typeof dashboardgroupsGroupsRoute
+  '/(dashboard)/(tenants)/tenants': typeof dashboardtenantsTenantsRoute
   '/(dashboard)/(users)/users': typeof dashboardusersUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/home' | '/profile' | '/tenants' | '/users'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/home'
+    | '/profile'
+    | '/courses'
+    | '/groups'
+    | '/tenants'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/home' | '/profile' | '/tenants' | '/users'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/home'
+    | '/profile'
+    | '/courses'
+    | '/groups'
+    | '/tenants'
+    | '/users'
   id:
     | '__root__'
     | '/'
     | '/(dashboard)'
     | '/(auth)/auth'
+    | '/(auth)/reset-password'
     | '/(dashboard)/home'
     | '/(dashboard)/profile'
-    | '/(dashboard)/(organizations)/tenants'
+    | '/(dashboard)/(courses)/courses'
+    | '/(dashboard)/(groups)/groups'
+    | '/(dashboard)/(tenants)/tenants'
     | '/(dashboard)/(users)/users'
   fileRoutesById: FileRoutesById
 }
@@ -99,6 +146,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   dashboardRouteRoute: typeof dashboardRouteRouteWithChildren
   authAuthRoute: typeof authAuthRoute
+  authResetPasswordRoute: typeof authResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -124,6 +172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/reset-password': {
+      id: '/(auth)/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof authResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(dashboard)/home': {
       id: '/(dashboard)/home'
       path: '/home'
@@ -138,11 +193,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardProfileRouteImport
       parentRoute: typeof dashboardRouteRoute
     }
-    '/(dashboard)/(organizations)/tenants': {
-      id: '/(dashboard)/(organizations)/tenants'
+    '/(dashboard)/(courses)/courses': {
+      id: '/(dashboard)/(courses)/courses'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof dashboardcoursesCoursesRouteImport
+      parentRoute: typeof dashboardRouteRoute
+    }
+    '/(dashboard)/(groups)/groups': {
+      id: '/(dashboard)/(groups)/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof dashboardgroupsGroupsRouteImport
+      parentRoute: typeof dashboardRouteRoute
+    }
+    '/(dashboard)/(tenants)/tenants': {
+      id: '/(dashboard)/(tenants)/tenants'
       path: '/tenants'
       fullPath: '/tenants'
-      preLoaderRoute: typeof dashboardorganizationsTenantsRouteImport
+      preLoaderRoute: typeof dashboardtenantsTenantsRouteImport
       parentRoute: typeof dashboardRouteRoute
     }
     '/(dashboard)/(users)/users': {
@@ -158,14 +227,18 @@ declare module '@tanstack/react-router' {
 interface dashboardRouteRouteChildren {
   dashboardHomeRoute: typeof dashboardHomeRoute
   dashboardProfileRoute: typeof dashboardProfileRoute
-  dashboardorganizationsTenantsRoute: typeof dashboardorganizationsTenantsRoute
+  dashboardcoursesCoursesRoute: typeof dashboardcoursesCoursesRoute
+  dashboardgroupsGroupsRoute: typeof dashboardgroupsGroupsRoute
+  dashboardtenantsTenantsRoute: typeof dashboardtenantsTenantsRoute
   dashboardusersUsersRoute: typeof dashboardusersUsersRoute
 }
 
 const dashboardRouteRouteChildren: dashboardRouteRouteChildren = {
   dashboardHomeRoute: dashboardHomeRoute,
   dashboardProfileRoute: dashboardProfileRoute,
-  dashboardorganizationsTenantsRoute: dashboardorganizationsTenantsRoute,
+  dashboardcoursesCoursesRoute: dashboardcoursesCoursesRoute,
+  dashboardgroupsGroupsRoute: dashboardgroupsGroupsRoute,
+  dashboardtenantsTenantsRoute: dashboardtenantsTenantsRoute,
   dashboardusersUsersRoute: dashboardusersUsersRoute,
 }
 
@@ -177,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   dashboardRouteRoute: dashboardRouteRouteWithChildren,
   authAuthRoute: authAuthRoute,
+  authResetPasswordRoute: authResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

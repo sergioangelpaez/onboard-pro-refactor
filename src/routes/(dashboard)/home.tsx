@@ -9,8 +9,8 @@ export const Route = createFileRoute("/(dashboard)/home")({
 
 function HomeComponent() {
 	return (
-		<div>
-			<h1 className="text-2xl font-bold">Bienvenido al Home</h1>
+		<div className="app-container">
+			<h1>Bienvenido al Home</h1>
 		</div>
 	);
 }

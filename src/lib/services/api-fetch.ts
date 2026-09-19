@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "./errors";
+import { ApiError, InvalidCredentialsError, UnauthorizedError } from "./errors";
 import { tokenStorage } from "./token-storage";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -27,13 +27,7 @@ export async function apiFetch<T>(
 
 	if (!res.ok) {
 		if (res.status === 401) {
-			throw new UnauthorizedError();
-		}
-
-		if (res.status === 404) {
-			throw new Error(
-				"Credenciales incorrectas. Por favor, verifica tu correo electrónico y contraseña.",
-			);
+			throw new InvalidCredentialsError();
 		}
 
 		throw new Error(`Request failed: ${res.status}`);

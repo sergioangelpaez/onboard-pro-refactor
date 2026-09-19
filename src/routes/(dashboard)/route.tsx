@@ -11,7 +11,7 @@ function DashboardLayoutComponent() {
 		<SidebarProvider>
 			<AppSidebar />
 			<main className="ml-0 flex min-h-screen w-full flex-col transition-all">
-				<SidebarTrigger />
+				<SidebarTrigger className="ml-4 mt-4" />
 				<Outlet />
 			</main>
 		</SidebarProvider>
