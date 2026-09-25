@@ -13,9 +13,13 @@ export const queryKeys = {
 		create: ["tenants", "create"],
 	},
 	courses: {
+		all: ["courses", "all"],
 		create: ["courses", "create"],
 	},
 	groups: {
 		create: ["groups", "create"],
+	},
+	activities: {
+		all: ["activities", "all"],
 	},
 };
