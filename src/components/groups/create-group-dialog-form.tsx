@@ -7,7 +7,7 @@ import {
 	type CreateGroupPayload,
 	createGroupSchema,
 } from "#/lib/schemas/groups";
-import { useUsers } from "@/hooks/users/use-users";
+import { useAllUsers } from "@/hooks/users/use-users";
 import { cn } from "@/lib/utils/utils";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -35,7 +35,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 export function CreateGroupDialogForm() {
 	const [open, setOpen] = useState(false);
 	const { mutate, isPending } = useCreateGroup();
-	const { data: users = [] } = useUsers();
+	const { data: users = [] } = useAllUsers();
 
 	const form = useForm({
 		defaultValues: {

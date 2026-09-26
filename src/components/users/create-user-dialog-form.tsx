@@ -1,8 +1,8 @@
 import { useForm } from "@tanstack/react-form";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { type CreateUserPayload, userSchema } from "#/lib/schemas/users";
+import { type CreateUserPayload, createUserSchema } from "#/lib/schemas/users";
 import { PasswordField } from "@/components/shared/form/password-field";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,8 +42,15 @@ export function CreateUserDialogForm() {
 			email: "",
 			password: "",
 			role: "",
+			phonumber: "",
+			status: "active",
+			level: 0,
+			xp: 0,
+			streak: 0,
+			average: 0,
+			missions: "",
 		} as CreateUserPayload,
-		validators: { onChange: userSchema },
+		validators: { onChange: createUserSchema },
 		onSubmit: ({ value }) =>
 			mutate(value, {
 				onSuccess: () => {
@@ -68,7 +75,10 @@ export function CreateUserDialogForm() {
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
-				<Button>Nuevo usuario</Button>
+				<Button>
+					<Plus />
+					Nuevo usuario
+				</Button>
 			</DialogTrigger>
 
 			<DialogContent className="sm:max-w-md">
@@ -146,6 +156,27 @@ export function CreateUserDialogForm() {
 										type="email"
 										autoComplete="off"
 										placeholder="juan@ucentral.edu.co"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
+					</form.Field>
+
+					<form.Field name="phonumber">
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>Teléfono</FieldLabel>
+									<Input
+										id={field.name}
+										type="tel"
+										placeholder="300 123 4567"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
