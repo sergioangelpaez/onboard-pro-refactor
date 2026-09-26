@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { usersService } from "#/lib/services/users";
 import { queryKeys } from "#/lib/utils/query-keys";
 
-export function useUsers() {
-	const { data, error, isError, isLoading } = useQuery({
+export function useAllUsers() {
+	const { data, error, isError, isLoading, refetch } = useQuery({
 		queryKey: queryKeys.users.all,
-		queryFn: () => usersService.getAllUsers(),
+		queryFn: () => usersService.getAll(),
 	});
 
-	return { data, error, isError, isLoading };
+	return { data, error, isError, isLoading, refetch };
 }

@@ -7,8 +7,7 @@ export function useCreateUser() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (payload: CreateUserPayload) =>
-			usersService.createUser(payload),
+		mutationFn: (payload: CreateUserPayload) => usersService.create(payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.users.create });
 		},

@@ -1,4 +1,4 @@
-import { Cloud, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import type { Course } from "#/lib/schemas/courses";
 import { coursesColumns } from "@/components/courses/courses-columns";
 import { EmptyState } from "../shared/states/empty-state";
@@ -43,7 +43,6 @@ export function CoursesRouteContent({
 			<EmptyState
 				title="Aún no hay cursos"
 				description="Aún no hay cursos para mostrar aquí. Para empezar, crea un nuevo curso."
-				icon={<Cloud />}
 				content={<CreateCourseDialogForm />}
 			/>
 		);
