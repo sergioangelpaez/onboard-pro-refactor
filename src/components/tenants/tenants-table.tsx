@@ -1,4 +1,3 @@
-// components/ui/generic-table.tsx
 import type { ReactNode } from "react";
 
 export interface Column<T> {

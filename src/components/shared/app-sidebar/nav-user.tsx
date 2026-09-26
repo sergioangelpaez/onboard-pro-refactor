@@ -1,7 +1,5 @@
-"use client";
-
 import { useRouter } from "@tanstack/react-router";
-import { ChevronsUpDown, LogOut, User } from "lucide-react";
+import { ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react";
 import { authService } from "#/lib/services/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -19,6 +17,7 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import type { User } from "@/lib/schemas/users";
 
 export function NavUser({ user }: { user: User }) {
 	const { isMobile } = useSidebar();
@@ -73,7 +72,7 @@ export function NavUser({ user }: { user: User }) {
 							<DropdownMenuItem
 								onClick={() => router.navigate({ to: "/profile" })}
 							>
-								<User />
+								<UserIcon />
 								Account
 							</DropdownMenuItem>
 						</DropdownMenuGroup>

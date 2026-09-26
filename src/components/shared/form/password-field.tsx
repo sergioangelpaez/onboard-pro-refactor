@@ -6,15 +6,20 @@ export function PasswordField({
 	field,
 	label,
 	autoComplete,
+	labelAction,
 }: {
 	field: AnyFieldApi;
 	label: string;
 	autoComplete: string;
+	labelAction?: React.ReactNode;
 }) {
 	const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 	return (
 		<Field data-invalid={isInvalid}>
-			<FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+			<div className="flex items-end justify-between">
+				<FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+				{labelAction}
+			</div>
 			<Input
 				id={field.name}
 				type="password"

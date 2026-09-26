@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreateGroupPayload } from "#/lib/schemas/groups";
 import { groupsService } from "#/lib/services/groups";
+import { queryKeys } from "#/lib/utils/query-keys";
 
 export function useCreateGroup() {
 	const queryClient = useQueryClient();
@@ -9,7 +10,7 @@ export function useCreateGroup() {
 		mutationFn: (values: CreateGroupPayload) =>
 			groupsService.createGroup(values),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["groups"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.groups.create });
 		},
 	});
 }

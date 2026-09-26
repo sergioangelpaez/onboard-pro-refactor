@@ -3,8 +3,8 @@ import type {
 	ForgotPasswordValues,
 	ResetPasswordPayload,
 } from "#/lib/schemas/auth";
-import { apiFetch } from "../api-fetch";
-import { tokenStorage } from "../token-storage";
+import { apiFetch } from "./api-fetch";
+import { tokenStorage } from "./token-storage";
 
 export const authService = {
 	/** Fetches the current authenticated user's data. */

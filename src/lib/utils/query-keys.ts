@@ -1,4 +1,8 @@
 export const queryKeys = {
+	auth: {
+		login: ["auth", "login"],
+		logout: ["auth", "logout"],
+	},
 	users: {
 		me: ["user", "me"],
 		all: ["user", "all"],
@@ -7,5 +11,15 @@ export const queryKeys = {
 	tenants: {
 		all: ["tenants", "all"],
 		create: ["tenants", "create"],
+	},
+	courses: {
+		all: ["courses", "all"],
+		create: ["courses", "create"],
+	},
+	groups: {
+		create: ["groups", "create"],
+	},
+	activities: {
+		all: ["activities", "all"],
 	},
 };

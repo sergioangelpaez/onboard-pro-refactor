@@ -1,11 +1,29 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { authService } from "#/lib/services/auth";
+import { InvalidCredentialsError } from "#/lib/services/errors";
+import { tokenStorage } from "#/lib/services/token-storage";
+import { queryKeys } from "#/lib/utils/query-keys";
 import backGroundImage from "@/assets/universidad-central.webp";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const Route = createFileRoute("/(auth)/auth")({
 	component: LoginComponent,
-	beforeLoad: ({ context }) => {
-		if (context.user) throw redirect({ to: "/home" });
+	ssr: false,
+	beforeLoad: async ({ context }) => {
+		if (!tokenStorage.get()) return;
+
+		try {
+			await context.queryClient.ensureQueryData({
+				queryKey: queryKeys.users.me,
+				queryFn: authService.getMe,
+				retry: false,
+			});
+		} catch (error) {
+			if (error instanceof InvalidCredentialsError) return;
+			throw error;
+		}
+
+		throw redirect({ to: "/home" });
 	},
 });
 

@@ -1,6 +1,7 @@
-import { apiFetch } from "../api-fetch";
+import type { CreateTenantPayload, Tenant } from "../schemas/tenants";
+import { apiFetch } from "./api-fetch";
 
-export const organizationsService = {
+export const tenantsService = {
 	async getAllTenants() {
 		return await apiFetch<Tenant[]>("/tenants/get/all");
 	},

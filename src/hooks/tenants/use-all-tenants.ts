@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAllTenantsFn } from "#/lib/services/organizations/functions";
+import { tenantsService } from "#/lib/services/tenants";
 import { queryKeys } from "#/lib/utils/query-keys";
 
-export function useAllOrganizations() {
+export function useAllTenants() {
 	const { data, error, isError, isLoading } = useQuery({
 		queryKey: queryKeys.tenants.all,
-		queryFn: getAllTenantsFn,
+		queryFn: tenantsService.getAllTenants,
 	});
 
 	return { data, error, isError, isLoading };

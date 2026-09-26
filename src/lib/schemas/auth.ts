@@ -5,7 +5,7 @@ export const loginFormSchema = z.object({
 	password: z.string().min(6, "Ingresa tu contraseña (mínimo 6 caracteres)"),
 });
 
-export type loginFormValues = z.infer<typeof loginFormSchema>;
+export type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export const changePasswordSchema = z
 	.object({
