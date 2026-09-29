@@ -6,6 +6,8 @@ import {
 	createTableHook,
 	filterFn_includesString,
 	globalFilteringFeature,
+	type Row,
+	type RowData,
 	rowPaginationFeature,
 	rowSortingFeature,
 	sortFn_alphanumeric,
@@ -34,3 +36,6 @@ export const { useAppTable, createAppColumnHelper } = createTableHook({
 	features,
 	debugTable: process.env.NODE_ENV === "development",
 });
+
+export type AppTableFeatures = typeof features;
+export type AppRow<TData extends RowData> = Row<AppTableFeatures, TData>;

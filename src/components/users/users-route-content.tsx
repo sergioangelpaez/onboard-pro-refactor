@@ -6,7 +6,7 @@ import { LoadingState } from "../shared/states/loading-state";
 import { DataTable } from "../shared/table/data-table";
 import { Button } from "../ui/button";
 import { CreateUserDialogForm } from "./create-user-dialog-form";
-import { usersColumns } from "./users-columns";
+import { usersColumns } from "./table/users-columns";
 
 interface UsersRouteContentProps {
 	data: User[] | undefined;

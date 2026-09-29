@@ -43,7 +43,7 @@ export function CreateUserDialogForm() {
 			password: "",
 			role: "",
 			phonumber: "",
-			status: "active",
+			status: "Active",
 			level: 0,
 			xp: 0,
 			streak: 0,
