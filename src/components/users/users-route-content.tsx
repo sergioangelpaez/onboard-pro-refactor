@@ -1,11 +1,10 @@
-import { RefreshCw } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import type { User } from "#/lib/schemas/users";
 import { EmptyState } from "../shared/states/empty-state";
 import { ErrorState } from "../shared/states/error-state";
 import { LoadingState } from "../shared/states/loading-state";
 import { DataTable } from "../shared/table/data-table";
 import { Button } from "../ui/button";
-import { CreateUserDialogForm } from "./create-user-dialog-form";
 import { usersColumns } from "./table/users-columns";
 
 interface UsersRouteContentProps {
@@ -13,6 +12,7 @@ interface UsersRouteContentProps {
 	isLoading: boolean;
 	error: Error | null;
 	refetch: () => void;
+	onCreate: () => void;
 }
 
 export function UsersRouteContent({
@@ -20,6 +20,7 @@ export function UsersRouteContent({
 	isLoading,
 	error,
 	refetch,
+	onCreate,
 }: UsersRouteContentProps) {
 	if (isLoading) return <LoadingState message="Cargando usuarios..." />;
 
@@ -42,7 +43,12 @@ export function UsersRouteContent({
 			<EmptyState
 				title="Aún no hay usuarios"
 				description="Aún no hay usuarios para mostrar aquí. Para empezar, crea un nuevo usuario."
-				content={<CreateUserDialogForm />}
+				content={
+					<Button onClick={onCreate}>
+						<Plus />
+						Crear usuario
+					</Button>
+				}
 			/>
 		);
 

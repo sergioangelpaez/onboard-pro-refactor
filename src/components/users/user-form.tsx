@@ -1,19 +1,18 @@
 import { useForm } from "@tanstack/react-form";
-import { LoaderCircle, Plus } from "lucide-react";
-import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { type CreateUserPayload, createUserSchema } from "#/lib/schemas/users";
+import { useCreateUser } from "#/hooks/users/use-create-user";
+import { useUpdateUser } from "#/hooks/users/use-update-user";
+import {
+	type CreateUserPayload,
+	type UpdateUserPayload,
+	type User,
+	updateUserSchema,
+	userPayloadSchema,
+} from "#/lib/schemas/users";
 import { PasswordField } from "@/components/shared/form/password-field";
 import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +22,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useCreateUser } from "@/hooks/users/use-create-user";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from "../ui/sheet";
 
 const ROLE_OPTIONS = [
 	{ value: "student", label: "Estudiante" },
@@ -31,72 +37,88 @@ const ROLE_OPTIONS = [
 	{ value: "admin", label: "Administrador" },
 ];
 
-export function CreateUserDialogForm() {
-	const [open, setOpen] = useState(false);
-	const { mutate, isPending } = useCreateUser();
+interface UserFormSheetProps {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	user?: User;
+}
+
+export function UserFormSheet({
+	open,
+	onOpenChange,
+	user,
+}: UserFormSheetProps) {
+	const isEdit = !!user;
+	const createUser = useCreateUser();
+	const updateUser = useUpdateUser();
+	const isPending = createUser.isPending || updateUser.isPending;
+	const navigate = useNavigate();
 
 	const form = useForm({
 		defaultValues: {
-			firstname: "",
-			lastname: "",
-			email: "",
-			password: "",
-			role: "",
-			phonumber: "",
-			status: "Active",
-			level: 0,
-			xp: 0,
-			streak: 0,
-			average: 0,
-			missions: "",
-		} as CreateUserPayload,
-		validators: { onChange: createUserSchema },
-		onSubmit: ({ value }) =>
-			mutate(value, {
+			email: user?.email ?? "",
+			firstname: user?.firstname ?? "",
+			lastname: user?.lastname ?? "",
+			phonumber: user?.phonumber ?? "",
+			role: user?.role ?? "student",
+			status: user?.status ?? "Active",
+			level: user?.level ?? 0,
+			xp: user?.xp ?? 0,
+			streak: user?.streak ?? 0,
+			average: user?.average ?? 0,
+			missions: user?.missions ?? "",
+		} as UpdateUserPayload | CreateUserPayload,
+		validators: { onChange: isEdit ? updateUserSchema : userPayloadSchema },
+		onSubmit: ({ value }) => {
+			const options = {
 				onSuccess: () => {
-					toast.success("Usuario creado", {
-						description: `Se creó el usuario "${value.firstname} ${value.lastname}".`,
-					});
+					toast.success(isEdit ? "Usuario actualizado" : "Usuario creado");
 					handleOpenChange(false);
 				},
-				onError: (error) => {
-					toast.error("Error al crear el usuario", {
-						description: error.message,
-					});
-				},
-			}),
+				onError: (e: Error) =>
+					toast.error(
+						isEdit
+							? "No se pudo actualizar el usuario"
+							: "No se pudo crear el usuario",
+						{ description: e.message },
+					),
+			};
+
+			if (isEdit && user) {
+				updateUser.mutate(
+					{ id: user.id, payload: value as UpdateUserPayload },
+					options,
+				);
+			} else {
+				createUser.mutate(value as CreateUserPayload, options);
+			}
+		},
 	});
 
 	function handleOpenChange(next: boolean) {
-		setOpen(next);
+		onOpenChange(next);
 		if (!next) form.reset();
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogTrigger asChild>
-				<Button>
-					<Plus />
-					Nuevo usuario
-				</Button>
-			</DialogTrigger>
-
-			<DialogContent className="sm:max-w-md">
-				<DialogHeader>
-					<DialogTitle>Crear usuario</DialogTitle>
-					<DialogDescription>
-						Completa los datos para registrar un nuevo usuario.
-					</DialogDescription>
-				</DialogHeader>
+		<Sheet open={open} onOpenChange={handleOpenChange}>
+			<SheetContent className="flex flex-col">
+				<SheetHeader>
+					<SheetTitle>{isEdit ? "Editar usuario" : "Crear usuario"}</SheetTitle>
+					<SheetDescription>
+						{isEdit
+							? "Modifica los datos del usuario."
+							: "Completa los datos para registrar un nuevo usuario."}
+					</SheetDescription>
+				</SheetHeader>
 
 				<form
-					id="create-user-form"
 					onSubmit={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
 						form.handleSubmit();
 					}}
-					className="flex flex-col gap-4"
+					className="flex min-h-0 px-4 gap-4 flex-1 flex-col"
 				>
 					<div className="grid grid-cols-2 gap-3">
 						<form.Field name="firstname">
@@ -187,15 +209,17 @@ export function CreateUserDialogForm() {
 						}}
 					</form.Field>
 
-					<form.Field name="password">
-						{(field) => (
-							<PasswordField
-								field={field}
-								label="Contraseña"
-								autoComplete="new-password"
-							/>
-						)}
-					</form.Field>
+					{!isEdit && (
+						<form.Field name="password">
+							{(field) => (
+								<PasswordField
+									field={field}
+									label="Contraseña"
+									autoComplete="new-password"
+								/>
+							)}
+						</form.Field>
+					)}
 
 					<form.Field name="role">
 						{(field) => {
@@ -224,31 +248,26 @@ export function CreateUserDialogForm() {
 							);
 						}}
 					</form.Field>
+					<SheetFooter>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => handleOpenChange(false)}
+							disabled={isPending}
+						>
+							Cancelar
+						</Button>
+						<form.Subscribe selector={(s) => s.canSubmit}>
+							{(canSubmit) => (
+								<Button type="submit" disabled={!canSubmit || isPending}>
+									{isPending && <LoaderCircle className="animate-spin" />}
+									{isEdit ? "Actualizar usuario" : "Crear usuario"}
+								</Button>
+							)}
+						</form.Subscribe>
+					</SheetFooter>
 				</form>
-
-				<DialogFooter>
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => handleOpenChange(false)}
-						disabled={isPending}
-					>
-						Cancelar
-					</Button>
-					<form.Subscribe selector={(s) => s.canSubmit}>
-						{(canSubmit) => (
-							<Button
-								type="submit"
-								form="create-user-form"
-								disabled={!canSubmit || isPending}
-							>
-								{isPending && <LoaderCircle className="animate-spin" />}
-								{isPending ? "Creando..." : "Crear usuario"}
-							</Button>
-						)}
-					</form.Subscribe>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+			</SheetContent>
+		</Sheet>
 	);
 }
