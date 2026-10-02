@@ -1,20 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreateUserDialogForm } from "#/components/users/create-user-dialog-form";
-import { UsersRouteContent } from "#/components/users/users-route-content";
-import { useAllUsers } from "#/hooks/users/use-users";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { UserFormSheet } from "#/components/users/user-form";
+import { Button } from "@/components/ui/button";
+import { UsersRouteContent } from "@/components/users/users-route-content";
+import { useAllUsers } from "@/hooks/users/use-users";
 
 export const Route = createFileRoute("/(dashboard)/(users)/users")({
 	component: UsersRoute,
 });
 
 function UsersRoute() {
+	const [open, setOpen] = useState(false);
 	const { data, isLoading, error, refetch } = useAllUsers();
 
 	return (
 		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Usuarios</h1>
-				<CreateUserDialogForm />
+				<Button onClick={() => setOpen(true)}>
+					<Plus />
+					Crear usuario
+				</Button>
 			</div>
 
 			<UsersRouteContent
@@ -22,7 +29,10 @@ function UsersRoute() {
 				isLoading={isLoading}
 				error={error}
 				refetch={refetch}
+				onCreate={() => setOpen(true)}
 			/>
+
+			<UserFormSheet open={open} onOpenChange={setOpen} />
 		</div>
 	);
 }

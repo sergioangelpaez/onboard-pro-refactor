@@ -1,6 +1,7 @@
 import type { User } from "@/lib/schemas/users";
 import { createAppColumnHelper } from "@/lib/ui/data-table";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../ui/badge";
+import { UserRowActions } from "./user-actions";
 
 const columnHelper = createAppColumnHelper<User>();
 
@@ -68,5 +69,10 @@ export const usersColumns = columnHelper.columns([
 	columnHelper.accessor("missions", {
 		header: "Misiones",
 		cell: (info) => info.getValue(),
+	}),
+	columnHelper.display({
+		id: "actions",
+		header: "Acciones",
+		cell: ({ row }) => <UserRowActions row={row} />,
 	}),
 ]);
