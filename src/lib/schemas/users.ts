@@ -16,9 +16,7 @@ export const userSchema = z.object({
 	tenantId: z.string().nullable(),
 });
 
-export type User = z.infer<typeof userSchema>;
-
-export const createUserSchema = z.object({
+export const userPayloadSchema = z.object({
 	firstname: z.string().min(1, "El nombre es obligatorio"),
 	lastname: z.string().min(1, "El apellido es obligatorio"),
 	email: z.email("Ingresa un correo válido"),
@@ -33,4 +31,8 @@ export const createUserSchema = z.object({
 	missions: z.string(),
 });
 
-export type CreateUserPayload = z.infer<typeof createUserSchema>;
+export const updateUserSchema = userPayloadSchema.omit({ password: true });
+
+export type User = z.infer<typeof userSchema>;
+export type CreateUserPayload = z.infer<typeof userPayloadSchema>;
+export type UpdateUserPayload = z.infer<typeof updateUserSchema>;

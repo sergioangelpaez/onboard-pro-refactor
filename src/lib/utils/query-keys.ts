@@ -17,6 +17,7 @@ export const queryKeys = {
 		create: ["courses", "create"],
 	},
 	groups: {
+		all: ["groups", "all"],
 		create: ["groups", "create"],
 	},
 	activities: {

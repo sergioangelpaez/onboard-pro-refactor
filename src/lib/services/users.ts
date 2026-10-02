@@ -1,11 +1,28 @@
-import type { CreateUserPayload, User } from "../schemas/users";
+import type {
+	CreateUserPayload,
+	UpdateUserPayload,
+	User,
+} from "../schemas/users";
 import { apiFetch } from "./api-fetch";
 
 export const usersService = {
-	async create(payload: CreateUserPayload) {
+	async create(user: CreateUserPayload) {
 		return await apiFetch<User>("/users/create", {
 			method: "POST",
-			body: JSON.stringify(payload),
+			body: JSON.stringify(user),
+		});
+	},
+
+	async update(id: string, user: UpdateUserPayload) {
+		return await apiFetch<User>(`/users/update/${id}`, {
+			method: "PUT",
+			body: JSON.stringify(user),
+		});
+	},
+
+	async delete(id: string) {
+		return await apiFetch(`/users/delete/${id}`, {
+			method: "DELETE",
 		});
 	},
 
