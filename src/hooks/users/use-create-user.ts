@@ -9,7 +9,7 @@ export function useCreateUser() {
 	return useMutation({
 		mutationFn: (payload: CreateUserPayload) => usersService.create(payload),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.users.create });
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
 		},
 	});
 }
