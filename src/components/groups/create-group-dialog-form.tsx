@@ -1,13 +1,13 @@
 import { useForm } from "@tanstack/react-form";
-import { Check, ChevronsUpDown, LoaderCircle, X } from "lucide-react";
+import { Check, ChevronsUpDown, LoaderCircle, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCreateGroup } from "#/hooks/groups/use-create-groups";
+import { useAllUsers } from "#/hooks/users/use-all-users";
 import {
 	type CreateGroupPayload,
 	createGroupSchema,
 } from "#/lib/schemas/groups";
-import { useAllUsers } from "@/hooks/users/use-users";
 import { cn } from "@/lib/utils/utils";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -68,7 +68,10 @@ export function CreateGroupDialogForm() {
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
-				<Button>Crear Grupo</Button>
+				<Button>
+					<Plus />
+					Crear Grupo
+				</Button>
 			</DialogTrigger>
 
 			<DialogContent className="sm:max-w-md">
