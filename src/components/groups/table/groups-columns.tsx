@@ -1,5 +1,6 @@
 import type { Group } from "#/lib/schemas/groups";
 import { createAppColumnHelper } from "@/lib/ui/data-table";
+import { GroupRowActions } from "./group-actions";
 
 const columnHelper = createAppColumnHelper<Group>();
 
@@ -18,8 +19,14 @@ export const groupsColumns = columnHelper.columns([
 		header: "Descripción",
 		cell: (info) => info.getValue(),
 	}),
-	columnHelper.accessor("userIds", {
+	columnHelper.accessor((group) => group.users.length, {
+		id: "users",
 		header: "Usuarios",
-		cell: (info) => info.getValue() || "N/A",
+		cell: (info) => info.getValue(),
+	}),
+	columnHelper.display({
+		id: "actions",
+		header: "Acciones",
+		cell: ({ row }) => <GroupRowActions row={row} />,
 	}),
 ]);
