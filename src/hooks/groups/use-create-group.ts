@@ -9,7 +9,7 @@ export function useCreateGroup() {
 	return useMutation({
 		mutationFn: (values: CreateGroupPayload) => groupsService.create(values),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.groups.create });
+			queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
 		},
 	});
 }
