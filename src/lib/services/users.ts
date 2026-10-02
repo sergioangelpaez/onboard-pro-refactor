@@ -20,6 +20,12 @@ export const usersService = {
 		});
 	},
 
+	async delete(id: string) {
+		return await apiFetch(`/users/delete/${id}`, {
+			method: "DELETE",
+		});
+	},
+
 	async getAll() {
 		return await apiFetch<User[]>("/users/get/all", {
 			method: "GET",
