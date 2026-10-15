@@ -6,6 +6,7 @@ import { useCreateActivity } from "#/hooks/activities/use-create-activity";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useCourseSections } from "#/hooks/sections/use-course-sections";
 import {
+	type Activity,
 	type CreateActivityFormValues,
 	type CreateActivityPayload,
 	createActivityFormSchema,
@@ -46,11 +47,12 @@ const TYPE_OPTIONS: { value: ActivityType; label: string }[] = [
 	{ value: "Examen", label: "Examen" },
 ];
 
-interface CreateActivitySheetProps {
+interface ActivitySheetProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	defaultCourseId?: string;
 	defaultSectionId?: string;
+	activity?: Activity;
 }
 
 export function ActivityFormSheet({
@@ -58,7 +60,8 @@ export function ActivityFormSheet({
 	onOpenChange,
 	defaultCourseId,
 	defaultSectionId,
-}: CreateActivitySheetProps) {
+	activity,
+}: ActivitySheetProps) {
 	const createActivity = useCreateActivity();
 	const isPending = createActivity.isPending;
 	const [courseId, setCourseId] = useState(defaultCourseId ?? "");
