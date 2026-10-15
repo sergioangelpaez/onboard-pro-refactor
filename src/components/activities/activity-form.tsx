@@ -2,13 +2,17 @@ import { useForm } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import type z from "zod";
 import { useCreateActivity } from "#/hooks/activities/use-create-activity";
+import { useUpdateActivity } from "#/hooks/activities/use-update-activity";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useCourseSections } from "#/hooks/sections/use-course-sections";
 import {
-	type CreateActivityFormValues,
+	type Activity,
+	type ActivityFormValues,
 	type CreateActivityPayload,
 	createActivityFormSchema,
+	updateActivityFormSchema,
 } from "#/lib/schemas/activities";
 import { Attachment } from "@/components/ui/attachment";
 import { Button } from "@/components/ui/button";
@@ -46,11 +50,12 @@ const TYPE_OPTIONS: { value: ActivityType; label: string }[] = [
 	{ value: "Examen", label: "Examen" },
 ];
 
-interface CreateActivitySheetProps {
+interface ActivitySheetProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	defaultCourseId?: string;
 	defaultSectionId?: string;
+	activity?: Activity;
 }
 
 export function ActivityFormSheet({
@@ -58,25 +63,53 @@ export function ActivityFormSheet({
 	onOpenChange,
 	defaultCourseId,
 	defaultSectionId,
-}: CreateActivitySheetProps) {
+	activity,
+}: ActivitySheetProps) {
 	const createActivity = useCreateActivity();
-	const isPending = createActivity.isPending;
+	const updateActivity = useUpdateActivity();
+	const isEdit = !!activity;
+	const isPending = createActivity.isPending || updateActivity.isPending;
 	const [courseId, setCourseId] = useState(defaultCourseId ?? "");
 	const courses = useAllCourses();
 	const sections = useCourseSections(courseId);
 
 	const form = useForm({
 		defaultValues: {
-			name: "",
-			title: "",
-			type: "Recurso",
-			description: "",
-			deliverable: false,
-			sectionId: defaultSectionId ?? "",
+			name: activity?.name ?? "",
+			title: activity?.title ?? "",
+			type: activity?.type ?? "Recurso",
+			description: activity?.description ?? "",
+			deliverable: activity?.deliverable ?? false,
+			sectionId: activity?.sectionId ?? defaultSectionId ?? "",
+			xp: activity?.xp ?? 0,
 			archivo: null as unknown as File,
-		} as CreateActivityFormValues,
-		validators: { onChange: createActivityFormSchema },
+		} as ActivityFormValues,
+		validators: {
+			onChange: (isEdit
+				? updateActivityFormSchema
+				: createActivityFormSchema) as unknown as z.ZodType<
+				ActivityFormValues,
+				ActivityFormValues
+			>,
+		},
 		onSubmit: ({ value }) => {
+			if (activity) {
+				updateActivity.mutate(
+					{ id: activity.id, values: value },
+					{
+						onSuccess: () => {
+							toast.success("Actividad actualizada");
+							handleOpenChange(false);
+						},
+						onError: (e: Error) =>
+							toast.error("No se pudo actualizar la actividad", {
+								description: e.message,
+							}),
+					},
+				);
+				return;
+			}
+
 			createActivity.mutate(value, {
 				onSuccess: () => {
 					toast.success("Actividad creada");
@@ -99,9 +132,13 @@ export function ActivityFormSheet({
 		<Sheet open={open} onOpenChange={handleOpenChange}>
 			<SheetContent className="flex flex-col">
 				<SheetHeader>
-					<SheetTitle>Crear actividad</SheetTitle>
+					<SheetTitle>
+						{isEdit ? "Editar actividad" : "Crear actividad"}
+					</SheetTitle>
 					<SheetDescription>
-						Completa los datos para registrar una nueva actividad.
+						{isEdit
+							? "Modifica los datos de la actividad."
+							: "Completa los datos para registrar una nueva actividad."}
 					</SheetDescription>
 				</SheetHeader>
 
@@ -159,75 +196,79 @@ export function ActivityFormSheet({
 								}}
 							</form.Field>
 
-							<Field>
-								<FieldLabel htmlFor="courseId">Curso</FieldLabel>
-								<Select
-									value={courseId}
-									onValueChange={(value) => {
-										setCourseId(value);
-										form.setFieldValue("sectionId", "");
-									}}
-								>
-									<SelectTrigger id="courseId" disabled={courses.isLoading}>
-										<SelectValue
-											placeholder={
-												courses.isLoading
-													? "Cargando cursos..."
-													: "Selecciona un curso"
-											}
-										/>
-									</SelectTrigger>
-									<SelectContent>
-										{courses.data?.map((course) => (
-											<SelectItem key={course.id} value={course.id}>
-												{course.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</Field>
+							{!isEdit && (
+								<>
+									<Field>
+										<FieldLabel htmlFor="courseId">Curso</FieldLabel>
+										<Select
+											value={courseId}
+											onValueChange={(value) => {
+												setCourseId(value);
+												form.setFieldValue("sectionId", "");
+											}}
+										>
+											<SelectTrigger id="courseId" disabled={courses.isLoading}>
+												<SelectValue
+													placeholder={
+														courses.isLoading
+															? "Cargando cursos..."
+															: "Selecciona un curso"
+													}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{courses.data?.map((course) => (
+													<SelectItem key={course.id} value={course.id}>
+														{course.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</Field>
 
-							<form.Field name="sectionId">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Sección</FieldLabel>
-											<Select
-												value={field.state.value}
-												onValueChange={field.handleChange}
-												disabled={!courseId || sections.isLoading}
-											>
-												<SelectTrigger
-													id={field.name}
-													onBlur={field.handleBlur}
-												>
-													<SelectValue
-														placeholder={
-															!courseId
-																? "Primero selecciona un curso"
-																: sections.isLoading
-																	? "Cargando secciones..."
-																	: "Selecciona una sección"
-														}
-													/>
-												</SelectTrigger>
-												<SelectContent>
-													{sections.data?.map((section) => (
-														<SelectItem key={section.id} value={section.id}>
-															{section.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-											{isInvalid && (
-												<FieldError errors={field.state.meta.errors} />
-											)}
-										</Field>
-									);
-								}}
-							</form.Field>
+									<form.Field name="sectionId">
+										{(field) => {
+											const isInvalid =
+												field.state.meta.isTouched && !field.state.meta.isValid;
+											return (
+												<Field data-invalid={isInvalid}>
+													<FieldLabel htmlFor={field.name}>Sección</FieldLabel>
+													<Select
+														value={field.state.value}
+														onValueChange={field.handleChange}
+														disabled={!courseId || sections.isLoading}
+													>
+														<SelectTrigger
+															id={field.name}
+															onBlur={field.handleBlur}
+														>
+															<SelectValue
+																placeholder={
+																	!courseId
+																		? "Primero selecciona un curso"
+																		: sections.isLoading
+																			? "Cargando secciones..."
+																			: "Selecciona una sección"
+																}
+															/>
+														</SelectTrigger>
+														<SelectContent>
+															{sections.data?.map((section) => (
+																<SelectItem key={section.id} value={section.id}>
+																	{section.name}
+																</SelectItem>
+															))}
+														</SelectContent>
+													</Select>
+													{isInvalid && (
+														<FieldError errors={field.state.meta.errors} />
+													)}
+												</Field>
+											);
+										}}
+									</form.Field>
+								</>
+							)}
 
 							<form.Field name="type">
 								{(field) => {
@@ -264,6 +305,33 @@ export function ActivityFormSheet({
 								}}
 							</form.Field>
 
+							{isEdit && (
+								<form.Field name="xp">
+									{(field) => {
+										const isInvalid =
+											field.state.meta.isTouched && !field.state.meta.isValid;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel htmlFor={field.name}>XP</FieldLabel>
+												<Input
+													id={field.name}
+													type="number"
+													min={0}
+													value={field.state.value}
+													onBlur={field.handleBlur}
+													onChange={(e) =>
+														field.handleChange(Number(e.target.value))
+													}
+												/>
+												{isInvalid && (
+													<FieldError errors={field.state.meta.errors} />
+												)}
+											</Field>
+										);
+									}}
+								</form.Field>
+							)}
+
 							<form.Field name="description">
 								{(field) => {
 									const isInvalid =
@@ -296,8 +364,15 @@ export function ActivityFormSheet({
 									return (
 										<Field data-invalid={isInvalid}>
 											<FieldLabel htmlFor={field.name}>
-												Archivo adjunto
+												{isEdit
+													? "Reemplazar archivo (opcional)"
+													: "Archivo adjunto"}
 											</FieldLabel>
+											{isEdit && !file && (
+												<FieldDescription>
+													Archivo actual: {activity.adjunto.split("/").pop()}
+												</FieldDescription>
+											)}
 
 											<Input
 												id={field.name}
@@ -370,7 +445,7 @@ export function ActivityFormSheet({
 							{(canSubmit) => (
 								<Button type="submit" disabled={!canSubmit || isPending}>
 									{isPending && <LoaderCircle className="animate-spin" />}
-									Crear actividad
+									{isEdit ? "Guardar cambios" : "Crear actividad"}
 								</Button>
 							)}
 						</form.Subscribe>
