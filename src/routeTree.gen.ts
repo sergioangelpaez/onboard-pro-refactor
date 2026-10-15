@@ -15,6 +15,7 @@ import { Route as authAuthRouteImport } from './routes/(auth)/auth'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as dashboardHomeRouteImport } from './routes/(dashboard)/home'
 import { Route as dashboardProfileRouteImport } from './routes/(dashboard)/profile'
+import { Route as dashboardactivitiesActivitiesRouteImport } from './routes/(dashboard)/(activities)/activities'
 import { Route as dashboardcoursesCoursesRouteImport } from './routes/(dashboard)/(courses)/courses'
 import { Route as dashboardgroupsGroupsRouteImport } from './routes/(dashboard)/(groups)/groups'
 import { Route as dashboardtenantsTenantsRouteImport } from './routes/(dashboard)/(tenants)/tenants'
@@ -49,6 +50,12 @@ const dashboardProfileRoute = dashboardProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => dashboardRouteRoute,
 } as any)
+const dashboardactivitiesActivitiesRoute =
+  dashboardactivitiesActivitiesRouteImport.update({
+    id: '/(activities)/activities',
+    path: '/activities',
+    getParentRoute: () => dashboardRouteRoute,
+  } as any)
 const dashboardcoursesCoursesRoute = dashboardcoursesCoursesRouteImport.update({
   id: '/(courses)/courses',
   path: '/courses',
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof authResetPasswordRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
+  '/activities': typeof dashboardactivitiesActivitiesRoute
   '/courses': typeof dashboardcoursesCoursesRoute
   '/groups': typeof dashboardgroupsGroupsRoute
   '/tenants': typeof dashboardtenantsTenantsRoute
@@ -87,6 +95,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof authResetPasswordRoute
   '/home': typeof dashboardHomeRoute
   '/profile': typeof dashboardProfileRoute
+  '/activities': typeof dashboardactivitiesActivitiesRoute
   '/courses': typeof dashboardcoursesCoursesRoute
   '/groups': typeof dashboardgroupsGroupsRoute
   '/tenants': typeof dashboardtenantsTenantsRoute
@@ -100,6 +109,7 @@ export interface FileRoutesById {
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(dashboard)/home': typeof dashboardHomeRoute
   '/(dashboard)/profile': typeof dashboardProfileRoute
+  '/(dashboard)/(activities)/activities': typeof dashboardactivitiesActivitiesRoute
   '/(dashboard)/(courses)/courses': typeof dashboardcoursesCoursesRoute
   '/(dashboard)/(groups)/groups': typeof dashboardgroupsGroupsRoute
   '/(dashboard)/(tenants)/tenants': typeof dashboardtenantsTenantsRoute
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/home'
     | '/profile'
+    | '/activities'
     | '/courses'
     | '/groups'
     | '/tenants'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/home'
     | '/profile'
+    | '/activities'
     | '/courses'
     | '/groups'
     | '/tenants'
@@ -136,6 +148,7 @@ export interface FileRouteTypes {
     | '/(auth)/reset-password'
     | '/(dashboard)/home'
     | '/(dashboard)/profile'
+    | '/(dashboard)/(activities)/activities'
     | '/(dashboard)/(courses)/courses'
     | '/(dashboard)/(groups)/groups'
     | '/(dashboard)/(tenants)/tenants'
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardProfileRouteImport
       parentRoute: typeof dashboardRouteRoute
     }
+    '/(dashboard)/(activities)/activities': {
+      id: '/(dashboard)/(activities)/activities'
+      path: '/activities'
+      fullPath: '/activities'
+      preLoaderRoute: typeof dashboardactivitiesActivitiesRouteImport
+      parentRoute: typeof dashboardRouteRoute
+    }
     '/(dashboard)/(courses)/courses': {
       id: '/(dashboard)/(courses)/courses'
       path: '/courses'
@@ -227,6 +247,7 @@ declare module '@tanstack/react-router' {
 interface dashboardRouteRouteChildren {
   dashboardHomeRoute: typeof dashboardHomeRoute
   dashboardProfileRoute: typeof dashboardProfileRoute
+  dashboardactivitiesActivitiesRoute: typeof dashboardactivitiesActivitiesRoute
   dashboardcoursesCoursesRoute: typeof dashboardcoursesCoursesRoute
   dashboardgroupsGroupsRoute: typeof dashboardgroupsGroupsRoute
   dashboardtenantsTenantsRoute: typeof dashboardtenantsTenantsRoute
@@ -236,6 +257,7 @@ interface dashboardRouteRouteChildren {
 const dashboardRouteRouteChildren: dashboardRouteRouteChildren = {
   dashboardHomeRoute: dashboardHomeRoute,
   dashboardProfileRoute: dashboardProfileRoute,
+  dashboardactivitiesActivitiesRoute: dashboardactivitiesActivitiesRoute,
   dashboardcoursesCoursesRoute: dashboardcoursesCoursesRoute,
   dashboardgroupsGroupsRoute: dashboardgroupsGroupsRoute,
   dashboardtenantsTenantsRoute: dashboardtenantsTenantsRoute,

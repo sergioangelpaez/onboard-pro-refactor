@@ -2,6 +2,7 @@ import {
 	BuildingComplex,
 	GalleryVerticalEnd,
 	LibraryBig,
+	ListTodo,
 	UserGroup,
 	Users,
 } from "lucide-react";
@@ -48,11 +49,17 @@ const data = {
 			isActive: false,
 			isCollapsible: false,
 		},
-
 		{
 			title: "Grupos",
 			url: "/groups",
 			icon: UserGroup,
+			isActive: false,
+			isCollapsible: false,
+		},
+		{
+			title: "Activities",
+			url: "/activities",
+			icon: ListTodo,
 			isActive: false,
 			isCollapsible: false,
 		},
