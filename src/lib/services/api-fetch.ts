@@ -14,12 +14,13 @@ export async function apiFetch<T>(
 	const { skipAuthRedirect, ...fetchOptions } = options;
 
 	const token = tokenStorage.get();
+	const isFormData = fetchOptions.body instanceof FormData;
 
 	const res = await fetch(`${BASE_URL}${path}`, {
 		...fetchOptions,
 		credentials: "include",
 		headers: {
-			"Content-Type": "application/json",
+			...(isFormData ? {} : { "Content-Type": "application/json" }),
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			...fetchOptions.headers,
 		},
