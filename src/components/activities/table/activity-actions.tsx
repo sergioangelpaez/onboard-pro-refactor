@@ -1,21 +1,29 @@
-import { Pencil } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
-import type { Group } from "#/lib/schemas/groups";
+import type { Activity } from "#/lib/schemas/activities";
 import {
 	type RowAction,
 	RowActions,
 } from "@/components/shared/table/row-actions";
 import type { AppRow } from "@/lib/ui/data-table";
+import { ActivityDeleteDialog } from "../activity-delete-dialog";
 import { ActivityFormSheet } from "../activity-form";
 
-export function ActivityRowActions({ row }: { row: AppRow<Group> }) {
+export function ActivityRowActions({ row }: { row: AppRow<Activity> }) {
+	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 
-	const actions: RowAction<Group>[] = [
+	const actions: RowAction<Activity>[] = [
 		{
 			label: "Editar",
 			icon: <Pencil />,
 			onClick: () => setEditOpen(true),
+		},
+		{
+			label: "Eliminar",
+			icon: <Trash />,
+			onClick: () => setDeleteOpen(true),
+			variant: "destructive",
 		},
 	];
 
@@ -26,6 +34,12 @@ export function ActivityRowActions({ row }: { row: AppRow<Group> }) {
 				key={row.original.id}
 				open={editOpen}
 				onOpenChange={setEditOpen}
+				activity={row.original}
+			/>
+
+			<ActivityDeleteDialog
+				open={deleteOpen}
+				onOpenChange={setDeleteOpen}
 				activity={row.original}
 			/>
 		</>

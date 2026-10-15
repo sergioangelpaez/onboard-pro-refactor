@@ -8,6 +8,14 @@ const ACCEPTED_MIME = [
 	"video/quicktime",
 ];
 
+const fileSchema = z
+	.custom<File>((v) => v instanceof File, "Adjunta un archivo")
+	.refine((f) => f.size <= MAX_FILE_SIZE, "El archivo supera los 50 MB")
+	.refine(
+		(f) => f.type.startsWith("image/") || ACCEPTED_MIME.includes(f.type),
+		"Formato no permitido (imágenes, PDF o video mp4, webm, mov)",
+	);
+
 export const activitySchema = z.object({
 	id: z.string(),
 	name: z.string(),
@@ -27,28 +35,33 @@ export const activitySchema = z.object({
 	courseName: z.string(),
 });
 
-export const createActivitySchema = activitySchema.pick({
-	name: true,
-	title: true,
-	type: true,
-	description: true,
-	deliverable: true,
-	sectionId: true,
-	adjunto: true,
-});
+export const createActivitySchema = activitySchema
+	.pick({
+		name: true,
+		title: true,
+		type: true,
+		description: true,
+		deliverable: true,
+		sectionId: true,
+		adjunto: true,
+	})
+	.extend({
+		archivo: fileSchema,
+	});
 
 export const createActivityFormSchema = createActivitySchema
 	.omit({ adjunto: true })
+	.extend({ archivo: fileSchema });
+
+export const updateActivityFormSchema = createActivitySchema
+	.omit({ adjunto: true, sectionId: true })
 	.extend({
-		archivo: z
-			.custom<File>((v) => v instanceof File, "Adjunta un archivo")
-			.refine((f) => f.size <= MAX_FILE_SIZE, "El archivo supera los 50 MB")
-			.refine(
-				(f) => f.type.startsWith("image/") || ACCEPTED_MIME.includes(f.type),
-				"Formato no permitido (imágenes, PDF o video mp4, webm, mov)",
-			),
+		xp: z.number().int().min(0, "El XP no puede ser negativo"),
+		archivo: fileSchema.nullish(),
 	});
 
 export type Activity = z.infer<typeof activitySchema>;
 export type CreateActivityPayload = z.infer<typeof createActivitySchema>;
 export type CreateActivityFormValues = z.infer<typeof createActivityFormSchema>;
+export type UpdateActivityFormValues = z.infer<typeof updateActivityFormSchema>;
+export type ActivityFormValues = CreateActivityFormValues & { xp: number };

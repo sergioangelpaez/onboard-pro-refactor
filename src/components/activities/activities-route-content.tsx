@@ -5,6 +5,7 @@ import { ErrorState } from "../shared/states/error-state";
 import { LoadingState } from "../shared/states/loading-state";
 import { DataTable } from "../shared/table/data-table";
 import { Button } from "../ui/button";
+import { activitiesColumns } from "./table/activities-columns";
 
 interface ActivitiesRouteContentProps {
 	data: Activity[] | undefined;

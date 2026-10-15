@@ -1,4 +1,3 @@
-// lib/schemas/sections.ts
 import { z } from "zod";
 
 export const sectionActivitySchema = z.object({

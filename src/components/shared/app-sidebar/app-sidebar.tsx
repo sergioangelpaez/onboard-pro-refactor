@@ -57,7 +57,7 @@ const data = {
 			isCollapsible: false,
 		},
 		{
-			title: "Activities",
+			title: "Actividades",
 			url: "/activities",
 			icon: ListTodo,
 			isActive: false,
