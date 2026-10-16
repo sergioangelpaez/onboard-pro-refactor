@@ -1,67 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreateTenantDialogForm } from "#/components/tenants/create-tenant-dialog-form";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { TenantFormSheet } from "#/components/tenants/tenants-form";
+import { TenantsRouteContent } from "#/components/tenants/tenants-route-content";
+import { Button } from "#/components/ui/button";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
-import { type Column, GenericTable } from "@/components/tenants/tenants-table";
 
 export const Route = createFileRoute("/(dashboard)/(tenants)/tenants")({
 	component: TenantsRoute,
 });
 
-const columns: Column<Tenant>[] = [
-	{ key: "id", header: "ID" },
-	{ key: "name", header: "Nombre" },
-	{ key: "domain", header: "Dominio" },
-	{
-		key: "active",
-		header: "Estado",
-		render: (tenant) => (
-			<span
-				className={`rounded-full px-2 py-1 text-xs font-medium ${
-					tenant.active
-						? "bg-green-100 text-green-700"
-						: "bg-gray-100 text-gray-600"
-				}`}
-			>
-				{tenant.active ? "Activo" : "Inactivo"}
-			</span>
-		),
-	},
-	{
-		key: "createdAt",
-		header: "Creado",
-		render: (tenant) =>
-			new Date(tenant.createdAt).toLocaleDateString("es-CO", {
-				year: "numeric",
-				month: "short",
-				day: "numeric",
-			}),
-	},
-];
-
 function TenantsRoute() {
-	const { data, isLoading, isError, error } = useAllTenants();
-
-	if (isError) {
-		return (
-			<div className="p-6 text-sm text-red-600">
-				Error al cargar organizaciones: {error?.message}
-			</div>
-		);
-	}
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const { data, isLoading, error, refetch } = useAllTenants();
 
 	return (
 		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Organizaciones</h1>
-				<CreateTenantDialogForm />
+				<Button onClick={() => setIsFormOpen(true)}>
+					<Plus />
+					Crear organización
+				</Button>
 			</div>
 
-			<GenericTable
-				columns={columns}
-				data={data ?? []}
-				rowKey={(tenant) => tenant.id}
+			<TenantsRouteContent
+				data={data}
 				isLoading={isLoading}
+				error={error}
+				refetch={refetch}
+				onCreate={() => setIsFormOpen(true)}
 			/>
+
+			<TenantFormSheet open={isFormOpen} onOpenChange={setIsFormOpen} />
 		</div>
 	);
 }
