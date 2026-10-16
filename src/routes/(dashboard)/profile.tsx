@@ -1,31 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ChangePasswordDialogForm } from "#/components/auth/change-password-dialog-form";
-import { ProfileField } from "#/components/shared/fields/info-field";
+import { UserDetailsCard } from "#/components/profile/user-details-card";
+import { UserGroupsCard } from "#/components/profile/user-groups-card";
+import { UserProgressCard } from "#/components/profile/user-progress-card";
+import { ErrorState } from "#/components/shared/states/error-state";
+import { LoadingState } from "#/components/shared/states/loading-state";
 import { useMyGroups } from "#/hooks/groups/use-my-groups";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/(dashboard)/profile")({
 	component: ProfileRoute,
 });
 
 function ProfileRoute() {
-	const { user } = useCurrentUser();
-	const { data, isLoading, error, refetch } = useMyGroups();
+	const {
+		user,
+		isLoading: isUserLoading,
+		error: isUserError,
+	} = useCurrentUser();
+	const {
+		groups,
+		isLoading: isGroupsLoading,
+		isError: isGroupsError,
+		refetch: refetchGroups,
+	} = useMyGroups();
 
-	if (!user) return null;
+	if (isUserLoading) {
+		return <LoadingState message="Cargando tu información..." />;
+	}
 
-	const initials =
-		`${user.firstname?.[0] ?? ""}${user.lastname?.[0] ?? ""}`.toUpperCase();
+	if (isUserError) {
+		return (
+			<ErrorState
+				title="Error al obtener tus datos"
+				description="Ocurrió un error al tratar de obtener tu información desde el servidor. Espera unos minutos e intenta recargar la página."
+			/>
+		);
+	}
 
 	return (
 		<div className="app-container">
@@ -35,65 +46,15 @@ function ProfileRoute() {
 					<ChangePasswordDialogForm />
 				</div>
 				<div className="grid grid-cols-2 gap-3">
-					<Card>
-						<CardHeader className="flex flex-row items-center gap-4">
-							<Avatar className="h-16 w-16 rounded-lg">
-								<AvatarFallback className="rounded-lg text-lg">
-									{initials || "?"}
-								</AvatarFallback>
-							</Avatar>
-							<div>
-								<CardTitle className="text-xl">
-									{user.firstname} {user.lastname}
-								</CardTitle>
-								<CardDescription>{user.email}</CardDescription>
-							</div>
-						</CardHeader>
-						<CardContent className="flex flex-col gap-4">
-							<Separator />
-							<div className="grid grid-cols-2 gap-4">
-								<ProfileField label="Rol" value={user.role} />
-								<ProfileField
-									label="Estado"
-									value={<Badge variant="outline">{user.status}</Badge>}
-								/>
-								<ProfileField label="Teléfono" value={user.phonumber || "—"} />
-								<ProfileField
-									label="Tenant"
-									value={user.tenantId ? String(user.tenantId) : "—"}
-								/>
-							</div>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-base">Progreso</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-								<ProfileField label="Nivel" value={String(user.level)} />
-								<ProfileField label="XP" value={String(user.xp)} />
-								<ProfileField label="Racha" value={String(user.streak)} />
-								<ProfileField label="Promedio" value={String(user.average)} />
-							</div>
-							<Separator className="my-4" />
-							<ProfileField label="Misiones" value={user.missions} />
-						</CardContent>
-					</Card>
-
-					<Card className="col-span-2">
-						<CardHeader>
-							<CardTitle className="text-base">Cursos</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{data?.map((group) => (
-								<div key={group.id} className="flex flex-col gap-1">
-									<span className="text-sm font-medium">{group.name}</span>
-								</div>
-							))}
-						</CardContent>
-					</Card>
+					<UserDetailsCard user={user} />
+					<UserProgressCard user={user} />
+					<UserGroupsCard
+						groups={groups ?? []}
+						className="col-span-2"
+						isLoading={isGroupsLoading}
+						isError={isGroupsError}
+						refetch={refetchGroups}
+					/>
 				</div>
 			</div>
 		</div>

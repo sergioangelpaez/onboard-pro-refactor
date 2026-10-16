@@ -8,5 +8,5 @@ export function useMyGroups() {
 		queryFn: () => groupsService.getMine(),
 	});
 
-	return { data, error, isError, isLoading, refetch };
+	return { groups: data, error, isError, isLoading, refetch };
 }
