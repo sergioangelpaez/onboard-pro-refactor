@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { ChangePasswordDialogForm } from "#/components/auth/change-password-dialog-form";
 import { UserDetailsCard } from "#/components/profile/user-details-card";
 import { UserGroupsCard } from "#/components/profile/user-groups-card";
 import { UserProgressCard } from "#/components/profile/user-progress-card";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
+import { Button } from "#/components/ui/button";
+import { UserFormSheet } from "#/components/users/user-form";
 import { useMyGroups } from "#/hooks/groups/use-my-groups";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 
@@ -13,6 +16,9 @@ export const Route = createFileRoute("/(dashboard)/profile")({
 });
 
 function ProfileRoute() {
+	const [isEditOpen, setIsEditOpen] = useState(false);
+	const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+
 	const {
 		user,
 		isLoading: isUserLoading,
@@ -43,7 +49,22 @@ function ProfileRoute() {
 			<div className="flex flex-col w-full">
 				<div className="mb-4 flex items-center w-full justify-between">
 					<h1>Perfil</h1>
-					<ChangePasswordDialogForm />
+					<div className="flex gap-2 items-center">
+						<Button onClick={() => setIsEditOpen(true)}>Editar perfil</Button>
+						<Button onClick={() => setIsPasswordOpen(true)}>
+							Cambiar contraseña
+						</Button>
+
+						<UserFormSheet
+							user={user}
+							open={isEditOpen}
+							onOpenChange={setIsEditOpen}
+						/>
+						<ChangePasswordDialogForm
+							open={isPasswordOpen}
+							onOpenChange={setIsPasswordOpen}
+						/>
+					</div>
 				</div>
 				<div className="grid grid-cols-2 gap-3">
 					<UserDetailsCard user={user} />
