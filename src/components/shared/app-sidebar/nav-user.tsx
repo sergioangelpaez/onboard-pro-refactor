@@ -73,13 +73,13 @@ export function NavUser({ user }: { user: User }) {
 								onClick={() => router.navigate({ to: "/profile" })}
 							>
 								<UserIcon />
-								Account
+								Perfil
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => authService.logOut()}>
 							<LogOut />
-							Log out
+							Salir
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
