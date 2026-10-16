@@ -31,4 +31,8 @@ export const groupsService = {
 			method: "DELETE",
 		});
 	},
+
+	async getMine() {
+		return await apiFetch<Group[]>("/groups/me");
+	},
 };

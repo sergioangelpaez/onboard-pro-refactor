@@ -19,6 +19,7 @@ export const queryKeys = {
 	groups: {
 		all: ["groups", "all"],
 		create: ["groups", "create"],
+		mine: ["groups", "mine"],
 	},
 	activities: {
 		all: ["activities", "all"],
