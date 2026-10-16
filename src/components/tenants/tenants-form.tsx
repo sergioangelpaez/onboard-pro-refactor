@@ -20,7 +20,6 @@ import {
 	createTenantSchema,
 	type Tenant,
 	type TenantPayload,
-	tenantSchema,
 } from "@/lib/schemas/tenants";
 
 interface TenantFormSheetProps {
