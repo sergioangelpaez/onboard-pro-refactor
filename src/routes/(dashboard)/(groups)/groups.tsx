@@ -28,7 +28,7 @@ function GroupsRoute() {
 				isLoading={isLoading}
 				error={error}
 				refetch={refetch}
-				onCreate={() => {}}
+				onCreate={() => setIsCreateOpen(true)}
 			/>
 
 			<GroupFormSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} />
