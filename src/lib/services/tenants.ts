@@ -19,4 +19,10 @@ export const tenantsService = {
 			body: JSON.stringify(payload),
 		});
 	},
+
+	async delete(id: string) {
+		return await apiFetch<void>(`/tenants/delete/${id}`, {
+			method: "DELETE",
+		});
+	},
 };

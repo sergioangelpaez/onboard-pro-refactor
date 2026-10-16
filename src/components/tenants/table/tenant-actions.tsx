@@ -1,4 +1,4 @@
-import { Pencil } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import type { Tenant } from "#/lib/schemas/tenants";
 import {
@@ -6,16 +6,24 @@ import {
 	RowActions,
 } from "@/components/shared/table/row-actions";
 import type { AppRow } from "@/lib/ui/data-table";
+import { TenantDeleteDialog } from "../tenant-delete-dialog";
 import { TenantFormSheet } from "../tenants-form";
 
 export function TenantRowActions({ row }: { row: AppRow<Tenant> }) {
 	const [editOpen, setEditOpen] = useState(false);
+	const [deleteOpen, setDeleteOpen] = useState(false);
 
 	const actions: RowAction<Tenant>[] = [
 		{
 			label: "Editar",
 			icon: <Pencil />,
 			onClick: () => setEditOpen(true),
+		},
+		{
+			label: "Eliminar",
+			icon: <Trash />,
+			onClick: () => setDeleteOpen(true),
+			variant: "destructive",
 		},
 	];
 
@@ -27,6 +35,13 @@ export function TenantRowActions({ row }: { row: AppRow<Tenant> }) {
 				open={editOpen}
 				onOpenChange={setEditOpen}
 				tenant={row.original}
+			/>
+
+			<TenantDeleteDialog
+				key={row.original.id}
+				open={deleteOpen}
+				onOpenChange={setDeleteOpen}
+				group={row.original}
 			/>
 		</>
 	);
