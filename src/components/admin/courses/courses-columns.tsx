@@ -1,6 +1,6 @@
 import type { Course } from "#/lib/schemas/courses";
 import { createAppColumnHelper } from "@/lib/ui/data-table";
-import { Badge } from "#/components/ui/badge";
+import { Badge } from "../../ui/badge";
 
 const columnHelper = createAppColumnHelper<Course>();
 

@@ -104,6 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	if (!user) return null;
 
+	// "superadmin" y "admin" se normalizan a "admin", así que comparten menú.
 	const items = navByRole[normalizeRole(user.role)];
 
 	return (

@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react";
 import { authService } from "#/lib/services/auth";
+import { isAdmin } from "#/lib/utils/auth/session";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -22,8 +24,20 @@ import type { User } from "@/lib/schemas/users";
 export function NavUser({ user }: { user: User }) {
 	const { isMobile } = useSidebar();
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	if (!user) return null;
+
+	const profilePath = isAdmin(user.role) ? "/admin/profile" : "/student/home";
+
+	async function handleLogout() {
+		try {
+			await authService.logOut();
+		} finally {
+			await router.navigate({ to: "/auth" });
+			queryClient.clear();
+		}
+	}
 
 	return (
 		<SidebarMenu>
@@ -70,14 +84,14 @@ export function NavUser({ user }: { user: User }) {
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem
-								onClick={() => router.navigate({ to: "/admin/profile" })}
+								onClick={() => router.navigate({ to: profilePath })}
 							>
 								<UserIcon />
 								Perfil
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => authService.logOut()}>
+						<DropdownMenuItem onClick={handleLogout}>
 							<LogOut />
 							Salir
 						</DropdownMenuItem>

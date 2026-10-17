@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteGroup } from "#/hooks/groups/use-delete-group";
 import type { Group } from "@/lib/schemas/groups";
-import { Button } from "#/components/ui/button";
+import { Button } from "../../ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +10,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "#/components/ui/dialog";
+} from "../../ui/dialog";
 
 interface GroupDeleteDialogProps {
 	open: boolean;

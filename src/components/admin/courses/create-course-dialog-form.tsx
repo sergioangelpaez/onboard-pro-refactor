@@ -10,8 +10,8 @@ import {
 	createCourseSchema,
 } from "@/lib/schemas/courses";
 import { cn } from "@/lib/utils/utils";
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -19,7 +19,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "#/components/ui/command";
+} from "../../ui/command";
 import {
 	Dialog,
 	DialogContent,
@@ -28,11 +28,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "#/components/ui/dialog";
-import { Checkbox } from "#/components/ui/checkbox";
-import { Field, FieldError, FieldLabel } from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
+} from "../../ui/dialog";
+import { Field, FieldError, FieldLabel } from "../../ui/field";
+import { Input } from "../../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 
 export function CreateCourseDialogForm() {
 	const [open, setOpen] = useState(false);
@@ -68,7 +67,7 @@ export function CreateCourseDialogForm() {
 								nombre: nombreLogro.trim(),
 								descripcion: `Se obtiene al terminar ${value.name}.`,
 								categoria: "Progreso",
-								// Terminar este curso: un curso completado, el de acá.
+								// Terminar este curso: un curso completado, el de aca.
 								tipoCondicion: "cursos_completados",
 								meta: 1,
 								xpRecompensa: 50,
@@ -76,7 +75,9 @@ export function CreateCourseDialogForm() {
 							});
 							toast.success(`Logro "${nombreLogro.trim()}" asociado al curso`);
 						} catch (e) {
-							toast.error(`El curso se creó, pero el logro no: ${(e as Error).message}`);
+							toast.error(
+								`El curso se creó, pero el logro no: ${(e as Error).message}`,
+							);
 						}
 					}
 
@@ -293,8 +294,8 @@ export function CreateCourseDialogForm() {
 						}}
 					</form.Field>
 
-					{/* Logro opcional del curso: la condición ya está decidida —
-					    terminar este curso—, así que solo hace falta el nombre. */}
+					{/* Logro opcional del curso: la condicion ya esta decidida
+					    —terminar este curso— asi que solo hace falta el nombre. */}
 					<Field orientation="horizontal">
 						<Checkbox
 							id="curso-con-logro"
