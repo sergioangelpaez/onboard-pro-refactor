@@ -3,7 +3,7 @@ import { CoursesRouteContent } from "#/components/courses/courses-route-content"
 import { CreateCourseDialogForm } from "#/components/courses/create-course-dialog-form";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 
-export const Route = createFileRoute("/(dashboard)/(courses)/courses")({
+export const Route = createFileRoute("/admin/(courses)/courses")({
 	component: CoursesRoute,
 });
 

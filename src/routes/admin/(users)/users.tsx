@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { UserFormSheet } from "#/components/users/user-form";
+import { UserFormSheet } from "#/components/admin/users/user-form";
+import { UsersRouteContent } from "#/components/admin/users/users-route-content";
 import { useAllUsers } from "#/hooks/users/use-all-users";
 import { Button } from "@/components/ui/button";
-import { UsersRouteContent } from "@/components/users/users-route-content";
 
-export const Route = createFileRoute("/(dashboard)/(users)/users")({
+export const Route = createFileRoute("/admin/(users)/users")({
 	component: UsersRoute,
 });
 

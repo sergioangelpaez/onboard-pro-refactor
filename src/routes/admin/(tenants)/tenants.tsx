@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { TenantFormSheet } from "#/components/tenants/tenants-form";
-import { TenantsRouteContent } from "#/components/tenants/tenants-route-content";
+import { TenantFormSheet } from "#/components/admin/tenants/tenants-form";
+import { TenantsRouteContent } from "#/components/admin/tenants/tenants-route-content";
 import { Button } from "#/components/ui/button";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
 
-export const Route = createFileRoute("/(dashboard)/(tenants)/tenants")({
+export const Route = createFileRoute("/admin/(tenants)/tenants")({
 	component: TenantsRoute,
 });
 

@@ -70,7 +70,7 @@ export function NavUser({ user }: { user: User }) {
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem
-								onClick={() => router.navigate({ to: "/profile" })}
+								onClick={() => router.navigate({ to: "/admin/profile" })}
 							>
 								<UserIcon />
 								Perfil

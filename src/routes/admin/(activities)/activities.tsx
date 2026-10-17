@@ -6,7 +6,7 @@ import { ActivityFormSheet } from "#/components/activities/activity-form";
 import { useAllActivities } from "#/hooks/activities/use-all-activities";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/(dashboard)/(activities)/activities")({
+export const Route = createFileRoute("/admin/(activities)/activities")({
 	component: RouteComponent,
 });
 

@@ -61,4 +61,10 @@ export const activitiesService = {
 			method: "DELETE",
 		});
 	},
+
+	async complete(id: string) {
+		return await apiFetch<void>(`/gamification/activities/${id}/completar`, {
+			method: "POST",
+		});
+	},
 };

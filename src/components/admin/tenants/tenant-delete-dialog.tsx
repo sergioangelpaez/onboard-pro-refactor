@@ -1,8 +1,8 @@
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useDeleteUser } from "#/hooks/users/use-delete-user";
-import type { User } from "@/lib/schemas/users";
-import { Button } from "../ui/button";
+import { useDeleteTenant } from "#/hooks/tenants/use-delete-tenant";
+import type { Tenant } from "#/lib/schemas/tenants";
+import { Button } from "../../ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -10,31 +10,31 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
+} from "../../ui/dialog";
 
-interface UserDeleteDialogProps {
+interface TenantDeleteDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	user: User;
+	group: Tenant;
 }
 
-export function UserDeleteDialog({
+export function TenantDeleteDialog({
 	open,
 	onOpenChange,
-	user,
-}: UserDeleteDialogProps) {
-	const deleteUser = useDeleteUser();
+	group,
+}: TenantDeleteDialogProps) {
+	const deleteTenant = useDeleteTenant();
 
 	function handleDelete() {
-		deleteUser.mutate(
-			{ id: user.id },
+		deleteTenant.mutate(
+			{ id: group.id },
 			{
 				onSuccess: () => {
-					toast.success("Usuario eliminado correctamente");
+					toast.success("Organización eliminada correctamente");
 					onOpenChange(false);
 				},
 				onError: (e: Error) => {
-					toast.error("No se pudo eliminar el usuario", {
+					toast.error("No se pudo eliminar la organización", {
 						description: e.message,
 					});
 				},
@@ -46,10 +46,9 @@ export function UserDeleteDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Eliminar Usuario</DialogTitle>
+					<DialogTitle>Eliminar Organización</DialogTitle>
 					<DialogDescription>
-						¿Estás seguro de que quieres eliminar a {user.firstname}{" "}
-						{user.lastname}?
+						¿Estás seguro de que quieres eliminar la organización {group.name}?
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
@@ -59,9 +58,11 @@ export function UserDeleteDialog({
 					<Button
 						variant="destructive"
 						onClick={handleDelete}
-						disabled={deleteUser.isPending}
+						disabled={deleteTenant.isPending}
 					>
-						{deleteUser.isPending && <LoaderCircle className="animate-spin" />}
+						{deleteTenant.isPending && (
+							<LoaderCircle className="animate-spin" />
+						)}
 						Eliminar
 					</Button>
 				</DialogFooter>

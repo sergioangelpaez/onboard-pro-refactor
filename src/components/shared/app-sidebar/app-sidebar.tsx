@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
+import { normalizeRole } from "#/lib/utils/auth/session";
 import {
 	Sidebar,
 	SidebarContent,
@@ -15,53 +16,60 @@ import {
 	SidebarHeader,
 	SidebarRail,
 } from "@/components/ui/sidebar";
+import type { User } from "@/lib/schemas/users";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 
-const data = {
-	organizaciones: [
-		{
-			name: "Universidad Central",
-			logo: GalleryVerticalEnd,
-			plan: "",
-		},
-	],
-	navMain: [
+type Role = User["role"];
+
+const organizaciones = [
+	{
+		name: "Universidad Central",
+		logo: GalleryVerticalEnd,
+		plan: "",
+	},
+];
+
+const navByRole: Record<Role, React.ComponentProps<typeof NavMain>["items"]> = {
+	admin: [
 		{
 			title: "Organizaciones",
-			url: "/tenants",
+			url: "/admin/tenants",
 			icon: BuildingComplex,
 			isActive: true,
-			isCollapsible: false,
 		},
 		{
 			title: "Usuarios",
-			url: "/users",
+			url: "/admin/users",
 			icon: Users,
 			isActive: false,
-			isCollapsible: false,
 		},
 		{
 			title: "Cursos",
-			url: "/courses",
+			url: "/admin/courses",
 			icon: LibraryBig,
 			isActive: false,
-			isCollapsible: false,
 		},
 		{
 			title: "Grupos",
-			url: "/groups",
+			url: "/admin/groups",
 			icon: UserGroup,
 			isActive: false,
-			isCollapsible: false,
 		},
 		{
 			title: "Actividades",
-			url: "/activities",
+			url: "/admin/activities",
 			icon: ListTodo,
 			isActive: false,
-			isCollapsible: false,
+		},
+	],
+	student: [
+		{
+			title: "Mis actividades",
+			url: "/student/activities",
+			icon: ListTodo,
+			isActive: false,
 		},
 	],
 };
@@ -71,13 +79,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	if (!user) return null;
 
+	const items = navByRole[normalizeRole(user.role)];
+
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher teams={data.organizaciones} />
+				<TeamSwitcher teams={organizaciones} />
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
+				<NavMain items={items} />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

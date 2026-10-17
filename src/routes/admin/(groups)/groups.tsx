@@ -6,7 +6,7 @@ import { GroupsRouteContent } from "#/components/groups/groups-route-content";
 import { Button } from "#/components/ui/button";
 import { useAllGroups } from "#/hooks/groups/use-all-groups";
 
-export const Route = createFileRoute("/(dashboard)/(groups)/groups")({
+export const Route = createFileRoute("/admin/(groups)/groups")({
 	component: GroupsRoute,
 });
 

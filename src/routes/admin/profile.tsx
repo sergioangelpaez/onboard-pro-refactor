@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { UserFormSheet } from "#/components/admin/users/user-form";
 import { ChangePasswordDialogForm } from "#/components/auth/change-password-dialog-form";
 import { UserDetailsCard } from "#/components/profile/user-details-card";
 import { UserGroupsCard } from "#/components/profile/user-groups-card";
@@ -7,11 +8,10 @@ import { UserProgressCard } from "#/components/profile/user-progress-card";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
 import { Button } from "#/components/ui/button";
-import { UserFormSheet } from "#/components/users/user-form";
 import { useMyGroups } from "#/hooks/groups/use-my-groups";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 
-export const Route = createFileRoute("/(dashboard)/profile")({
+export const Route = createFileRoute("/admin/profile")({
 	component: ProfileRoute,
 });
 
