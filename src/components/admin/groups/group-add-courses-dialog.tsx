@@ -6,8 +6,8 @@ import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useAddCourses } from "#/hooks/groups/use-add-courses";
 import type { Group } from "@/lib/schemas/groups";
 import { cn } from "@/lib/utils/utils";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -15,7 +15,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "../ui/command";
+} from "../../ui/command";
 import {
 	Dialog,
 	DialogContent,
@@ -23,9 +23,9 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
-import { Field, FieldError, FieldLabel } from "../ui/field";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+} from "../../ui/dialog";
+import { Field, FieldError, FieldLabel } from "../../ui/field";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 
 const addCoursesSchema = z.object({
 	coursesIds: z.array(z.string()).min(1, "Selecciona al menos un curso"),

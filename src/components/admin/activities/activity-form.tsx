@@ -40,7 +40,7 @@ import {
 	SheetFooter,
 	SheetHeader,
 	SheetTitle,
-} from "../ui/sheet";
+} from "../../ui/sheet";
 
 type ActivityType = CreateActivityPayload["type"];
 

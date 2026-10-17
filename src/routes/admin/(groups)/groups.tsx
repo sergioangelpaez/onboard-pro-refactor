@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { GroupFormSheet } from "#/components/groups/groups-form";
-import { GroupsRouteContent } from "#/components/groups/groups-route-content";
+import { GroupFormSheet } from "#/components/admin/groups/groups-form";
+import { GroupsRouteContent } from "#/components/admin/groups/groups-route-content";
 import { Button } from "#/components/ui/button";
 import { useAllGroups } from "#/hooks/groups/use-all-groups";
 

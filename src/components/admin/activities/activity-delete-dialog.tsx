@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteActivity } from "#/hooks/activities/use-delete-activity";
 import type { Activity } from "#/lib/schemas/activities";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +10,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
+} from "../../ui/dialog";
 
 interface ActivityDeleteDialogProps {
 	open: boolean;

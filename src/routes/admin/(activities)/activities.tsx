@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { ActivitiesRouteContent } from "#/components/activities/activities-route-content";
-import { ActivityFormSheet } from "#/components/activities/activity-form";
+import { ActivitiesRouteContent } from "#/components/admin/activities/activities-route-content";
+import { ActivityFormSheet } from "#/components/admin/activities/activity-form";
 import { useAllActivities } from "#/hooks/activities/use-all-activities";
 import { Button } from "@/components/ui/button";
 
