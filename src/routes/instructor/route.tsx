@@ -1,13 +1,13 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "#/components/shared/app-sidebar/app-sidebar";
-import { getCurrentUser, normalizeRole } from "#/lib/utils/auth/session";
+import { getCurrentUser, rolReal } from "#/lib/utils/auth/session";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/instructor")({
 	beforeLoad: async ({ context }) => {
 		const user = await getCurrentUser(context.queryClient);
 		if (!user) throw redirect({ to: "/auth" });
-		if (normalizeRole(user.role) !== "instructor")
+		if (rolReal(user.role) !== "instructor")
 			throw redirect({ to: "/auth" });
 		return { user };
 	},

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import { normalizeRole, type Role } from "#/lib/utils/auth/session";
+import { rolReal, type RolReal } from "#/lib/utils/auth/session";
 import {
 	Sidebar,
 	SidebarContent,
@@ -68,7 +68,7 @@ const ACTIVIDADES = {
  * contenido de sus cursos, aunque no de de alta personas ni toque empresas;
  * el servidor ya le devuelve solo los cursos que dicta.
  */
-const navByRole: Record<Role, React.ComponentProps<typeof NavMain>["items"]> = {
+const navByRole: Record<RolReal, React.ComponentProps<typeof NavMain>["items"]> = {
 	superadmin: [
 		RESUMEN,
 		{
@@ -105,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	if (!user) return null;
 
 	// "superadmin" y "admin" se normalizan a "admin", así que comparten menú.
-	const items = navByRole[normalizeRole(user.role)];
+	const items = navByRole[rolReal(user.role)];
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

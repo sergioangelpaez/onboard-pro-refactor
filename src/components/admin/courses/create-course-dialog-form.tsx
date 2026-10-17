@@ -10,6 +10,7 @@ import {
 	createCourseSchema,
 } from "@/lib/schemas/courses";
 import { cn } from "@/lib/utils/utils";
+import { Checkbox } from "#/components/ui/checkbox";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import {
@@ -300,7 +301,7 @@ export function CreateCourseDialogForm() {
 						<Checkbox
 							id="curso-con-logro"
 							checked={conLogro}
-							onCheckedChange={(v) => setConLogro(v === true)}
+							onCheckedChange={(v: boolean | string) => setConLogro(v === true)}
 						/>
 						<FieldLabel htmlFor="curso-con-logro">
 							Dar un logro al terminar el curso
