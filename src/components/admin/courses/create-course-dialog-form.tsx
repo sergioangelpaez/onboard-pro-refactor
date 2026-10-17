@@ -9,8 +9,8 @@ import {
 	createCourseSchema,
 } from "@/lib/schemas/courses";
 import { cn } from "@/lib/utils/utils";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -18,7 +18,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "../ui/command";
+} from "../../ui/command";
 import {
 	Dialog,
 	DialogContent,
@@ -27,10 +27,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
-import { Field, FieldError, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+} from "../../ui/dialog";
+import { Field, FieldError, FieldLabel } from "../../ui/field";
+import { Input } from "../../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 
 export function CreateCourseDialogForm() {
 	const [open, setOpen] = useState(false);

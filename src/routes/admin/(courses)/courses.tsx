@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CoursesRouteContent } from "#/components/courses/courses-route-content";
-import { CreateCourseDialogForm } from "#/components/courses/create-course-dialog-form";
+import { CoursesRouteContent } from "#/components/admin/courses/courses-route-content";
+import { CreateCourseDialogForm } from "#/components/admin/courses/create-course-dialog-form";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 
 export const Route = createFileRoute("/admin/(courses)/courses")({
