@@ -19,11 +19,11 @@ function ProfileRoute() {
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const [isPasswordOpen, setIsPasswordOpen] = useState(false);
 
-	const {
-		user,
-		isLoading: isUserLoading,
-		error: isUserError,
-	} = useCurrentUser();
+	// useCurrentUser usa useSuspenseQuery: no expone isLoading ni error, la
+	// espera y el fallo los maneja el Suspense de la ruta.
+	const { user } = useCurrentUser();
+	const isUserLoading = false;
+	const isUserError = null;
 	const {
 		groups,
 		isLoading: isGroupsLoading,

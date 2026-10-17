@@ -29,7 +29,7 @@ import {
 	SheetFooter,
 	SheetHeader,
 	SheetTitle,
-} from "../../ui/sheet";
+} from "#/components/ui/sheet";
 
 type Status = "Active" | "Inactive" | "Pending" | "Suspended";
 

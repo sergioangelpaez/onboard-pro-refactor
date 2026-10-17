@@ -368,7 +368,7 @@ export function ActivityFormSheet({
 													? "Reemplazar archivo (opcional)"
 													: "Archivo adjunto"}
 											</FieldLabel>
-											{isEdit && !file && (
+											{isEdit && !file && activity.adjunto && (
 												<FieldDescription>
 													Archivo actual: {activity.adjunto.split("/").pop()}
 												</FieldDescription>

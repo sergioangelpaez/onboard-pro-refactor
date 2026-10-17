@@ -1,14 +1,14 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "#/components/shared/app-sidebar/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
-import { getCurrentUser, normalizeRole } from "#/lib/utils/auth/session";
+import { areaDe, getCurrentUser, getHomeByRole } from "#/lib/utils/auth/session";
 
 export const Route = createFileRoute("/student")({
 	beforeLoad: async ({ context }) => {
 		const user = await getCurrentUser(context.queryClient);
 		if (!user) throw redirect({ to: "/auth" });
-		if (normalizeRole(user.role) === "admin")
-			throw redirect({ to: "/admin/home" });
+		if (areaDe(user.role) !== "/student")
+			throw redirect({ to: getHomeByRole(user.role) });
 		return { user };
 	},
 	component: RouteComponent,

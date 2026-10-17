@@ -6,8 +6,8 @@ import {
 	RowActions,
 } from "@/components/shared/table/row-actions";
 import type { AppRow } from "@/lib/ui/data-table";
-import { TenantDeleteDialog } from "../tenant-delete-dialog";
-import { TenantFormSheet } from "../tenants-form";
+import { TenantDeleteDialog } from "#/components/admin/tenants/tenant-delete-dialog";
+import { TenantFormSheet } from "#/components/admin/tenants/tenants-form";
 
 export function TenantRowActions({ row }: { row: AppRow<Tenant> }) {
 	const [editOpen, setEditOpen] = useState(false);

@@ -22,10 +22,11 @@ export const activitySchema = z.object({
 	type: z.enum(["Recurso", "Tarea", "Examen"]),
 	title: z.string(),
 	description: z.string(),
-	adjunto: z.string(),
+	// Desde HU-039 se puede quitar el material: la actividad queda sin adjunto.
+	adjunto: z.string().nullish(),
 	deliverable: z.boolean(),
 	created_at: z.string(),
-	mime: z.string(),
+	mime: z.string().nullish(),
 	orden: z.number(),
 	xp: z.number(),
 	tenantId: z.string(),
@@ -65,3 +66,18 @@ export type CreateActivityPayload = z.infer<typeof createActivitySchema>;
 export type CreateActivityFormValues = z.infer<typeof createActivityFormSchema>;
 export type UpdateActivityFormValues = z.infer<typeof updateActivityFormSchema>;
 export type ActivityFormValues = CreateActivityFormValues & { xp: number };
+
+/** Un archivo de apoyo de la actividad (HU-037). `url` vence en una hora. */
+export const materialSchema = z.object({
+	id: z.string(),
+	actividadId: z.string(),
+	nombre: z.string(),
+	mime: z.string().nullish(),
+	tamano: z.number().nullish(),
+	orden: z.number(),
+	subidoPor: z.string().nullish(),
+	subidoEn: z.string(),
+	url: z.string().nullish(),
+});
+
+export type Material = z.infer<typeof materialSchema>;

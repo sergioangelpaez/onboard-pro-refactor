@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as InstructorRouteRouteImport } from './routes/instructor/route'
 import { Route as StudentRouteRouteImport } from './routes/student/route'
 import { Route as authAuthRouteImport } from './routes/(auth)/auth'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as AdminHomeRouteImport } from './routes/admin/home'
 import { Route as AdminProfileRouteImport } from './routes/admin/profile'
+import { Route as InstructorHomeRouteImport } from './routes/instructor/home'
 import { Route as StudentActivitiesRouteImport } from './routes/student/activities'
 import { Route as StudentHomeRouteImport } from './routes/student/home'
 import { Route as AdminactivitiesActivitiesRouteImport } from './routes/admin/(activities)/activities'
@@ -23,6 +25,10 @@ import { Route as AdmincoursesCoursesRouteImport } from './routes/admin/(courses
 import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/groups'
 import { Route as AdmintenantsTenantsRouteImport } from './routes/admin/(tenants)/tenants'
 import { Route as AdminusersUsersRouteImport } from './routes/admin/(users)/users'
+import { Route as InstructorgroupsGroupsRouteImport } from './routes/instructor/(groups)/groups'
+import { Route as InstructoractivitiesActivitiesActivityIdRouteImport } from './routes/instructor/(activities)/activities.$activityId'
+import { Route as InstructorcoursesCoursesIndexRouteImport } from './routes/instructor/(courses)/courses.index'
+import { Route as InstructorcoursesCoursesCourseIdRouteImport } from './routes/instructor/(courses)/courses.$courseId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,6 +38,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstructorRouteRoute = InstructorRouteRouteImport.update({
+  id: '/instructor',
+  path: '/instructor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentRouteRoute = StudentRouteRouteImport.update({
@@ -58,6 +69,11 @@ const AdminProfileRoute = AdminProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const InstructorHomeRoute = InstructorHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => InstructorRouteRoute,
 } as any)
 const StudentActivitiesRoute = StudentActivitiesRouteImport.update({
   id: '/activities',
@@ -95,15 +111,40 @@ const AdminusersUsersRoute = AdminusersUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const InstructorgroupsGroupsRoute = InstructorgroupsGroupsRouteImport.update({
+  id: '/(groups)/groups',
+  path: '/groups',
+  getParentRoute: () => InstructorRouteRoute,
+} as any)
+const InstructoractivitiesActivitiesActivityIdRoute =
+  InstructoractivitiesActivitiesActivityIdRouteImport.update({
+    id: '/(activities)/activities/$activityId',
+    path: '/activities/$activityId',
+    getParentRoute: () => InstructorRouteRoute,
+  } as any)
+const InstructorcoursesCoursesIndexRoute =
+  InstructorcoursesCoursesIndexRouteImport.update({
+    id: '/(courses)/courses/',
+    path: '/courses/',
+    getParentRoute: () => InstructorRouteRoute,
+  } as any)
+const InstructorcoursesCoursesCourseIdRoute =
+  InstructorcoursesCoursesCourseIdRouteImport.update({
+    id: '/(courses)/courses/$courseId',
+    path: '/courses/$courseId',
+    getParentRoute: () => InstructorRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/instructor': typeof InstructorRouteRouteWithChildren
   '/student': typeof StudentRouteRouteWithChildren
   '/auth': typeof authAuthRoute
   '/reset-password': typeof authResetPasswordRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/profile': typeof AdminProfileRoute
+  '/instructor/home': typeof InstructorHomeRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
@@ -111,15 +152,21 @@ export interface FileRoutesByFullPath {
   '/admin/groups': typeof AdmingroupsGroupsRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
+  '/instructor/groups': typeof InstructorgroupsGroupsRoute
+  '/instructor/activities/$activityId': typeof InstructoractivitiesActivitiesActivityIdRoute
+  '/instructor/courses/$courseId': typeof InstructorcoursesCoursesCourseIdRoute
+  '/instructor/courses/': typeof InstructorcoursesCoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/instructor': typeof InstructorRouteRouteWithChildren
   '/student': typeof StudentRouteRouteWithChildren
   '/auth': typeof authAuthRoute
   '/reset-password': typeof authResetPasswordRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/profile': typeof AdminProfileRoute
+  '/instructor/home': typeof InstructorHomeRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
@@ -127,16 +174,22 @@ export interface FileRoutesByTo {
   '/admin/groups': typeof AdmingroupsGroupsRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
+  '/instructor/groups': typeof InstructorgroupsGroupsRoute
+  '/instructor/activities/$activityId': typeof InstructoractivitiesActivitiesActivityIdRoute
+  '/instructor/courses/$courseId': typeof InstructorcoursesCoursesCourseIdRoute
+  '/instructor/courses': typeof InstructorcoursesCoursesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/instructor': typeof InstructorRouteRouteWithChildren
   '/student': typeof StudentRouteRouteWithChildren
   '/(auth)/auth': typeof authAuthRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/profile': typeof AdminProfileRoute
+  '/instructor/home': typeof InstructorHomeRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
   '/admin/(activities)/activities': typeof AdminactivitiesActivitiesRoute
@@ -144,17 +197,23 @@ export interface FileRoutesById {
   '/admin/(groups)/groups': typeof AdmingroupsGroupsRoute
   '/admin/(tenants)/tenants': typeof AdmintenantsTenantsRoute
   '/admin/(users)/users': typeof AdminusersUsersRoute
+  '/instructor/(groups)/groups': typeof InstructorgroupsGroupsRoute
+  '/instructor/(activities)/activities/$activityId': typeof InstructoractivitiesActivitiesActivityIdRoute
+  '/instructor/(courses)/courses/$courseId': typeof InstructorcoursesCoursesCourseIdRoute
+  '/instructor/(courses)/courses/': typeof InstructorcoursesCoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/instructor'
     | '/student'
     | '/auth'
     | '/reset-password'
     | '/admin/home'
     | '/admin/profile'
+    | '/instructor/home'
     | '/student/activities'
     | '/student/home'
     | '/admin/activities'
@@ -162,15 +221,21 @@ export interface FileRouteTypes {
     | '/admin/groups'
     | '/admin/tenants'
     | '/admin/users'
+    | '/instructor/groups'
+    | '/instructor/activities/$activityId'
+    | '/instructor/courses/$courseId'
+    | '/instructor/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/instructor'
     | '/student'
     | '/auth'
     | '/reset-password'
     | '/admin/home'
     | '/admin/profile'
+    | '/instructor/home'
     | '/student/activities'
     | '/student/home'
     | '/admin/activities'
@@ -178,15 +243,21 @@ export interface FileRouteTypes {
     | '/admin/groups'
     | '/admin/tenants'
     | '/admin/users'
+    | '/instructor/groups'
+    | '/instructor/activities/$activityId'
+    | '/instructor/courses/$courseId'
+    | '/instructor/courses'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/instructor'
     | '/student'
     | '/(auth)/auth'
     | '/(auth)/reset-password'
     | '/admin/home'
     | '/admin/profile'
+    | '/instructor/home'
     | '/student/activities'
     | '/student/home'
     | '/admin/(activities)/activities'
@@ -194,11 +265,16 @@ export interface FileRouteTypes {
     | '/admin/(groups)/groups'
     | '/admin/(tenants)/tenants'
     | '/admin/(users)/users'
+    | '/instructor/(groups)/groups'
+    | '/instructor/(activities)/activities/$activityId'
+    | '/instructor/(courses)/courses/$courseId'
+    | '/instructor/(courses)/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  InstructorRouteRoute: typeof InstructorRouteRouteWithChildren
   StudentRouteRoute: typeof StudentRouteRouteWithChildren
   authAuthRoute: typeof authAuthRoute
   authResetPasswordRoute: typeof authResetPasswordRoute
@@ -218,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instructor': {
+      id: '/instructor'
+      path: '/instructor'
+      fullPath: '/instructor'
+      preLoaderRoute: typeof InstructorRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/student': {
@@ -254,6 +337,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/profile'
       preLoaderRoute: typeof AdminProfileRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/instructor/home': {
+      id: '/instructor/home'
+      path: '/home'
+      fullPath: '/instructor/home'
+      preLoaderRoute: typeof InstructorHomeRouteImport
+      parentRoute: typeof InstructorRouteRoute
     }
     '/student/activities': {
       id: '/student/activities'
@@ -304,6 +394,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminusersUsersRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/instructor/(groups)/groups': {
+      id: '/instructor/(groups)/groups'
+      path: '/groups'
+      fullPath: '/instructor/groups'
+      preLoaderRoute: typeof InstructorgroupsGroupsRouteImport
+      parentRoute: typeof InstructorRouteRoute
+    }
+    '/instructor/(activities)/activities/$activityId': {
+      id: '/instructor/(activities)/activities/$activityId'
+      path: '/activities/$activityId'
+      fullPath: '/instructor/activities/$activityId'
+      preLoaderRoute: typeof InstructoractivitiesActivitiesActivityIdRouteImport
+      parentRoute: typeof InstructorRouteRoute
+    }
+    '/instructor/(courses)/courses/': {
+      id: '/instructor/(courses)/courses/'
+      path: '/courses'
+      fullPath: '/instructor/courses/'
+      preLoaderRoute: typeof InstructorcoursesCoursesIndexRouteImport
+      parentRoute: typeof InstructorRouteRoute
+    }
+    '/instructor/(courses)/courses/$courseId': {
+      id: '/instructor/(courses)/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/instructor/courses/$courseId'
+      preLoaderRoute: typeof InstructorcoursesCoursesCourseIdRouteImport
+      parentRoute: typeof InstructorRouteRoute
+    }
   }
 }
 
@@ -331,6 +449,27 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface InstructorRouteRouteChildren {
+  InstructorHomeRoute: typeof InstructorHomeRoute
+  InstructorgroupsGroupsRoute: typeof InstructorgroupsGroupsRoute
+  InstructoractivitiesActivitiesActivityIdRoute: typeof InstructoractivitiesActivitiesActivityIdRoute
+  InstructorcoursesCoursesCourseIdRoute: typeof InstructorcoursesCoursesCourseIdRoute
+  InstructorcoursesCoursesIndexRoute: typeof InstructorcoursesCoursesIndexRoute
+}
+
+const InstructorRouteRouteChildren: InstructorRouteRouteChildren = {
+  InstructorHomeRoute: InstructorHomeRoute,
+  InstructorgroupsGroupsRoute: InstructorgroupsGroupsRoute,
+  InstructoractivitiesActivitiesActivityIdRoute:
+    InstructoractivitiesActivitiesActivityIdRoute,
+  InstructorcoursesCoursesCourseIdRoute: InstructorcoursesCoursesCourseIdRoute,
+  InstructorcoursesCoursesIndexRoute: InstructorcoursesCoursesIndexRoute,
+}
+
+const InstructorRouteRouteWithChildren = InstructorRouteRoute._addFileChildren(
+  InstructorRouteRouteChildren,
+)
+
 interface StudentRouteRouteChildren {
   StudentActivitiesRoute: typeof StudentActivitiesRoute
   StudentHomeRoute: typeof StudentHomeRoute
@@ -348,6 +487,7 @@ const StudentRouteRouteWithChildren = StudentRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  InstructorRouteRoute: InstructorRouteRouteWithChildren,
   StudentRouteRoute: StudentRouteRouteWithChildren,
   authAuthRoute: authAuthRoute,
   authResetPasswordRoute: authResetPasswordRoute,

@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteUser } from "#/hooks/users/use-delete-user";
 import type { User } from "@/lib/schemas/users";
-import { Button } from "../../ui/button";
+import { Button } from "#/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +10,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../../ui/dialog";
+} from "#/components/ui/dialog";
 
 interface UserDeleteDialogProps {
 	open: boolean;

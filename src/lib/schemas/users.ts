@@ -14,6 +14,10 @@ export const userSchema = z.object({
 	average: z.number(),
 	missions: z.string(),
 	tenantId: z.string().nullable(),
+	// Resueltos por el backend en /auth/me: el id suelto ("tenant-uc") no
+	// sirve para mostrar, y oauthOnly dice si la cuenta tiene contrasena.
+	tenantName: z.string().nullish(),
+	oauthOnly: z.boolean().nullish(),
 });
 
 export const userPayloadSchema = z.object({
