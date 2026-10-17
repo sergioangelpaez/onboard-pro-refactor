@@ -1,59 +1,91 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
+import { ChevronRight, type LucideIcon } from "lucide-react";
+
 import {
-	BuildingComplex,
-	LayoutDashboard,
-	LibraryBig,
-	UserGroup,
-	Users,
-} from "lucide-react";
-import type { IconName, MenuGroup } from "#/lib/utils/roles";
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarMenuSub,
+	SidebarMenuSubButton,
+	SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-const ICONOS: Record<IconName, React.ComponentType> = {
-	dashboard: LayoutDashboard,
-	tenants: BuildingComplex,
-	users: Users,
-	courses: LibraryBig,
-	groups: UserGroup,
-};
-
-/**
- * El menú lateral, agrupado por rol: "Docencia", "Personas", "Contenido".
- * Los grupos ya vienen filtrados, así que acá solo se pintan.
- *
- * No hay desplegables: cada elemento lleva directo a su pantalla.
- */
-export function NavMain({ groups }: { groups: MenuGroup[] }) {
+export function NavMain({
+	items,
+}: {
+	items: {
+		title: string;
+		url: string;
+		icon?: LucideIcon;
+		isActive?: boolean;
+		items?: {
+			title: string;
+			url: string;
+		}[];
+	}[];
+}) {
 	return (
-		<>
-			{groups.map((grupo) => (
-				<SidebarGroup key={grupo.label}>
-					<SidebarGroupLabel>{grupo.label}</SidebarGroupLabel>
-					<SidebarMenu>
-						{grupo.items.map((item) => {
-							const Icono = ICONOS[item.icon];
-							return (
-								<SidebarMenuItem key={item.url}>
-									<SidebarMenuButton asChild tooltip={item.label}>
-										<Link to={item.url}>
-											<Icono />
-											<span>{item.label}</span>
-										</Link>
+		<SidebarGroup>
+			<SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+			<SidebarMenu>
+				{items.map((item) => {
+					const hasSubItems = item.items && item.items.length > 0;
+
+					if (!hasSubItems) {
+						return (
+							<SidebarMenuItem key={item.title}>
+								<SidebarMenuButton asChild tooltip={item.title}>
+									<Link to={item.url}>
+										{item.icon && <item.icon />}
+										<span>{item.title}</span>
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						);
+					}
+
+					return (
+						<Collapsible
+							key={item.title}
+							asChild
+							defaultOpen={item.isActive}
+							className="group/collapsible"
+						>
+							<SidebarMenuItem>
+								<CollapsibleTrigger asChild>
+									<SidebarMenuButton tooltip={item.title}>
+										{item.icon && <item.icon />}
+										<span>{item.title}</span>
+										<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
 									</SidebarMenuButton>
-								</SidebarMenuItem>
-							);
-						})}
-					</SidebarMenu>
-				</SidebarGroup>
-			))}
-		</>
+								</CollapsibleTrigger>
+								<CollapsibleContent>
+									<SidebarMenuSub>
+										{item.items?.map((subItem) => (
+											<SidebarMenuSubItem key={subItem.title}>
+												<SidebarMenuSubButton asChild>
+													<Link to={subItem.url}>
+														<span>{subItem.title}</span>
+													</Link>
+												</SidebarMenuSubButton>
+											</SidebarMenuSubItem>
+										))}
+									</SidebarMenuSub>
+								</CollapsibleContent>
+							</SidebarMenuItem>
+						</Collapsible>
+					);
+				})}
+			</SidebarMenu>
+		</SidebarGroup>
 	);
 }

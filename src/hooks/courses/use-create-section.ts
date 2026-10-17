@@ -10,7 +10,7 @@ export function useCreateSection(courseId: string) {
 			coursesService.createSection(courseId, name),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.courses.sections(courseId),
+				queryKey: queryKeys.sections.byCourse(courseId),
 			});
 		},
 	});

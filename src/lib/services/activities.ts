@@ -1,4 +1,9 @@
-import type { Activity, Material } from "../schemas/activities";
+import type {
+	Activity,
+	CreateActivityFormValues,
+	Material,
+	UpdateActivityFormValues,
+} from "../schemas/activities";
 import { apiFetch } from "./api-fetch";
 
 export const activitiesService = {
@@ -6,36 +11,55 @@ export const activitiesService = {
 		return await apiFetch<Activity[]>("/activities/get/all");
 	},
 
-	/**
-	 * Crea una actividad dentro de una seccion (HU-034).
-	 *
-	 * Va como FormData porque el adjunto viaja en la misma peticion. El
-	 * backend espera cada dato en su propio campo, no un JSON: por eso los
-	 * booleanos y los numeros se mandan como texto y alla se convierten.
-	 */
-	async create(payload: {
-		sectionId: string;
-		name: string;
-		title: string;
-		type: string;
-		description?: string;
-		deliverable: boolean;
-		xp?: number;
-		file?: File | null;
-	}) {
+	async create(activity: CreateActivityFormValues) {
 		const body = new FormData();
-		body.append("sectionId", payload.sectionId);
-		body.append("name", payload.name);
-		body.append("title", payload.title);
-		body.append("type", payload.type);
-		body.append("deliverable", String(payload.deliverable));
-		if (payload.description) body.append("description", payload.description);
-		if (payload.xp !== undefined) body.append("xp", String(payload.xp));
-		if (payload.file) body.append("archivo", payload.file);
+		body.append("name", activity.name);
+		body.append("title", activity.title);
+		body.append("type", activity.type);
+		body.append("description", activity.description);
+		body.append("deliverable", String(activity.deliverable));
+		body.append("sectionId", activity.sectionId);
+		body.append("archivo", activity.archivo);
 
 		return await apiFetch<Activity>("/activities/create", {
 			method: "POST",
 			body,
+		});
+	},
+
+	async update(id: string, values: UpdateActivityFormValues) {
+		const fields = {
+			name: values.name,
+			title: values.title,
+			type: values.type,
+			description: values.description,
+			deliverable: values.deliverable,
+			xp: values.xp,
+		};
+
+		if (values.archivo instanceof File) {
+			const body = new FormData();
+			for (const [key, value] of Object.entries(fields)) {
+				body.append(key, String(value));
+			}
+			body.append("archivo", values.archivo);
+
+			return await apiFetch<Activity>(`/activities/${id}`, {
+				method: "PUT",
+				body,
+			});
+		}
+
+		return await apiFetch<Activity>(`/activities/${id}`, {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(fields),
+		});
+	},
+
+	async delete(id: string) {
+		return await apiFetch<void>(`/activities/${id}`, {
+			method: "DELETE",
 		});
 	},
 
@@ -45,10 +69,8 @@ export const activitiesService = {
 	},
 
 	/**
-	 * Agrega un archivo a la actividad (HU-037).
-	 *
-	 * Se manda como FormData a proposito: apiFetch detecta que lo es y no fija
-	 * el Content-Type, para que el navegador escriba el boundary del multipart.
+	 * Agrega un archivo a la actividad (HU-037). Se suma a los que ya estaban:
+	 * no los reemplaza.
 	 */
 	async addMaterial(activityId: string, file: File) {
 		const body = new FormData();
@@ -66,5 +88,11 @@ export const activitiesService = {
 			`/materiales/${materialId}`,
 			{ method: "DELETE" },
 		);
+	},
+
+	async complete(id: string) {
+		return await apiFetch<void>(`/gamification/activities/${id}/completar`, {
+			method: "POST",
+		});
 	},
 };

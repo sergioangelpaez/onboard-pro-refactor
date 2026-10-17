@@ -1,7 +1,15 @@
-import { GalleryVerticalEnd } from "lucide-react";
+import {
+	BuildingComplex,
+	GalleryVerticalEnd,
+	LayoutDashboard,
+	LibraryBig,
+	ListTodo,
+	UserGroup,
+	Users,
+} from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import { menuDe } from "#/lib/utils/roles";
+import { normalizeRole, type Role } from "#/lib/utils/auth/session";
 import {
 	Sidebar,
 	SidebarContent,
@@ -13,25 +21,90 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 
+const organizaciones = [
+	{
+		name: "Universidad Central",
+		logo: GalleryVerticalEnd,
+		plan: "",
+	},
+];
+
+const RESUMEN = {
+	title: "Resumen",
+	url: "/admin/home",
+	icon: LayoutDashboard,
+	isActive: true,
+};
+const USUARIOS = {
+	title: "Usuarios",
+	url: "/admin/users",
+	icon: Users,
+	isActive: false,
+};
+const CURSOS = {
+	title: "Cursos",
+	url: "/admin/courses",
+	icon: LibraryBig,
+	isActive: false,
+};
+const GRUPOS = {
+	title: "Grupos",
+	url: "/admin/groups",
+	icon: UserGroup,
+	isActive: false,
+};
+const ACTIVIDADES = {
+	title: "Actividades",
+	url: "/admin/activities",
+	icon: ListTodo,
+	isActive: false,
+};
+
+/**
+ * Que ve cada rol, siguiendo lo que exige el backend con `requireRole`.
+ *
+ * Organizaciones es solo del superadministrador: `tenantRoutes` pide ese rol.
+ * El instructor entra al area de administracion porque administra el
+ * contenido de sus cursos, aunque no de de alta personas ni toque empresas;
+ * el servidor ya le devuelve solo los cursos que dicta.
+ */
+const navByRole: Record<Role, React.ComponentProps<typeof NavMain>["items"]> = {
+	superadmin: [
+		RESUMEN,
+		{
+			title: "Organizaciones",
+			url: "/admin/tenants",
+			icon: BuildingComplex,
+			isActive: false,
+		},
+		USUARIOS,
+		CURSOS,
+		GRUPOS,
+		ACTIVIDADES,
+	],
+	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES],
+	// Su propia area: no comparte pantallas con la administracion de la empresa.
+	instructor: [
+		{ ...RESUMEN, url: "/instructor/home" },
+		{ ...CURSOS, title: "Mis cursos", url: "/instructor/courses" },
+		{ ...GRUPOS, url: "/instructor/groups" },
+	],
+	student: [
+		{
+			title: "Mis actividades",
+			url: "/student/activities",
+			icon: ListTodo,
+			isActive: false,
+		},
+	],
+};
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useCurrentUser();
 
 	if (!user) return null;
 
-	// Cada rol tiene su propio menú, con sus grupos y sus nombres: un
-	// instructor ve "Docencia · Mis cursos", un administrador "Mi empresa ·
-	// Personas". Sale de lib/utils/roles.
-	const grupos = menuDe(user.role);
-
-	// El nombre de la organización sale del usuario y no de una constante:
-	// antes decía "Universidad Central" para todo el mundo.
-	const organizaciones = [
-		{
-			name: user.tenantName ?? "OnBoard Pro",
-			logo: GalleryVerticalEnd,
-			plan: "",
-		},
-	];
+	const items = navByRole[normalizeRole(user.role)];
 
 	return (
 		<Sidebar collapsible="icon" {...props}>
@@ -39,7 +112,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<TeamSwitcher teams={organizaciones} />
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain groups={grupos} />
+				<NavMain items={items} />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

@@ -70,16 +70,16 @@ export function NavUser({ user }: { user: User }) {
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem
-								onClick={() => router.navigate({ to: "/profile" })}
+								onClick={() => router.navigate({ to: "/admin/profile" })}
 							>
 								<UserIcon />
-								Account
+								Perfil
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => authService.logOut()}>
 							<LogOut />
-							Log out
+							Salir
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

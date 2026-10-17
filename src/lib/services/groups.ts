@@ -47,4 +47,15 @@ export const groupsService = {
 			method: "DELETE",
 		});
 	},
+
+	async getMine() {
+		return await apiFetch<Group[]>("/groups/me");
+	},
+
+	async addCourses(id: string, courseIds: string[]) {
+		return await apiFetch<void>(`/groups/${id}/add-courses`, {
+			method: "POST",
+			body: JSON.stringify({ courseIds }),
+		});
+	},
 };

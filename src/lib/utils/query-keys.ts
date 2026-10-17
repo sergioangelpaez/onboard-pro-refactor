@@ -15,13 +15,11 @@ export const queryKeys = {
 	courses: {
 		all: ["courses", "all"],
 		create: ["courses", "create"],
-		byId: (id: string) => ["courses", id],
-		sections: (id: string) => ["courses", id, "sections"],
 	},
 	groups: {
 		all: ["groups", "all"],
 		create: ["groups", "create"],
-		byId: (id: string) => ["groups", id],
+		mine: ["groups", "mine"],
 	},
 	entregas: {
 		byActivity: (activityId: string) => ["entregas", activityId],
@@ -32,5 +30,9 @@ export const queryKeys = {
 	activities: {
 		all: ["activities", "all"],
 		materials: (activityId: string) => ["activities", activityId, "materials"],
+	},
+	sections: {
+		all: ["sections", "all"],
+		byCourse: (courseId: string) => ["sections", "byCourse", courseId],
 	},
 };

@@ -29,17 +29,13 @@ export async function apiFetch<T>(
 	const { skipAuthRedirect, ...fetchOptions } = options;
 
 	const token = tokenStorage.get();
-
-	// Un FormData tiene que viajar sin Content-Type puesto a mano: el navegador
-	// lo arma con el boundary del multipart. Fijarlo rompe la subida y el
-	// backend responde que no encuentra el archivo.
-	const esFormData = fetchOptions.body instanceof FormData;
+	const isFormData = fetchOptions.body instanceof FormData;
 
 	const res = await fetch(`${BASE_URL}${path}`, {
 		...fetchOptions,
 		credentials: "include",
 		headers: {
-			...(esFormData ? {} : { "Content-Type": "application/json" }),
+			...(isFormData ? {} : { "Content-Type": "application/json" }),
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			...fetchOptions.headers,
 		},
@@ -47,8 +43,8 @@ export async function apiFetch<T>(
 
 	if (!res.ok) {
 		// El backend explica cada fallo con un mensaje pensado para leerse
-		// ("Ya existe un logro con ese nombre"). Antes se descartaba y el
-		// usuario veía "Request failed: 409".
+		// ("Ya existe un logro con ese nombre"). Sin esto el usuario veía
+		// "Request failed: 409" y no sabía qué corregir.
 		const mensaje = await mensajeDe(res, `Request failed: ${res.status}`);
 
 		if (res.status === 401) throw new InvalidCredentialsError(mensaje);

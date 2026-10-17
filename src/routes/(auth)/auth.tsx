@@ -1,45 +1,32 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { toast } from "sonner";
-import { authService } from "#/lib/services/auth";
 import { InvalidCredentialsError } from "#/lib/services/errors";
 import { tokenStorage } from "#/lib/services/token-storage";
-import { queryKeys } from "#/lib/utils/query-keys";
+import {
+	currentUserQueryOptions,
+	getHomeByRole,
+} from "#/lib/utils/auth/session";
 import backGroundImage from "@/assets/universidad-central.webp";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const Route = createFileRoute("/(auth)/auth")({
 	component: LoginComponent,
 	ssr: false,
-	validateSearch: (search: Record<string, unknown>): { error?: string } => ({
-		error: typeof search.error === "string" ? search.error : undefined,
-	}),
 	beforeLoad: async ({ context }) => {
 		if (!tokenStorage.get()) return;
 
+		let user;
 		try {
-			await context.queryClient.ensureQueryData({
-				queryKey: queryKeys.users.me,
-				queryFn: authService.getMe,
-				retry: false,
-			});
+			user = await context.queryClient.ensureQueryData(currentUserQueryOptions);
 		} catch (error) {
 			if (error instanceof InvalidCredentialsError) return;
 			throw error;
 		}
 
-		throw redirect({ to: "/home" });
+		throw redirect({ to: getHomeByRole(user.role) });
 	},
 });
 
 function LoginComponent() {
-	const { error } = Route.useSearch();
-
-	// Error devuelto por el backend al fallar el login con Google/Microsoft.
-	useEffect(() => {
-		if (error) toast.error(error, { id: "oauth-error" });
-	}, [error]);
-
 	return (
 		<div className="relative flex h-screen w-screen items-center justify-around overflow-hidden">
 			<img

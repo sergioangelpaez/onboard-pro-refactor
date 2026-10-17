@@ -1,33 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { tokenStorage } from "#/lib/services/token-storage";
+import { getCurrentUser, getHomeByRole } from "@/lib/utils/auth/session";
 
-// El backend vuelve del login con Google/Microsoft a /?token=<jwt>,
-// o a /?token=Fail&reason=<mensaje> si la autenticación falló.
 export const Route = createFileRoute("/")({
-	component: Home,
-	ssr: false,
-	beforeLoad: ({ location }) => {
-		const { token, reason } = location.search as {
-			token?: string;
-			reason?: string;
-		};
-
-		if (token && token !== "Fail") {
-			tokenStorage.set(token);
-			throw redirect({ to: "/home" });
-		}
-
-		if (token === "Fail") {
-			throw redirect({
-				to: "/auth",
-				search: { error: reason || "No se pudo iniciar sesión." },
-			});
-		}
-
-		throw redirect({ to: "/auth" });
+	beforeLoad: async ({ context }) => {
+		const user = await getCurrentUser(context.queryClient);
+		if (!user) throw redirect({ to: "/auth" });
+		throw redirect({ to: getHomeByRole(user.role) });
 	},
 });
-
-function Home() {
-	return null;
-}

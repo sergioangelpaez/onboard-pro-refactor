@@ -4,7 +4,7 @@ import { queryKeys } from "#/lib/utils/query-keys";
 
 export function useCourseSections(courseId: string) {
 	const { data, isLoading, error, refetch } = useQuery({
-		queryKey: queryKeys.courses.sections(courseId),
+		queryKey: queryKeys.sections.byCourse(courseId),
 		queryFn: () => coursesService.getSections(courseId),
 	});
 
