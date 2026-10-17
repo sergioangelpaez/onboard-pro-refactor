@@ -1,4 +1,3 @@
-// shared/states/empty-state.tsx
 import { Inbox } from "lucide-react";
 import { StateMessage, type StateMessageProps } from "./state-message";
 

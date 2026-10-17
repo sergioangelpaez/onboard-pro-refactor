@@ -1,9 +1,11 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useLogin } from "#/hooks/auth/use-login";
 import { authService } from "#/lib/services/auth";
+import { currentUserQueryOptions } from "#/lib/utils/auth/session";
 import GoogleLogo from "@/assets/google-logo.svg";
 import MicrosoftLogo from "@/assets/microsoft-logo.svg";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,7 @@ import { ForgotPasswordDialogForm } from "./forgot-password-dialog-form";
 
 export function LoginForm() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const { mutate, isPending } = useLogin();
 
 	const form = useForm({
@@ -31,9 +34,18 @@ export function LoginForm() {
 		validators: { onChange: loginFormSchema },
 		onSubmit: ({ value }) =>
 			mutate(value, {
-				onSuccess: () => {
+				onSuccess: async () => {
 					toast.success("¡Bienvenido de nuevo!");
-					router.navigate({ to: "/home" });
+
+					// Descarta cualquier usuario cacheado (de una sesión anterior o un
+					// intento fallido) para que el guard pida /me con el token nuevo.
+					queryClient.removeQueries({
+						queryKey: currentUserQueryOptions.queryKey,
+					});
+
+					// "/" decide el destino según el rol que devuelve /me,
+					// la misma fuente que usan los guards de /admin y /student.
+					await router.navigate({ to: "/" });
 				},
 				onError: (error) => {
 					toast.error("Error al iniciar sesión", {

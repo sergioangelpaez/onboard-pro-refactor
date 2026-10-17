@@ -10,23 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as dashboardRouteRouteImport } from './routes/(dashboard)/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as StudentRouteRouteImport } from './routes/student/route'
 import { Route as authAuthRouteImport } from './routes/(auth)/auth'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
-import { Route as dashboardHomeRouteImport } from './routes/(dashboard)/home'
-import { Route as dashboardProfileRouteImport } from './routes/(dashboard)/profile'
-import { Route as dashboardcoursesCoursesRouteImport } from './routes/(dashboard)/(courses)/courses'
-import { Route as dashboardgroupsGroupsRouteImport } from './routes/(dashboard)/(groups)/groups'
-import { Route as dashboardtenantsTenantsRouteImport } from './routes/(dashboard)/(tenants)/tenants'
-import { Route as dashboardusersUsersRouteImport } from './routes/(dashboard)/(users)/users'
+import { Route as AdminHomeRouteImport } from './routes/admin/home'
+import { Route as AdminProfileRouteImport } from './routes/admin/profile'
+import { Route as StudentActivitiesRouteImport } from './routes/student/activities'
+import { Route as StudentHomeRouteImport } from './routes/student/home'
+import { Route as AdminactivitiesActivitiesRouteImport } from './routes/admin/(activities)/activities'
+import { Route as AdmincoursesCoursesRouteImport } from './routes/admin/(courses)/courses'
+import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/groups'
+import { Route as AdmintenantsTenantsRouteImport } from './routes/admin/(tenants)/tenants'
+import { Route as AdminusersUsersRouteImport } from './routes/admin/(users)/users'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const dashboardRouteRoute = dashboardRouteRouteImport.update({
-  id: '/(dashboard)',
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentRouteRoute = StudentRouteRouteImport.update({
+  id: '/student',
+  path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authAuthRoute = authAuthRouteImport.update({
@@ -39,112 +49,157 @@ const authResetPasswordRoute = authResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const dashboardHomeRoute = dashboardHomeRouteImport.update({
+const AdminHomeRoute = AdminHomeRouteImport.update({
   id: '/home',
   path: '/home',
-  getParentRoute: () => dashboardRouteRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const dashboardProfileRoute = dashboardProfileRouteImport.update({
+const AdminProfileRoute = AdminProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => dashboardRouteRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const dashboardcoursesCoursesRoute = dashboardcoursesCoursesRouteImport.update({
+const StudentActivitiesRoute = StudentActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentHomeRoute = StudentHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const AdminactivitiesActivitiesRoute =
+  AdminactivitiesActivitiesRouteImport.update({
+    id: '/(activities)/activities',
+    path: '/activities',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdmincoursesCoursesRoute = AdmincoursesCoursesRouteImport.update({
   id: '/(courses)/courses',
   path: '/courses',
-  getParentRoute: () => dashboardRouteRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const dashboardgroupsGroupsRoute = dashboardgroupsGroupsRouteImport.update({
+const AdmingroupsGroupsRoute = AdmingroupsGroupsRouteImport.update({
   id: '/(groups)/groups',
   path: '/groups',
-  getParentRoute: () => dashboardRouteRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const dashboardtenantsTenantsRoute = dashboardtenantsTenantsRouteImport.update({
+const AdmintenantsTenantsRoute = AdmintenantsTenantsRouteImport.update({
   id: '/(tenants)/tenants',
   path: '/tenants',
-  getParentRoute: () => dashboardRouteRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const dashboardusersUsersRoute = dashboardusersUsersRouteImport.update({
+const AdminusersUsersRoute = AdminusersUsersRouteImport.update({
   id: '/(users)/users',
   path: '/users',
-  getParentRoute: () => dashboardRouteRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/student': typeof StudentRouteRouteWithChildren
   '/auth': typeof authAuthRoute
   '/reset-password': typeof authResetPasswordRoute
-  '/home': typeof dashboardHomeRoute
-  '/profile': typeof dashboardProfileRoute
-  '/courses': typeof dashboardcoursesCoursesRoute
-  '/groups': typeof dashboardgroupsGroupsRoute
-  '/tenants': typeof dashboardtenantsTenantsRoute
-  '/users': typeof dashboardusersUsersRoute
+  '/admin/home': typeof AdminHomeRoute
+  '/admin/profile': typeof AdminProfileRoute
+  '/student/activities': typeof StudentActivitiesRoute
+  '/student/home': typeof StudentHomeRoute
+  '/admin/activities': typeof AdminactivitiesActivitiesRoute
+  '/admin/courses': typeof AdmincoursesCoursesRoute
+  '/admin/groups': typeof AdmingroupsGroupsRoute
+  '/admin/tenants': typeof AdmintenantsTenantsRoute
+  '/admin/users': typeof AdminusersUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/student': typeof StudentRouteRouteWithChildren
   '/auth': typeof authAuthRoute
   '/reset-password': typeof authResetPasswordRoute
-  '/home': typeof dashboardHomeRoute
-  '/profile': typeof dashboardProfileRoute
-  '/courses': typeof dashboardcoursesCoursesRoute
-  '/groups': typeof dashboardgroupsGroupsRoute
-  '/tenants': typeof dashboardtenantsTenantsRoute
-  '/users': typeof dashboardusersUsersRoute
+  '/admin/home': typeof AdminHomeRoute
+  '/admin/profile': typeof AdminProfileRoute
+  '/student/activities': typeof StudentActivitiesRoute
+  '/student/home': typeof StudentHomeRoute
+  '/admin/activities': typeof AdminactivitiesActivitiesRoute
+  '/admin/courses': typeof AdmincoursesCoursesRoute
+  '/admin/groups': typeof AdmingroupsGroupsRoute
+  '/admin/tenants': typeof AdmintenantsTenantsRoute
+  '/admin/users': typeof AdminusersUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/(dashboard)': typeof dashboardRouteRouteWithChildren
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/student': typeof StudentRouteRouteWithChildren
   '/(auth)/auth': typeof authAuthRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
-  '/(dashboard)/home': typeof dashboardHomeRoute
-  '/(dashboard)/profile': typeof dashboardProfileRoute
-  '/(dashboard)/(courses)/courses': typeof dashboardcoursesCoursesRoute
-  '/(dashboard)/(groups)/groups': typeof dashboardgroupsGroupsRoute
-  '/(dashboard)/(tenants)/tenants': typeof dashboardtenantsTenantsRoute
-  '/(dashboard)/(users)/users': typeof dashboardusersUsersRoute
+  '/admin/home': typeof AdminHomeRoute
+  '/admin/profile': typeof AdminProfileRoute
+  '/student/activities': typeof StudentActivitiesRoute
+  '/student/home': typeof StudentHomeRoute
+  '/admin/(activities)/activities': typeof AdminactivitiesActivitiesRoute
+  '/admin/(courses)/courses': typeof AdmincoursesCoursesRoute
+  '/admin/(groups)/groups': typeof AdmingroupsGroupsRoute
+  '/admin/(tenants)/tenants': typeof AdmintenantsTenantsRoute
+  '/admin/(users)/users': typeof AdminusersUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/student'
     | '/auth'
     | '/reset-password'
-    | '/home'
-    | '/profile'
-    | '/courses'
-    | '/groups'
-    | '/tenants'
-    | '/users'
+    | '/admin/home'
+    | '/admin/profile'
+    | '/student/activities'
+    | '/student/home'
+    | '/admin/activities'
+    | '/admin/courses'
+    | '/admin/groups'
+    | '/admin/tenants'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
+    | '/student'
     | '/auth'
     | '/reset-password'
-    | '/home'
-    | '/profile'
-    | '/courses'
-    | '/groups'
-    | '/tenants'
-    | '/users'
+    | '/admin/home'
+    | '/admin/profile'
+    | '/student/activities'
+    | '/student/home'
+    | '/admin/activities'
+    | '/admin/courses'
+    | '/admin/groups'
+    | '/admin/tenants'
+    | '/admin/users'
   id:
     | '__root__'
     | '/'
-    | '/(dashboard)'
+    | '/admin'
+    | '/student'
     | '/(auth)/auth'
     | '/(auth)/reset-password'
-    | '/(dashboard)/home'
-    | '/(dashboard)/profile'
-    | '/(dashboard)/(courses)/courses'
-    | '/(dashboard)/(groups)/groups'
-    | '/(dashboard)/(tenants)/tenants'
-    | '/(dashboard)/(users)/users'
+    | '/admin/home'
+    | '/admin/profile'
+    | '/student/activities'
+    | '/student/home'
+    | '/admin/(activities)/activities'
+    | '/admin/(courses)/courses'
+    | '/admin/(groups)/groups'
+    | '/admin/(tenants)/tenants'
+    | '/admin/(users)/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  dashboardRouteRoute: typeof dashboardRouteRouteWithChildren
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  StudentRouteRoute: typeof StudentRouteRouteWithChildren
   authAuthRoute: typeof authAuthRoute
   authResetPasswordRoute: typeof authResetPasswordRoute
 }
@@ -158,11 +213,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(dashboard)': {
-      id: '/(dashboard)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof dashboardRouteRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student': {
+      id: '/student'
+      path: '/student'
+      fullPath: '/student'
+      preLoaderRoute: typeof StudentRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/auth': {
@@ -179,76 +241,114 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(dashboard)/home': {
-      id: '/(dashboard)/home'
+    '/admin/home': {
+      id: '/admin/home'
       path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof dashboardHomeRouteImport
-      parentRoute: typeof dashboardRouteRoute
+      fullPath: '/admin/home'
+      preLoaderRoute: typeof AdminHomeRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/(dashboard)/profile': {
-      id: '/(dashboard)/profile'
+    '/admin/profile': {
+      id: '/admin/profile'
       path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof dashboardProfileRouteImport
-      parentRoute: typeof dashboardRouteRoute
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminProfileRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/(dashboard)/(courses)/courses': {
-      id: '/(dashboard)/(courses)/courses'
+    '/student/activities': {
+      id: '/student/activities'
+      path: '/activities'
+      fullPath: '/student/activities'
+      preLoaderRoute: typeof StudentActivitiesRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/home': {
+      id: '/student/home'
+      path: '/home'
+      fullPath: '/student/home'
+      preLoaderRoute: typeof StudentHomeRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/admin/(activities)/activities': {
+      id: '/admin/(activities)/activities'
+      path: '/activities'
+      fullPath: '/admin/activities'
+      preLoaderRoute: typeof AdminactivitiesActivitiesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/(courses)/courses': {
+      id: '/admin/(courses)/courses'
       path: '/courses'
-      fullPath: '/courses'
-      preLoaderRoute: typeof dashboardcoursesCoursesRouteImport
-      parentRoute: typeof dashboardRouteRoute
+      fullPath: '/admin/courses'
+      preLoaderRoute: typeof AdmincoursesCoursesRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/(dashboard)/(groups)/groups': {
-      id: '/(dashboard)/(groups)/groups'
+    '/admin/(groups)/groups': {
+      id: '/admin/(groups)/groups'
       path: '/groups'
-      fullPath: '/groups'
-      preLoaderRoute: typeof dashboardgroupsGroupsRouteImport
-      parentRoute: typeof dashboardRouteRoute
+      fullPath: '/admin/groups'
+      preLoaderRoute: typeof AdmingroupsGroupsRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/(dashboard)/(tenants)/tenants': {
-      id: '/(dashboard)/(tenants)/tenants'
+    '/admin/(tenants)/tenants': {
+      id: '/admin/(tenants)/tenants'
       path: '/tenants'
-      fullPath: '/tenants'
-      preLoaderRoute: typeof dashboardtenantsTenantsRouteImport
-      parentRoute: typeof dashboardRouteRoute
+      fullPath: '/admin/tenants'
+      preLoaderRoute: typeof AdmintenantsTenantsRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/(dashboard)/(users)/users': {
-      id: '/(dashboard)/(users)/users'
+    '/admin/(users)/users': {
+      id: '/admin/(users)/users'
       path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof dashboardusersUsersRouteImport
-      parentRoute: typeof dashboardRouteRoute
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminusersUsersRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
   }
 }
 
-interface dashboardRouteRouteChildren {
-  dashboardHomeRoute: typeof dashboardHomeRoute
-  dashboardProfileRoute: typeof dashboardProfileRoute
-  dashboardcoursesCoursesRoute: typeof dashboardcoursesCoursesRoute
-  dashboardgroupsGroupsRoute: typeof dashboardgroupsGroupsRoute
-  dashboardtenantsTenantsRoute: typeof dashboardtenantsTenantsRoute
-  dashboardusersUsersRoute: typeof dashboardusersUsersRoute
+interface AdminRouteRouteChildren {
+  AdminHomeRoute: typeof AdminHomeRoute
+  AdminProfileRoute: typeof AdminProfileRoute
+  AdminactivitiesActivitiesRoute: typeof AdminactivitiesActivitiesRoute
+  AdmincoursesCoursesRoute: typeof AdmincoursesCoursesRoute
+  AdmingroupsGroupsRoute: typeof AdmingroupsGroupsRoute
+  AdmintenantsTenantsRoute: typeof AdmintenantsTenantsRoute
+  AdminusersUsersRoute: typeof AdminusersUsersRoute
 }
 
-const dashboardRouteRouteChildren: dashboardRouteRouteChildren = {
-  dashboardHomeRoute: dashboardHomeRoute,
-  dashboardProfileRoute: dashboardProfileRoute,
-  dashboardcoursesCoursesRoute: dashboardcoursesCoursesRoute,
-  dashboardgroupsGroupsRoute: dashboardgroupsGroupsRoute,
-  dashboardtenantsTenantsRoute: dashboardtenantsTenantsRoute,
-  dashboardusersUsersRoute: dashboardusersUsersRoute,
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminHomeRoute: AdminHomeRoute,
+  AdminProfileRoute: AdminProfileRoute,
+  AdminactivitiesActivitiesRoute: AdminactivitiesActivitiesRoute,
+  AdmincoursesCoursesRoute: AdmincoursesCoursesRoute,
+  AdmingroupsGroupsRoute: AdmingroupsGroupsRoute,
+  AdmintenantsTenantsRoute: AdmintenantsTenantsRoute,
+  AdminusersUsersRoute: AdminusersUsersRoute,
 }
 
-const dashboardRouteRouteWithChildren = dashboardRouteRoute._addFileChildren(
-  dashboardRouteRouteChildren,
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
+interface StudentRouteRouteChildren {
+  StudentActivitiesRoute: typeof StudentActivitiesRoute
+  StudentHomeRoute: typeof StudentHomeRoute
+}
+
+const StudentRouteRouteChildren: StudentRouteRouteChildren = {
+  StudentActivitiesRoute: StudentActivitiesRoute,
+  StudentHomeRoute: StudentHomeRoute,
+}
+
+const StudentRouteRouteWithChildren = StudentRouteRoute._addFileChildren(
+  StudentRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  dashboardRouteRoute: dashboardRouteRouteWithChildren,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
+  StudentRouteRoute: StudentRouteRouteWithChildren,
   authAuthRoute: authAuthRoute,
   authResetPasswordRoute: authResetPasswordRoute,
 }

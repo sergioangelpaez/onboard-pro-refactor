@@ -1,6 +1,5 @@
 import { useForm } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { useChangePassword } from "#/hooks/auth/use-change-password";
 import {
@@ -15,12 +14,16 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from "@/components/ui/dialog";
 import { PasswordField } from "../shared/form/password-field";
 
-export function ChangePasswordDialogForm() {
-	const [open, setOpen] = useState(false);
+export function ChangePasswordDialogForm({
+	open,
+	onOpenChange,
+}: {
+	open: boolean;
+	onOpenChange: (next: boolean) => void;
+}) {
 	const { mutate, isPending } = useChangePassword();
 
 	const form = useForm({
@@ -48,16 +51,12 @@ export function ChangePasswordDialogForm() {
 	});
 
 	function handleOpenChange(next: boolean) {
-		setOpen(next);
+		onOpenChange(next);
 		if (!next) form.reset();
 	}
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogTrigger asChild>
-				<Button variant="default">Cambiar contraseña</Button>
-			</DialogTrigger>
-
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Cambiar contraseña</DialogTitle>
