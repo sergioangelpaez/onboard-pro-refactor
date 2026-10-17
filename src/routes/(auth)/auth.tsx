@@ -1,4 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { authService } from "#/lib/services/auth";
 import { InvalidCredentialsError } from "#/lib/services/errors";
 import { tokenStorage } from "#/lib/services/token-storage";
@@ -9,6 +11,9 @@ import { LoginForm } from "@/components/auth/login-form";
 export const Route = createFileRoute("/(auth)/auth")({
 	component: LoginComponent,
 	ssr: false,
+	validateSearch: (search: Record<string, unknown>): { error?: string } => ({
+		error: typeof search.error === "string" ? search.error : undefined,
+	}),
 	beforeLoad: async ({ context }) => {
 		if (!tokenStorage.get()) return;
 
@@ -28,6 +33,13 @@ export const Route = createFileRoute("/(auth)/auth")({
 });
 
 function LoginComponent() {
+	const { error } = Route.useSearch();
+
+	// Error devuelto por el backend al fallar el login con Google/Microsoft.
+	useEffect(() => {
+		if (error) toast.error(error, { id: "oauth-error" });
+	}, [error]);
+
 	return (
 		<div className="relative flex h-screen w-screen items-center justify-around overflow-hidden">
 			<img

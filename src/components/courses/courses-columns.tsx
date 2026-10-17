@@ -11,7 +11,7 @@ export const coursesColumns = columnHelper.columns([
 	}),
 	columnHelper.accessor("name", {
 		header: "Nombre",
-		cell: (info) => info.getValue(),
+		cell: (info) => <span className="font-medium">{info.getValue()}</span>,
 	}),
 	columnHelper.accessor("instructor", {
 		header: "Instructor",

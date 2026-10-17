@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { RefreshCw } from "lucide-react";
 import type { Course } from "#/lib/schemas/courses";
 import { coursesColumns } from "@/components/courses/courses-columns";
@@ -21,6 +22,8 @@ export function CoursesRouteContent({
 	error,
 	refetch,
 }: CoursesRouteContentProps) {
+	const navigate = useNavigate();
+
 	if (isLoading) return <LoadingState message="Cargando cursos..." />;
 
 	if (!data && error) {
@@ -54,6 +57,13 @@ export function CoursesRouteContent({
 				tableKey="courses-table"
 				columns={coursesColumns}
 				data={data ?? []}
+				// Toda la fila entra al curso, no solo el nombre.
+				onRowClick={(curso) =>
+					navigate({
+						to: "/courses/$courseId",
+						params: { courseId: curso.id },
+					})
+				}
 			/>
 			<div className="spacer-md" />
 		</div>

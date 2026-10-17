@@ -1,12 +1,7 @@
-import {
-	BuildingComplex,
-	GalleryVerticalEnd,
-	LibraryBig,
-	UserGroup,
-	Users,
-} from "lucide-react";
+import { GalleryVerticalEnd } from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
+import { menuDe } from "#/lib/utils/roles";
 import {
 	Sidebar,
 	SidebarContent,
@@ -18,59 +13,33 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 
-const data = {
-	organizaciones: [
-		{
-			name: "Universidad Central",
-			logo: GalleryVerticalEnd,
-			plan: "",
-		},
-	],
-	navMain: [
-		{
-			title: "Organizaciones",
-			url: "/tenants",
-			icon: BuildingComplex,
-			isActive: true,
-			isCollapsible: false,
-		},
-		{
-			title: "Usuarios",
-			url: "/users",
-			icon: Users,
-			isActive: false,
-			isCollapsible: false,
-		},
-		{
-			title: "Cursos",
-			url: "/courses",
-			icon: LibraryBig,
-			isActive: false,
-			isCollapsible: false,
-		},
-
-		{
-			title: "Grupos",
-			url: "/groups",
-			icon: UserGroup,
-			isActive: false,
-			isCollapsible: false,
-		},
-	],
-};
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useCurrentUser();
 
 	if (!user) return null;
 
+	// Cada rol tiene su propio menú, con sus grupos y sus nombres: un
+	// instructor ve "Docencia · Mis cursos", un administrador "Mi empresa ·
+	// Personas". Sale de lib/utils/roles.
+	const grupos = menuDe(user.role);
+
+	// El nombre de la organización sale del usuario y no de una constante:
+	// antes decía "Universidad Central" para todo el mundo.
+	const organizaciones = [
+		{
+			name: user.tenantName ?? "OnBoard Pro",
+			logo: GalleryVerticalEnd,
+			plan: "",
+		},
+	];
+
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher teams={data.organizaciones} />
+				<TeamSwitcher teams={organizaciones} />
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
+				<NavMain groups={grupos} />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

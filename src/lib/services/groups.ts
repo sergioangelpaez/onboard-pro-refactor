@@ -26,6 +26,22 @@ export const groupsService = {
 		});
 	},
 
+	/** Suma integrantes al grupo. El backend espera { userIds: [...] }. */
+	async addUsers(id: string, userIds: string[]) {
+		return await apiFetch<GeneralAPIResponse>(`/groups/${id}/add-users`, {
+			method: "POST",
+			body: JSON.stringify({ userIds }),
+		});
+	},
+
+	/** Saca integrantes del grupo. No borra al usuario, solo lo desvincula. */
+	async removeUsers(id: string, userIds: string[]) {
+		return await apiFetch<GeneralAPIResponse>(`/groups/${id}/remove-users`, {
+			method: "DELETE",
+			body: JSON.stringify({ userIds }),
+		});
+	},
+
 	async delete(id: string) {
 		return await apiFetch<void>(`/groups/delete/${id}`, {
 			method: "DELETE",

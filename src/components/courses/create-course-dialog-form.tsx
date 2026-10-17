@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAllActivities } from "#/hooks/activities/use-all-activities";
 import { useCreateCourse } from "#/hooks/courses/use-create-course";
+import { useCreateLogro } from "#/hooks/logros/use-create-logro";
 import {
 	type CreateCoursePayload,
 	createCourseSchema,
@@ -28,6 +29,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
+import { Checkbox } from "../ui/checkbox";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -35,6 +37,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 export function CreateCourseDialogForm() {
 	const [open, setOpen] = useState(false);
 	const { mutate, isPending } = useCreateCourse();
+	const crearLogro = useCreateLogro();
+
+	// Logro opcional que se otorga al terminar el curso. Se crea despues del
+	// curso porque necesita su id, y si falla no se deshace el curso: tener el
+	// curso sin insignia es mejor que perder los dos.
+	const [conLogro, setConLogro] = useState(false);
+	const [nombreLogro, setNombreLogro] = useState("");
 	const { data: activities = [] } = useAllActivities();
 
 	const form = useForm({
@@ -48,10 +57,29 @@ export function CreateCourseDialogForm() {
 		validators: { onChange: createCourseSchema },
 		onSubmit: ({ value }) =>
 			mutate(value, {
-				onSuccess: () => {
+				onSuccess: async (curso) => {
 					toast.success("Curso creado", {
 						description: `Se creó el curso "${value.name}".`,
 					});
+
+					if (conLogro && nombreLogro.trim() && curso?.id) {
+						try {
+							await crearLogro.mutateAsync({
+								nombre: nombreLogro.trim(),
+								descripcion: `Se obtiene al terminar ${value.name}.`,
+								categoria: "Progreso",
+								// Terminar este curso: un curso completado, el de acá.
+								tipoCondicion: "cursos_completados",
+								meta: 1,
+								xpRecompensa: 50,
+								cursoId: curso.id,
+							});
+							toast.success(`Logro "${nombreLogro.trim()}" asociado al curso`);
+						} catch (e) {
+							toast.error(`El curso se creó, pero el logro no: ${(e as Error).message}`);
+						}
+					}
+
 					handleOpenChange(false);
 				},
 				onError: (error) => {
@@ -64,7 +92,11 @@ export function CreateCourseDialogForm() {
 
 	function handleOpenChange(next: boolean) {
 		setOpen(next);
-		if (!next) form.reset();
+		if (!next) {
+			form.reset();
+			setConLogro(false);
+			setNombreLogro("");
+		}
 	}
 
 	return (
@@ -260,6 +292,34 @@ export function CreateCourseDialogForm() {
 							);
 						}}
 					</form.Field>
+
+					{/* Logro opcional del curso: la condición ya está decidida —
+					    terminar este curso—, así que solo hace falta el nombre. */}
+					<Field orientation="horizontal">
+						<Checkbox
+							id="curso-con-logro"
+							checked={conLogro}
+							onCheckedChange={(v) => setConLogro(v === true)}
+						/>
+						<FieldLabel htmlFor="curso-con-logro">
+							Dar un logro al terminar el curso
+						</FieldLabel>
+					</Field>
+
+					{conLogro && (
+						<Field>
+							<FieldLabel htmlFor="curso-logro-nombre">
+								Nombre del logro
+							</FieldLabel>
+							<Input
+								id="curso-logro-nombre"
+								value={nombreLogro}
+								onChange={(e) => setNombreLogro(e.target.value)}
+								placeholder="Onboarding completo"
+								maxLength={100}
+							/>
+						</Field>
+					)}
 				</form>
 
 				<DialogFooter>

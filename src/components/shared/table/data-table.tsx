@@ -34,6 +34,11 @@ interface DataTableProps<TData extends RowData> {
 	columns: Parameters<typeof useAppTable<TData>>[0]["columns"];
 	data: TData[];
 	emptyMessage?: string;
+	/**
+	 * Si se pasa, toda la fila abre el elemento, no solo el enlace del nombre,
+	 * y se resalta al pasar el mouse para que se note que es pulsable.
+	 */
+	onRowClick?: (item: TData) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -71,6 +76,7 @@ export function DataTable<TData extends RowData>({
 	tableKey,
 	columns,
 	data,
+	onRowClick,
 	emptyMessage = "Sin resultados.",
 }: DataTableProps<TData>) {
 	const table = useAppTable({
@@ -122,7 +128,28 @@ export function DataTable<TData extends RowData>({
 					<TableBody>
 						{table.getRowModel().rows.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow key={row.id}>
+								<TableRow
+									key={row.id}
+									data-clickable={onRowClick ? "" : undefined}
+									className={
+										onRowClick
+											? "cursor-pointer transition-colors hover:bg-accent"
+											: undefined
+									}
+									onClick={
+										onRowClick ? () => onRowClick(row.original) : undefined
+									}
+									// Con teclado: Enter abre la fila igual que el clic. Sin
+									// esto, quien no usa mouse se queda sin la accion.
+									tabIndex={onRowClick ? 0 : undefined}
+									onKeyDown={
+										onRowClick
+											? (e) => {
+													if (e.key === "Enter") onRowClick(row.original);
+												}
+											: undefined
+									}
+								>
 									{row.getAllCells().map((cell) => (
 										<TableCell key={cell.id}>
 											<table.FlexRender cell={cell} />
