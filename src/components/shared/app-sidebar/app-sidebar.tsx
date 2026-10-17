@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import { normalizeRole } from "#/lib/utils/auth/session";
+import { normalizeRole, type Role } from "#/lib/utils/auth/session";
 import {
 	Sidebar,
 	SidebarContent,
@@ -16,12 +16,9 @@ import {
 	SidebarHeader,
 	SidebarRail,
 } from "@/components/ui/sidebar";
-import type { User } from "@/lib/schemas/users";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-
-type Role = User["role"];
 
 const organizaciones = [
 	{
@@ -79,6 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	if (!user) return null;
 
+	// "superadmin" y "admin" se normalizan a "admin", así que comparten menú.
 	const items = navByRole[normalizeRole(user.role)];
 
 	return (
