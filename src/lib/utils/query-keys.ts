@@ -24,6 +24,10 @@ export const queryKeys = {
 	activities: {
 		all: ["activities", "all"],
 	},
+	achievements: {
+		options: ["achievements", "options"],
+		create: ["achievements", "create"],
+	},
 	sections: {
 		all: ["sections", "all"],
 		byCourse: (courseId: string) => ["sections", "byCourse", courseId],

@@ -18,6 +18,7 @@ import { Route as AdminHomeRouteImport } from './routes/admin/home'
 import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as StudentActivitiesRouteImport } from './routes/student/activities'
 import { Route as StudentHomeRouteImport } from './routes/student/home'
+import { Route as AdminachievementsLogrosRouteImport } from './routes/admin/(achievements)/logros'
 import { Route as AdminactivitiesActivitiesRouteImport } from './routes/admin/(activities)/activities'
 import { Route as AdmincoursesCoursesRouteImport } from './routes/admin/(courses)/courses'
 import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/groups'
@@ -69,6 +70,11 @@ const StudentHomeRoute = StudentHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => StudentRouteRoute,
 } as any)
+const AdminachievementsLogrosRoute = AdminachievementsLogrosRouteImport.update({
+  id: '/(achievements)/logros',
+  path: '/logros',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminactivitiesActivitiesRoute =
   AdminactivitiesActivitiesRouteImport.update({
     id: '/(activities)/activities',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/admin/profile': typeof AdminProfileRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
+  '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/admin/profile': typeof AdminProfileRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
+  '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/admin/profile': typeof AdminProfileRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
+  '/admin/(achievements)/logros': typeof AdminachievementsLogrosRoute
   '/admin/(activities)/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/(courses)/courses': typeof AdmincoursesCoursesRoute
   '/admin/(groups)/groups': typeof AdmingroupsGroupsRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/student/activities'
     | '/student/home'
+    | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
     | '/admin/groups'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/student/activities'
     | '/student/home'
+    | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
     | '/admin/groups'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/student/activities'
     | '/student/home'
+    | '/admin/(achievements)/logros'
     | '/admin/(activities)/activities'
     | '/admin/(courses)/courses'
     | '/admin/(groups)/groups'
@@ -269,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentHomeRouteImport
       parentRoute: typeof StudentRouteRoute
     }
+    '/admin/(achievements)/logros': {
+      id: '/admin/(achievements)/logros'
+      path: '/logros'
+      fullPath: '/admin/logros'
+      preLoaderRoute: typeof AdminachievementsLogrosRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/(activities)/activities': {
       id: '/admin/(activities)/activities'
       path: '/activities'
@@ -310,6 +329,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminHomeRoute: typeof AdminHomeRoute
   AdminProfileRoute: typeof AdminProfileRoute
+  AdminachievementsLogrosRoute: typeof AdminachievementsLogrosRoute
   AdminactivitiesActivitiesRoute: typeof AdminactivitiesActivitiesRoute
   AdmincoursesCoursesRoute: typeof AdmincoursesCoursesRoute
   AdmingroupsGroupsRoute: typeof AdmingroupsGroupsRoute
@@ -320,6 +340,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminHomeRoute: AdminHomeRoute,
   AdminProfileRoute: AdminProfileRoute,
+  AdminachievementsLogrosRoute: AdminachievementsLogrosRoute,
   AdminactivitiesActivitiesRoute: AdminactivitiesActivitiesRoute,
   AdmincoursesCoursesRoute: AdmincoursesCoursesRoute,
   AdmingroupsGroupsRoute: AdmingroupsGroupsRoute,

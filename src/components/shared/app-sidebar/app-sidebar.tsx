@@ -3,6 +3,7 @@ import {
 	GalleryVerticalEnd,
 	LibraryBig,
 	ListTodo,
+	Medal,
 	UserGroup,
 	Users,
 } from "lucide-react";
@@ -58,6 +59,12 @@ const navByRole: Record<Role, React.ComponentProps<typeof NavMain>["items"]> = {
 			title: "Actividades",
 			url: "/admin/activities",
 			icon: ListTodo,
+			isActive: false,
+		},
+		{
+			title: "Logros",
+			url: "/admin/logros",
+			icon: Medal,
 			isActive: false,
 		},
 	],
