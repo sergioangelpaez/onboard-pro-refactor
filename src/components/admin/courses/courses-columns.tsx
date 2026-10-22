@@ -1,6 +1,7 @@
 import type { Course } from "#/lib/schemas/courses";
 import { createAppColumnHelper } from "@/lib/ui/data-table";
 import { Badge } from "../../ui/badge";
+import { CourseRowActions } from "./table/course-actions";
 
 const columnHelper = createAppColumnHelper<Course>();
 
@@ -33,5 +34,10 @@ export const coursesColumns = columnHelper.columns([
 				month: "short",
 				day: "numeric",
 			}),
+	}),
+	columnHelper.display({
+		id: "actions",
+		header: "Acciones",
+		cell: ({ row }) => <CourseRowActions row={row} />,
 	}),
 ]);
