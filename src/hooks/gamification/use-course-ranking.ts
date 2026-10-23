@@ -4,7 +4,9 @@ import { queryKeys } from "#/lib/utils/query-keys";
 
 export function useCourseRanking(courseId: string, limite = 3) {
 	const { data, isLoading } = useQuery({
-		queryKey: queryKeys.gamification.courseRanking(courseId),
+		// El límite va en la clave: el top 3 del instructor y la lista completa
+		// del curso son respuestas distintas y no deben pisarse en cache.
+		queryKey: [...queryKeys.gamification.courseRanking(courseId), limite],
 		queryFn: () => gamificationService.courseRanking(courseId, limite),
 	});
 

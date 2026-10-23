@@ -1,15 +1,19 @@
 import {
 	BuildingComplex,
-	GalleryVerticalEnd,
+	CircleUser,
 	LayoutDashboard,
 	LibraryBig,
 	ListTodo,
+	Medal,
+	Star,
+	Trophy,
 	UserGroup,
 	Users,
 } from "lucide-react";
 import type * as React from "react";
+import { SidebarProgress } from "#/components/student/sidebar-progress";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import { rolReal, type RolReal } from "#/lib/utils/auth/session";
+import { type RolReal, rolReal } from "#/lib/utils/auth/session";
 import {
 	Sidebar,
 	SidebarContent,
@@ -20,14 +24,6 @@ import {
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-
-const organizaciones = [
-	{
-		name: "Universidad Central",
-		logo: GalleryVerticalEnd,
-		plan: "",
-	},
-];
 
 const RESUMEN = {
 	title: "Resumen",
@@ -59,6 +55,18 @@ const ACTIVIDADES = {
 	icon: ListTodo,
 	isActive: false,
 };
+const NIVELES = {
+	title: "Niveles",
+	url: "/admin/niveles",
+	icon: Star,
+	isActive: false,
+};
+const LOGROS = {
+	title: "Logros",
+	url: "/admin/logros",
+	icon: Medal,
+	isActive: false,
+};
 
 /**
  * Que ve cada rol, siguiendo lo que exige el backend con `requireRole`.
@@ -68,7 +76,10 @@ const ACTIVIDADES = {
  * contenido de sus cursos, aunque no de de alta personas ni toque empresas;
  * el servidor ya le devuelve solo los cursos que dicta.
  */
-const navByRole: Record<RolReal, React.ComponentProps<typeof NavMain>["items"]> = {
+const navByRole: Record<
+	RolReal,
+	React.ComponentProps<typeof NavMain>["items"]
+> = {
 	superadmin: [
 		RESUMEN,
 		{
@@ -81,8 +92,10 @@ const navByRole: Record<RolReal, React.ComponentProps<typeof NavMain>["items"]> 
 		CURSOS,
 		GRUPOS,
 		ACTIVIDADES,
+		LOGROS,
+		NIVELES,
 	],
-	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES],
+	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS, NIVELES],
 	// Su propia area: no comparte pantallas con la administracion de la empresa.
 	instructor: [
 		{ ...RESUMEN, url: "/instructor/home" },
@@ -90,10 +103,21 @@ const navByRole: Record<RolReal, React.ComponentProps<typeof NavMain>["items"]> 
 		{ ...GRUPOS, url: "/instructor/groups" },
 	],
 	student: [
+		{ ...RESUMEN, title: "Inicio", url: "/student/home" },
+		// Las actividades se hacen dentro de cada curso, donde se ve su sección
+		// y su estado. Lo pendiente de todos los cursos está en el inicio.
+		{ ...CURSOS, title: "Mis cursos", url: "/student/courses" },
+		{ ...LOGROS, title: "Mis logros", url: "/student/logros" },
 		{
-			title: "Mis actividades",
-			url: "/student/activities",
-			icon: ListTodo,
+			title: "Ranking",
+			url: "/student/ranking",
+			icon: Trophy,
+			isActive: false,
+		},
+		{
+			title: "Mi perfil",
+			url: "/student/profile",
+			icon: CircleUser,
 			isActive: false,
 		},
 	],
@@ -110,10 +134,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher teams={organizaciones} />
+				<TeamSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={items} />
+				{/* El aprendiz tiene su progreso siempre a la vista. */}
+				{rolReal(user.role) === "student" && <SidebarProgress />}
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

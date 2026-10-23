@@ -1,7 +1,11 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "#/components/shared/app-sidebar/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
-import { areaDe, getCurrentUser, getHomeByRole } from "#/lib/utils/auth/session";
+import {
+	areaDe,
+	getCurrentUser,
+	getHomeByRole,
+} from "#/lib/utils/auth/session";
 
 export const Route = createFileRoute("/student")({
 	beforeLoad: async ({ context }) => {

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { ActivityMaterials } from "#/components/admin/activities/activity-materials";
 import { ActivitySubmissions } from "#/components/admin/activities/activity-submissions";
+import { ExamEditor } from "#/components/admin/activities/exam-editor";
 import { EmptyState } from "#/components/shared/states/empty-state";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
@@ -16,7 +17,13 @@ export const Route = createFileRoute(
 	"/instructor/(activities)/activities/$activityId",
 )({ component: ActivityDetailRoute });
 
-function Dato({ etiqueta, valor }: { etiqueta: string; valor: React.ReactNode }) {
+function Dato({
+	etiqueta,
+	valor,
+}: {
+	etiqueta: string;
+	valor: React.ReactNode;
+}) {
 	return (
 		<div>
 			<dt className="text-muted-foreground text-xs">{etiqueta}</dt>
@@ -124,6 +131,11 @@ function ActivityDetailRoute() {
 					</dl>
 				</CardContent>
 			</Card>
+
+			{/* Un examen es una actividad con preguntas: se arman acá mismo. */}
+			{activity.type === "Examen" && puedeEditar && (
+				<ExamEditor activityId={activity.id} />
+			)}
 
 			<ActivityMaterials activityId={activity.id} puedeEditar={puedeEditar} />
 
