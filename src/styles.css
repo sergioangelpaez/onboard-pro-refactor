@@ -139,7 +139,7 @@ body {
   }
 
   .app-container {
-    @apply flex flex-col grow p-6;
+    @apply flex flex-col grow p-6 w-full max-w-7xl mx-auto;
   }
 
   .state-container {

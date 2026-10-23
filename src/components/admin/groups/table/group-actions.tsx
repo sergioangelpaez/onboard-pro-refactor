@@ -6,9 +6,9 @@ import {
 	RowActions,
 } from "@/components/shared/table/row-actions";
 import type { AppRow } from "@/lib/ui/data-table";
-import { GroupAddCoursesDialog } from "../group-add-courses-dialog";
-import { GroupDeleteDialog } from "../group-delete-dialog";
-import { GroupFormSheet } from "../groups-form";
+import { GroupAddCoursesDialog } from "#/components/admin/groups/group-add-courses-dialog";
+import { GroupDeleteDialog } from "#/components/admin/groups/group-delete-dialog";
+import { GroupFormSheet } from "#/components/admin/groups/groups-form";
 
 export function GroupRowActions({ row }: { row: AppRow<Group> }) {
 	const [deleteOpen, setDeleteOpen] = useState(false);

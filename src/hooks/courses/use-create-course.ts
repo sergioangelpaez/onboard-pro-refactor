@@ -9,7 +9,7 @@ export function useCreateCourse() {
 	return useMutation({
 		mutationFn: (values: CreateCoursePayload) => coursesService.create(values),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.courses.create });
+			queryClient.invalidateQueries({ queryKey: queryKeys.courses.all });
 		},
 	});
 }

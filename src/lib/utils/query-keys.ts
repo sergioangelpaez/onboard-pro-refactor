@@ -21,8 +21,15 @@ export const queryKeys = {
 		create: ["groups", "create"],
 		mine: ["groups", "mine"],
 	},
+	entregas: {
+		byActivity: (activityId: string) => ["entregas", activityId],
+	},
+	gamification: {
+		courseRanking: (courseId: string) => ["gamification", courseId, "ranking"],
+	},
 	activities: {
 		all: ["activities", "all"],
+		materials: (activityId: string) => ["activities", activityId, "materials"],
 	},
 	achievements: {
 		options: ["achievements", "options"],

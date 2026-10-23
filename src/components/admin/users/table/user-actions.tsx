@@ -6,8 +6,8 @@ import {
 } from "@/components/shared/table/row-actions";
 import type { User } from "@/lib/schemas/users";
 import type { AppRow } from "@/lib/ui/data-table";
-import { UserDeleteDialog } from "../user-delete-dialog";
-import { UserFormSheet } from "../user-form";
+import { UserDeleteDialog } from "#/components/admin/users/user-delete-dialog";
+import { UserFormSheet } from "#/components/admin/users/user-form";
 
 export function UserRowActions({ row }: { row: AppRow<User> }) {
 	const [deleteOpen, setDeleteOpen] = useState(false);

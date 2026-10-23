@@ -1,10 +1,10 @@
 import { Plus, RefreshCcw } from "lucide-react";
 import type { Tenant } from "#/lib/schemas/tenants";
-import { EmptyState } from "../../shared/states/empty-state";
-import { ErrorState } from "../../shared/states/error-state";
-import { LoadingState } from "../../shared/states/loading-state";
-import { DataTable } from "../../shared/table/data-table";
-import { Button } from "../../ui/button";
+import { EmptyState } from "#/components/shared/states/empty-state";
+import { ErrorState } from "#/components/shared/states/error-state";
+import { LoadingState } from "#/components/shared/states/loading-state";
+import { DataTable } from "#/components/shared/table/data-table";
+import { Button } from "#/components/ui/button";
 import { tenantsColumns } from "./table/tenants-columns";
 
 interface TenantsRouteContent {

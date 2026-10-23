@@ -6,8 +6,8 @@ import {
 	RowActions,
 } from "@/components/shared/table/row-actions";
 import type { AppRow } from "@/lib/ui/data-table";
-import { ActivityDeleteDialog } from "../activity-delete-dialog";
-import { ActivityFormSheet } from "../activity-form";
+import { ActivityDeleteDialog } from "#/components/admin/activities/activity-delete-dialog";
+import { ActivityFormSheet } from "#/components/admin/activities/activity-form";
 
 export function ActivityRowActions({ row }: { row: AppRow<Activity> }) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
