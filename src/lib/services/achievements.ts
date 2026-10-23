@@ -1,8 +1,8 @@
-import type { CreateAchievementPayload } from "#/lib/schemas/achievements";
+import type { payloadDeLogro } from "#/lib/schemas/achievements";
 import { apiFetch } from "./api-fetch";
 
 export const achievementsService = {
-	async create(values: CreateAchievementPayload) {
+	async create(values: ReturnType<typeof payloadDeLogro>) {
 		return await apiFetch<GeneralAPIResponse>("/gamification/logros", {
 			method: "POST",
 			body: JSON.stringify(values),

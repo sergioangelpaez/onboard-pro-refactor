@@ -1,6 +1,5 @@
 import {
 	BuildingComplex,
-	GalleryVerticalEnd,
 	LayoutDashboard,
 	LibraryBig,
 	ListTodo,
@@ -10,7 +9,7 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import { rolReal, type RolReal } from "#/lib/utils/auth/session";
+import { type RolReal, rolReal } from "#/lib/utils/auth/session";
 import {
 	Sidebar,
 	SidebarContent,
@@ -21,14 +20,6 @@ import {
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-
-const organizaciones = [
-	{
-		name: "Universidad Central",
-		logo: GalleryVerticalEnd,
-		plan: "",
-	},
-];
 
 const RESUMEN = {
 	title: "Resumen",
@@ -75,7 +66,10 @@ const LOGROS = {
  * contenido de sus cursos, aunque no de de alta personas ni toque empresas;
  * el servidor ya le devuelve solo los cursos que dicta.
  */
-const navByRole: Record<RolReal, React.ComponentProps<typeof NavMain>["items"]> = {
+const navByRole: Record<
+	RolReal,
+	React.ComponentProps<typeof NavMain>["items"]
+> = {
 	superadmin: [
 		RESUMEN,
 		{
@@ -98,12 +92,10 @@ const navByRole: Record<RolReal, React.ComponentProps<typeof NavMain>["items"]> 
 		{ ...GRUPOS, url: "/instructor/groups" },
 	],
 	student: [
-		{
-			title: "Mis actividades",
-			url: "/student/activities",
-			icon: ListTodo,
-			isActive: false,
-		},
+		{ ...RESUMEN, title: "Inicio", url: "/student/home" },
+		// Las actividades se hacen dentro de cada curso, donde se ve su sección
+		// y su estado. Lo pendiente de todos los cursos está en el inicio.
+		{ ...CURSOS, title: "Mis cursos", url: "/student/courses" },
 	],
 };
 
@@ -118,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher teams={organizaciones} />
+				<TeamSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={items} />

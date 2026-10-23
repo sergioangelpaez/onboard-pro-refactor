@@ -27,6 +27,9 @@ import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/g
 import { Route as AdmintenantsTenantsRouteImport } from './routes/admin/(tenants)/tenants'
 import { Route as AdminusersUsersRouteImport } from './routes/admin/(users)/users'
 import { Route as InstructorgroupsGroupsRouteImport } from './routes/instructor/(groups)/groups'
+import { Route as StudentCoursesIndexRouteImport } from './routes/student/courses.index'
+import { Route as StudentCoursesCourseIdRouteImport } from './routes/student/courses.$courseId'
+import { Route as StudentExamActivityIdRouteImport } from './routes/student/exam.$activityId'
 import { Route as InstructoractivitiesActivitiesActivityIdRouteImport } from './routes/instructor/(activities)/activities.$activityId'
 import { Route as InstructorcoursesCoursesIndexRouteImport } from './routes/instructor/(courses)/courses.index'
 import { Route as InstructorcoursesCoursesCourseIdRouteImport } from './routes/instructor/(courses)/courses.$courseId'
@@ -122,6 +125,21 @@ const InstructorgroupsGroupsRoute = InstructorgroupsGroupsRouteImport.update({
   path: '/groups',
   getParentRoute: () => InstructorRouteRoute,
 } as any)
+const StudentCoursesIndexRoute = StudentCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentCoursesCourseIdRoute = StudentCoursesCourseIdRouteImport.update({
+  id: '/courses/$courseId',
+  path: '/courses/$courseId',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentExamActivityIdRoute = StudentExamActivityIdRouteImport.update({
+  id: '/exam/$activityId',
+  path: '/exam/$activityId',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
 const InstructoractivitiesActivitiesActivityIdRoute =
   InstructoractivitiesActivitiesActivityIdRouteImport.update({
     id: '/(activities)/activities/$activityId',
@@ -160,6 +178,9 @@ export interface FileRoutesByFullPath {
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
   '/instructor/groups': typeof InstructorgroupsGroupsRoute
+  '/student/courses/$courseId': typeof StudentCoursesCourseIdRoute
+  '/student/exam/$activityId': typeof StudentExamActivityIdRoute
+  '/student/courses/': typeof StudentCoursesIndexRoute
   '/instructor/activities/$activityId': typeof InstructoractivitiesActivitiesActivityIdRoute
   '/instructor/courses/$courseId': typeof InstructorcoursesCoursesCourseIdRoute
   '/instructor/courses/': typeof InstructorcoursesCoursesIndexRoute
@@ -183,6 +204,9 @@ export interface FileRoutesByTo {
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
   '/instructor/groups': typeof InstructorgroupsGroupsRoute
+  '/student/courses/$courseId': typeof StudentCoursesCourseIdRoute
+  '/student/exam/$activityId': typeof StudentExamActivityIdRoute
+  '/student/courses': typeof StudentCoursesIndexRoute
   '/instructor/activities/$activityId': typeof InstructoractivitiesActivitiesActivityIdRoute
   '/instructor/courses/$courseId': typeof InstructorcoursesCoursesCourseIdRoute
   '/instructor/courses': typeof InstructorcoursesCoursesIndexRoute
@@ -207,6 +231,9 @@ export interface FileRoutesById {
   '/admin/(tenants)/tenants': typeof AdmintenantsTenantsRoute
   '/admin/(users)/users': typeof AdminusersUsersRoute
   '/instructor/(groups)/groups': typeof InstructorgroupsGroupsRoute
+  '/student/courses/$courseId': typeof StudentCoursesCourseIdRoute
+  '/student/exam/$activityId': typeof StudentExamActivityIdRoute
+  '/student/courses/': typeof StudentCoursesIndexRoute
   '/instructor/(activities)/activities/$activityId': typeof InstructoractivitiesActivitiesActivityIdRoute
   '/instructor/(courses)/courses/$courseId': typeof InstructorcoursesCoursesCourseIdRoute
   '/instructor/(courses)/courses/': typeof InstructorcoursesCoursesIndexRoute
@@ -232,6 +259,9 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/admin/users'
     | '/instructor/groups'
+    | '/student/courses/$courseId'
+    | '/student/exam/$activityId'
+    | '/student/courses/'
     | '/instructor/activities/$activityId'
     | '/instructor/courses/$courseId'
     | '/instructor/courses/'
@@ -255,6 +285,9 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/admin/users'
     | '/instructor/groups'
+    | '/student/courses/$courseId'
+    | '/student/exam/$activityId'
+    | '/student/courses'
     | '/instructor/activities/$activityId'
     | '/instructor/courses/$courseId'
     | '/instructor/courses'
@@ -278,6 +311,9 @@ export interface FileRouteTypes {
     | '/admin/(tenants)/tenants'
     | '/admin/(users)/users'
     | '/instructor/(groups)/groups'
+    | '/student/courses/$courseId'
+    | '/student/exam/$activityId'
+    | '/student/courses/'
     | '/instructor/(activities)/activities/$activityId'
     | '/instructor/(courses)/courses/$courseId'
     | '/instructor/(courses)/courses/'
@@ -420,6 +456,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstructorgroupsGroupsRouteImport
       parentRoute: typeof InstructorRouteRoute
     }
+    '/student/courses/': {
+      id: '/student/courses/'
+      path: '/courses'
+      fullPath: '/student/courses/'
+      preLoaderRoute: typeof StudentCoursesIndexRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/courses/$courseId': {
+      id: '/student/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/student/courses/$courseId'
+      preLoaderRoute: typeof StudentCoursesCourseIdRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/exam/$activityId': {
+      id: '/student/exam/$activityId'
+      path: '/exam/$activityId'
+      fullPath: '/student/exam/$activityId'
+      preLoaderRoute: typeof StudentExamActivityIdRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
     '/instructor/(activities)/activities/$activityId': {
       id: '/instructor/(activities)/activities/$activityId'
       path: '/activities/$activityId'
@@ -494,11 +551,17 @@ const InstructorRouteRouteWithChildren = InstructorRouteRoute._addFileChildren(
 interface StudentRouteRouteChildren {
   StudentActivitiesRoute: typeof StudentActivitiesRoute
   StudentHomeRoute: typeof StudentHomeRoute
+  StudentCoursesCourseIdRoute: typeof StudentCoursesCourseIdRoute
+  StudentExamActivityIdRoute: typeof StudentExamActivityIdRoute
+  StudentCoursesIndexRoute: typeof StudentCoursesIndexRoute
 }
 
 const StudentRouteRouteChildren: StudentRouteRouteChildren = {
   StudentActivitiesRoute: StudentActivitiesRoute,
   StudentHomeRoute: StudentHomeRoute,
+  StudentCoursesCourseIdRoute: StudentCoursesCourseIdRoute,
+  StudentExamActivityIdRoute: StudentExamActivityIdRoute,
+  StudentCoursesIndexRoute: StudentCoursesIndexRoute,
 }
 
 const StudentRouteRouteWithChildren = StudentRouteRoute._addFileChildren(

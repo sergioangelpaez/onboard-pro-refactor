@@ -10,6 +10,8 @@ export const courseSchema = z.object({
 	created_at: z.iso.datetime({ offset: true }),
 	tenantId: z.string(),
 	bannerUrl: z.url().nullable(),
+	archivado: z.boolean().nullish(),
+	archivadoAt: z.string().nullish(),
 	// Solo lo manda el backend cuando hay varias organizaciones a la vista.
 	tenantName: z.string().nullish(),
 });
@@ -19,6 +21,8 @@ export const createCourseSchema = courseSchema.omit({
 	created_at: true,
 	tenantId: true,
 	bannerUrl: true,
+	archivado: true,
+	archivadoAt: true,
 });
 
 export type Course = z.infer<typeof courseSchema>;
@@ -41,6 +45,10 @@ export const sectionSchema = z.object({
 			adjunto: z.string().nullish(),
 			mime: z.string().nullish(),
 			orden: z.number().nullish(),
+			xp: z.number().nullish(),
+			// Solo vienen cuando quien pide es un aprendiz.
+			completada: z.boolean().nullish(),
+			entrega: z.enum(["entregado", "aprobada", "rehacer"]).nullish(),
 		}),
 	),
 });

@@ -4,13 +4,19 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAchievementOptions } from "#/hooks/achievements/use-achievement-options";
 import { useCreateAchievement } from "#/hooks/achievements/use-create-achievement";
-import { useAllCourses } from "#/hooks/courses/use-all-courses";
+import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
+import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
+import { useCurrentUser } from "#/hooks/users/use-current-user";
 import {
 	type CreateAchievementPayload,
 	createAchievementSchema,
+	etiquetaCondicion,
+	payloadDeLogro,
+	SIN_CURSO,
+	TODAS,
 } from "#/lib/schemas/achievements";
+import { rolReal } from "#/lib/utils/auth/session";
 import { Button } from "../../ui/button";
-import { Checkbox } from "../../ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -44,22 +50,37 @@ export function CreateAchievementDialogForm() {
 		isLoading: isOptionsLoading,
 		error: optionsError,
 	} = useAchievementOptions();
-	const { data: courses = [], isLoading: isCoursesLoading } = useAllCourses();
+	const { user } = useCurrentUser();
+	// Solo el superadmin crea logros para todas las organizaciones; el backend
+	// le responde 403 a cualquier otro.
+	const esSuper = rolReal(user?.role) === "superadmin";
+	// Para el superadmin, la organización que eligió en el menú.
+	const organizacion = useOrganizacionActiva();
+	const { data: empresas = [] } = useAllTenants(esSuper);
+	const nombreOrganizacion = esSuper
+		? empresas.find((e) => e.id === organizacion)?.name
+		: user?.tenantName;
+	// El superadmin sin organización elegida solo puede crear genéricos: un
+	// logro de organización o de curso necesita saber de cuál.
+	const soloGenerico = esSuper && !organizacion;
+	const iconoDeCategoria = new Map(
+		(options?.categorias ?? []).map((c) => [c.nombre, c.icono]),
+	);
 
 	const form = useForm({
 		defaultValues: {
 			nombre: "",
 			descripcion: "",
-			categoria: "",
 			tipoCondicion: "",
-			meta: 0,
+			meta: 1,
 			xpRecompensa: 0,
-			cursoId: "",
-			generico: false,
+			icono: "",
+			cursoId: soloGenerico ? TODAS : SIN_CURSO,
 		} as CreateAchievementPayload,
 		validators: { onChange: createAchievementSchema },
 		onSubmit: ({ value }) => {
-			mutate(createAchievementSchema.parse(value), {
+			const datos = createAchievementSchema.parse(value);
+			mutate(payloadDeLogro(datos, esSuper ? organizacion : null), {
 				onSuccess: () => {
 					toast.success("Logro creado", {
 						description: `Se creó el logro "${value.nombre}".`,
@@ -78,6 +99,9 @@ export function CreateAchievementDialogForm() {
 	function handleOpenChange(next: boolean) {
 		setOpen(next);
 		if (!next) form.reset();
+		// Al abrir, el alcance arranca según la organización elegida en ese
+		// momento: pudo cambiar desde la última vez.
+		if (next) form.setFieldValue("cursoId", soloGenerico ? TODAS : SIN_CURSO);
 	}
 
 	return (
@@ -145,46 +169,6 @@ export function CreateAchievementDialogForm() {
 						}}
 					</form.Field>
 
-					<form.Field name="categoria">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>Categoría</FieldLabel>
-									<Select
-										value={field.state.value}
-										onValueChange={field.handleChange}
-										disabled={isOptionsLoading || !!optionsError}
-									>
-										<SelectTrigger id={field.name} onBlur={field.handleBlur}>
-											<SelectValue
-												placeholder={
-													isOptionsLoading
-														? "Cargando categorías..."
-														: "Selecciona una categoría"
-												}
-											/>
-										</SelectTrigger>
-										<SelectContent>
-											{options?.categorias.map((categoria) => (
-												<SelectItem key={categoria} value={categoria}>
-													{categoria}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									{optionsError && (
-										<FieldDescription>
-											No se pudieron cargar las opciones de categorías.
-										</FieldDescription>
-									)}
-									{isInvalid && <FieldError errors={field.state.meta.errors} />}
-								</Field>
-							);
-						}}
-					</form.Field>
-
 					<form.Field name="tipoCondicion">
 						{(field) => {
 							const isInvalid =
@@ -195,7 +179,9 @@ export function CreateAchievementDialogForm() {
 
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>Tipo de condición</FieldLabel>
+									<FieldLabel htmlFor={field.name}>
+										Tipo de condición
+									</FieldLabel>
 									<Select
 										value={field.state.value}
 										onValueChange={field.handleChange}
@@ -216,29 +202,69 @@ export function CreateAchievementDialogForm() {
 													key={condition.tipoCondicion}
 													value={condition.tipoCondicion}
 												>
-													{condition.tipoCondicion}
+													{iconoDeCategoria.get(condition.categoria) ?? ""}{" "}
+													{etiquetaCondicion(condition.tipoCondicion)}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
 
-									{selectedCondition &&
-										(selectedCondition.unidad || selectedCondition.ejemplo) && (
-											<FieldDescription>
-												{selectedCondition.unidad &&
-													`Unidad: ${selectedCondition.unidad}`}
-												{selectedCondition.unidad &&
-													selectedCondition.ejemplo && " | "}
-												{selectedCondition.ejemplo &&
-													`Ejemplo: ${selectedCondition.ejemplo}`}
-											</FieldDescription>
-										)}
+									{optionsError && (
+										<FieldDescription>
+											No se pudieron cargar las condiciones.
+										</FieldDescription>
+									)}
+									{selectedCondition && (
+										<FieldDescription>
+											{selectedCondition.categoria &&
+												`Categoría: ${selectedCondition.categoria}`}
+											{selectedCondition.categoria &&
+												selectedCondition.ejemplo &&
+												" · "}
+											{selectedCondition.ejemplo &&
+												`Por ejemplo: ${selectedCondition.ejemplo}`}
+										</FieldDescription>
+									)}
 
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
 								</Field>
 							);
 						}}
 					</form.Field>
+
+					<form.Subscribe selector={(s) => s.values.tipoCondicion}>
+						{(tipo) => {
+							const categoria = options?.condiciones.find(
+								(c) => c.tipoCondicion === tipo,
+							)?.categoria;
+							const porDefecto =
+								(categoria && iconoDeCategoria.get(categoria)) ||
+								options?.iconoGenerico ||
+								"🏅";
+							return (
+								<form.Field name="icono">
+									{(field) => (
+										<Field>
+											<FieldLabel htmlFor={field.name}>
+												Ícono (opcional)
+											</FieldLabel>
+											<Input
+												id={field.name}
+												value={field.state.value}
+												placeholder={porDefecto}
+												maxLength={100}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+											<FieldDescription>
+												Un emoji. Si lo dejas vacío se usa {porDefecto}.
+											</FieldDescription>
+										</Field>
+									)}
+								</form.Field>
+							);
+						}}
+					</form.Subscribe>
 
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 						<form.Field name="meta">
@@ -251,14 +277,16 @@ export function CreateAchievementDialogForm() {
 										<Input
 											id={field.name}
 											type="number"
-											min={0}
+											min={1}
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) =>
 												field.handleChange(Number(e.target.value))
 											}
 										/>
-										{isInvalid && <FieldError errors={field.state.meta.errors} />}
+										{isInvalid && (
+											<FieldError errors={field.state.meta.errors} />
+										)}
 									</Field>
 								);
 							}}
@@ -281,7 +309,9 @@ export function CreateAchievementDialogForm() {
 												field.handleChange(Number(e.target.value))
 											}
 										/>
-										{isInvalid && <FieldError errors={field.state.meta.errors} />}
+										{isInvalid && (
+											<FieldError errors={field.state.meta.errors} />
+										)}
 									</Field>
 								);
 							}}
@@ -294,48 +324,39 @@ export function CreateAchievementDialogForm() {
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>Curso</FieldLabel>
+									<FieldLabel htmlFor={field.name}>Alcance</FieldLabel>
+									{/* Los logros cuentan lo que la persona hace en todos sus
+									    cursos: no se atan a uno solo. */}
 									<Select
 										value={field.state.value}
 										onValueChange={field.handleChange}
-										disabled={isCoursesLoading}
 									>
 										<SelectTrigger id={field.name} onBlur={field.handleBlur}>
-											<SelectValue
-												placeholder={
-													isCoursesLoading
-														? "Cargando cursos..."
-														: "Selecciona un curso"
-												}
-											/>
+											<SelectValue placeholder="Elige el alcance" />
 										</SelectTrigger>
 										<SelectContent>
-											{courses.map((course) => (
-												<SelectItem key={course.id} value={course.id}>
-													{course.name}
+											{esSuper && (
+												<SelectItem value={TODAS}>
+													🌐 Todas las organizaciones
 												</SelectItem>
-											))}
+											)}
+											{!soloGenerico && (
+												<SelectItem value={SIN_CURSO}>
+													🏢 Toda la organización
+													{nombreOrganizacion ? `: ${nombreOrganizacion}` : ""}
+												</SelectItem>
+											)}
 										</SelectContent>
 									</Select>
+									<FieldDescription>
+										{soloGenerico
+											? "Para crear un logro de una sola organización, elige primero la organización en el menú."
+											: "Cuenta lo que la persona hace en todos sus cursos."}
+									</FieldDescription>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
 								</Field>
 							);
 						}}
-					</form.Field>
-
-					<form.Field name="generico">
-						{(field) => (
-							<Field orientation="horizontal">
-								<Checkbox
-									id={field.name}
-									checked={field.state.value}
-									onCheckedChange={(checked) =>
-										field.handleChange(checked === true)
-									}
-								/>
-								<FieldLabel htmlFor={field.name}>Logro genérico</FieldLabel>
-							</Field>
-						)}
 					</form.Field>
 				</form>
 

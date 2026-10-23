@@ -15,6 +15,7 @@ export const queryKeys = {
 	courses: {
 		all: ["courses", "all"],
 		create: ["courses", "create"],
+		mine: ["courses", "mine"],
 	},
 	groups: {
 		all: ["groups", "all"],
@@ -23,15 +24,23 @@ export const queryKeys = {
 	},
 	entregas: {
 		byActivity: (activityId: string) => ["entregas", activityId],
+		mine: (activityId: string) => ["entregas", activityId, "mine"],
 	},
 	gamification: {
 		courseRanking: (courseId: string) => ["gamification", courseId, "ranking"],
+		me: ["gamification", "me"],
+		pending: ["gamification", "pending"],
+	},
+	exams: {
+		byActivity: (activityId: string) => ["exams", activityId],
+		attempts: (activityId: string) => ["exams", activityId, "attempts"],
 	},
 	activities: {
 		all: ["activities", "all"],
 		materials: (activityId: string) => ["activities", activityId, "materials"],
 	},
 	achievements: {
+		all: ["achievements", "all"],
 		options: ["achievements", "options"],
 		create: ["achievements", "create"],
 	},

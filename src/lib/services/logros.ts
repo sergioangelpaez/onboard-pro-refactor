@@ -5,6 +5,9 @@ export interface Logro {
 	nombre: string;
 	descripcion: string | null;
 	categoria: string;
+	/** Emoji o nombre de ícono. Si el logro no tiene uno propio, viene el de su categoría. */
+	icono: string;
+	iconoPropio: boolean;
 	condicion: {
 		tipo: string;
 		meta: number;
@@ -12,6 +15,9 @@ export interface Logro {
 		descripcion: string | null;
 	};
 	cursoId: string | null;
+	/** Sin organización: lo creó el superadmin y vale para todas. */
+	generico: boolean;
+	tenantId: string | null;
 	xpRecompensa: number;
 	activo: boolean;
 }
@@ -28,9 +34,16 @@ export interface CrearLogroPayload {
 }
 
 export const logrosService = {
-	async getAll(params: { cursoId?: string } = {}) {
-		const query = params.cursoId ? `?cursoId=${params.cursoId}` : "";
-		return await apiFetch<Logro[]>(`/gamification/logros${query}`);
+	/**
+	 * `tenantId` solo lo usa el superadmin: trae los logros de esa organización
+	 * más los genéricos. Para el resto el backend usa siempre la del token.
+	 */
+	async getAll(params: { cursoId?: string; tenantId?: string | null } = {}) {
+		const query = new URLSearchParams();
+		if (params.cursoId) query.set("cursoId", params.cursoId);
+		if (params.tenantId) query.set("tenantId", params.tenantId);
+		const qs = query.toString();
+		return await apiFetch<Logro[]>(`/gamification/logros${qs ? `?${qs}` : ""}`);
 	},
 
 	async create(payload: CrearLogroPayload) {

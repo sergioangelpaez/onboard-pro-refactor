@@ -9,6 +9,13 @@ export function useCompleteActivity() {
 		mutationFn: (id: string) => activitiesService.complete(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+			// Completar suma XP y cuenta para la racha: el inicio tiene que reflejarlo.
+			queryClient.invalidateQueries({ queryKey: queryKeys.gamification.me });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.gamification.pending,
+			});
+			// Las secciones del curso traen qué está completada.
+			queryClient.invalidateQueries({ queryKey: ["sections"] });
 		},
 	});
 }
