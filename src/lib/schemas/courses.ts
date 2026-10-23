@@ -16,17 +16,45 @@ export const courseSchema = z.object({
 	tenantName: z.string().nullish(),
 });
 
-export const createCourseSchema = courseSchema.omit({
-	id: true,
-	created_at: true,
-	tenantId: true,
-	bannerUrl: true,
-	archivado: true,
-	archivadoAt: true,
-});
+export const createCourseSchema = courseSchema
+	.omit({
+		id: true,
+		created_at: true,
+		tenantId: true,
+		bannerUrl: true,
+		archivado: true,
+		archivadoAt: true,
+	})
+	.partial({ grupo: true });
 
 export type Course = z.infer<typeof courseSchema>;
 export type CreateCoursePayload = z.infer<typeof createCourseSchema>;
+
+/**
+ * Lo que se completa en los formularios de curso.
+ *
+ * `grupoId` no es un campo del curso: es el grupo al que se le asigna al
+ * guardar (la relación grupo↔curso, que es lo que da acceso a la gente). La
+ * columna `grupo` del curso es de texto y no asigna nada, por eso no se usa.
+ */
+export const courseFormSchema = z.object({
+	name: z
+		.string()
+		.trim()
+		.min(1, "El nombre es obligatorio")
+		.max(50, "Máximo 50 caracteres"),
+	instructor: z.email("Elige quién dicta el curso"),
+	status: z.enum(["Abierto", "Cerrado"], "Elige el estado"),
+	grupoId: z.string(),
+	actividades: z.array(z.string()),
+});
+
+export type CourseFormValues = z.infer<typeof courseFormSchema>;
+
+/** Lo que acepta `PUT /courses/update/:id`: solo se manda lo que cambió. */
+export type UpdateCoursePayload = Partial<
+	Pick<CourseFormValues, "name" | "instructor" | "status">
+>;
 
 /** Una seccion del curso con las actividades que cuelgan de ella. */
 export const sectionSchema = z.object({

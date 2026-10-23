@@ -19,7 +19,7 @@ export const groupsColumns = columnHelper.columns([
 		header: "Descripción",
 		cell: (info) => info.getValue(),
 	}),
-	columnHelper.accessor((group) => group.users.length, {
+	columnHelper.accessor((group) => group.users?.length ?? 0, {
 		id: "users",
 		header: "Usuarios",
 		cell: (info) => info.getValue(),

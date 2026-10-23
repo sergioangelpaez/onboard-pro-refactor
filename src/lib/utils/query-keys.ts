@@ -30,6 +30,8 @@ export const queryKeys = {
 		courseRanking: (courseId: string) => ["gamification", courseId, "ranking"],
 		me: ["gamification", "me"],
 		pending: ["gamification", "pending"],
+		ranking: ["gamification", "ranking"],
+		niveles: (tenantId: string | null) => ["gamification", "niveles", tenantId],
 	},
 	exams: {
 		byActivity: (activityId: string) => ["exams", activityId],
@@ -41,6 +43,7 @@ export const queryKeys = {
 	},
 	achievements: {
 		all: ["achievements", "all"],
+		mine: ["achievements", "mine"],
 		options: ["achievements", "options"],
 		create: ["achievements", "create"],
 	},

@@ -7,7 +7,7 @@ import {
 	GraduationCap,
 	LoaderCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -45,17 +45,30 @@ const ENTREGA: Record<
 export function StudentActivityItem({
 	actividad,
 	courseId,
+	destacada = false,
 }: {
 	actividad: SectionActivity;
 	courseId: string;
+	/** Se abre y se lleva a la vista: viene de "Continuar" en la cabecera. */
+	destacada?: boolean;
 }) {
 	const [abierta, setAbierta] = useState(false);
+	const fila = useRef<HTMLLIElement>(null);
+
+	useEffect(() => {
+		if (!destacada) return;
+		setAbierta(true);
+		fila.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+	}, [destacada]);
 	const tipo = tipoDe(actividad.type);
 	const hecha = Boolean(actividad.completada);
 	const entrega = actividad.entrega ? ENTREGA[actividad.entrega] : null;
 
 	return (
-		<li className="rounded-md border">
+		<li
+			ref={fila}
+			className={`rounded-md border transition-shadow ${destacada ? "ring-2 ring-primary/40" : ""}`}
+		>
 			<button
 				type="button"
 				onClick={() => setAbierta((v) => !v)}

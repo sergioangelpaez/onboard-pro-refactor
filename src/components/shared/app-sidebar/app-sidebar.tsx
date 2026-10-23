@@ -1,13 +1,17 @@
 import {
 	BuildingComplex,
+	CircleUser,
 	LayoutDashboard,
 	LibraryBig,
 	ListTodo,
 	Medal,
+	Star,
+	Trophy,
 	UserGroup,
 	Users,
 } from "lucide-react";
 import type * as React from "react";
+import { SidebarProgress } from "#/components/student/sidebar-progress";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import { type RolReal, rolReal } from "#/lib/utils/auth/session";
 import {
@@ -51,6 +55,12 @@ const ACTIVIDADES = {
 	icon: ListTodo,
 	isActive: false,
 };
+const NIVELES = {
+	title: "Niveles",
+	url: "/admin/niveles",
+	icon: Star,
+	isActive: false,
+};
 const LOGROS = {
 	title: "Logros",
 	url: "/admin/logros",
@@ -83,8 +93,9 @@ const navByRole: Record<
 		GRUPOS,
 		ACTIVIDADES,
 		LOGROS,
+		NIVELES,
 	],
-	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS],
+	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS, NIVELES],
 	// Su propia area: no comparte pantallas con la administracion de la empresa.
 	instructor: [
 		{ ...RESUMEN, url: "/instructor/home" },
@@ -96,6 +107,19 @@ const navByRole: Record<
 		// Las actividades se hacen dentro de cada curso, donde se ve su sección
 		// y su estado. Lo pendiente de todos los cursos está en el inicio.
 		{ ...CURSOS, title: "Mis cursos", url: "/student/courses" },
+		{ ...LOGROS, title: "Mis logros", url: "/student/logros" },
+		{
+			title: "Ranking",
+			url: "/student/ranking",
+			icon: Trophy,
+			isActive: false,
+		},
+		{
+			title: "Mi perfil",
+			url: "/student/profile",
+			icon: CircleUser,
+			isActive: false,
+		},
 	],
 };
 
@@ -114,6 +138,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={items} />
+				{/* El aprendiz tiene su progreso siempre a la vista. */}
+				{rolReal(user.role) === "student" && <SidebarProgress />}
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

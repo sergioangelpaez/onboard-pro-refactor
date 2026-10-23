@@ -20,10 +20,14 @@ import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as InstructorHomeRouteImport } from './routes/instructor/home'
 import { Route as StudentActivitiesRouteImport } from './routes/student/activities'
 import { Route as StudentHomeRouteImport } from './routes/student/home'
+import { Route as StudentLogrosRouteImport } from './routes/student/logros'
+import { Route as StudentProfileRouteImport } from './routes/student/profile'
+import { Route as StudentRankingRouteImport } from './routes/student/ranking'
 import { Route as AdminachievementsLogrosRouteImport } from './routes/admin/(achievements)/logros'
 import { Route as AdminactivitiesActivitiesRouteImport } from './routes/admin/(activities)/activities'
 import { Route as AdmincoursesCoursesRouteImport } from './routes/admin/(courses)/courses'
 import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/groups'
+import { Route as AdminnivelesNivelesRouteImport } from './routes/admin/(niveles)/niveles'
 import { Route as AdmintenantsTenantsRouteImport } from './routes/admin/(tenants)/tenants'
 import { Route as AdminusersUsersRouteImport } from './routes/admin/(users)/users'
 import { Route as InstructorgroupsGroupsRouteImport } from './routes/instructor/(groups)/groups'
@@ -89,6 +93,21 @@ const StudentHomeRoute = StudentHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => StudentRouteRoute,
 } as any)
+const StudentLogrosRoute = StudentLogrosRouteImport.update({
+  id: '/logros',
+  path: '/logros',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentProfileRoute = StudentProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentRankingRoute = StudentRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
 const AdminachievementsLogrosRoute = AdminachievementsLogrosRouteImport.update({
   id: '/(achievements)/logros',
   path: '/logros',
@@ -108,6 +127,11 @@ const AdmincoursesCoursesRoute = AdmincoursesCoursesRouteImport.update({
 const AdmingroupsGroupsRoute = AdmingroupsGroupsRouteImport.update({
   id: '/(groups)/groups',
   path: '/groups',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminnivelesNivelesRoute = AdminnivelesNivelesRouteImport.update({
+  id: '/(niveles)/niveles',
+  path: '/niveles',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdmintenantsTenantsRoute = AdmintenantsTenantsRouteImport.update({
@@ -171,10 +195,14 @@ export interface FileRoutesByFullPath {
   '/instructor/home': typeof InstructorHomeRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
+  '/student/logros': typeof StudentLogrosRoute
+  '/student/profile': typeof StudentProfileRoute
+  '/student/ranking': typeof StudentRankingRoute
   '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
+  '/admin/niveles': typeof AdminnivelesNivelesRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
   '/instructor/groups': typeof InstructorgroupsGroupsRoute
@@ -197,10 +225,14 @@ export interface FileRoutesByTo {
   '/instructor/home': typeof InstructorHomeRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
+  '/student/logros': typeof StudentLogrosRoute
+  '/student/profile': typeof StudentProfileRoute
+  '/student/ranking': typeof StudentRankingRoute
   '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
+  '/admin/niveles': typeof AdminnivelesNivelesRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
   '/instructor/groups': typeof InstructorgroupsGroupsRoute
@@ -224,10 +256,14 @@ export interface FileRoutesById {
   '/instructor/home': typeof InstructorHomeRoute
   '/student/activities': typeof StudentActivitiesRoute
   '/student/home': typeof StudentHomeRoute
+  '/student/logros': typeof StudentLogrosRoute
+  '/student/profile': typeof StudentProfileRoute
+  '/student/ranking': typeof StudentRankingRoute
   '/admin/(achievements)/logros': typeof AdminachievementsLogrosRoute
   '/admin/(activities)/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/(courses)/courses': typeof AdmincoursesCoursesRoute
   '/admin/(groups)/groups': typeof AdmingroupsGroupsRoute
+  '/admin/(niveles)/niveles': typeof AdminnivelesNivelesRoute
   '/admin/(tenants)/tenants': typeof AdmintenantsTenantsRoute
   '/admin/(users)/users': typeof AdminusersUsersRoute
   '/instructor/(groups)/groups': typeof InstructorgroupsGroupsRoute
@@ -252,10 +288,14 @@ export interface FileRouteTypes {
     | '/instructor/home'
     | '/student/activities'
     | '/student/home'
+    | '/student/logros'
+    | '/student/profile'
+    | '/student/ranking'
     | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
     | '/admin/groups'
+    | '/admin/niveles'
     | '/admin/tenants'
     | '/admin/users'
     | '/instructor/groups'
@@ -278,10 +318,14 @@ export interface FileRouteTypes {
     | '/instructor/home'
     | '/student/activities'
     | '/student/home'
+    | '/student/logros'
+    | '/student/profile'
+    | '/student/ranking'
     | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
     | '/admin/groups'
+    | '/admin/niveles'
     | '/admin/tenants'
     | '/admin/users'
     | '/instructor/groups'
@@ -304,10 +348,14 @@ export interface FileRouteTypes {
     | '/instructor/home'
     | '/student/activities'
     | '/student/home'
+    | '/student/logros'
+    | '/student/profile'
+    | '/student/ranking'
     | '/admin/(achievements)/logros'
     | '/admin/(activities)/activities'
     | '/admin/(courses)/courses'
     | '/admin/(groups)/groups'
+    | '/admin/(niveles)/niveles'
     | '/admin/(tenants)/tenants'
     | '/admin/(users)/users'
     | '/instructor/(groups)/groups'
@@ -407,6 +455,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentHomeRouteImport
       parentRoute: typeof StudentRouteRoute
     }
+    '/student/logros': {
+      id: '/student/logros'
+      path: '/logros'
+      fullPath: '/student/logros'
+      preLoaderRoute: typeof StudentLogrosRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/profile': {
+      id: '/student/profile'
+      path: '/profile'
+      fullPath: '/student/profile'
+      preLoaderRoute: typeof StudentProfileRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/ranking': {
+      id: '/student/ranking'
+      path: '/ranking'
+      fullPath: '/student/ranking'
+      preLoaderRoute: typeof StudentRankingRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
     '/admin/(achievements)/logros': {
       id: '/admin/(achievements)/logros'
       path: '/logros'
@@ -433,6 +502,13 @@ declare module '@tanstack/react-router' {
       path: '/groups'
       fullPath: '/admin/groups'
       preLoaderRoute: typeof AdmingroupsGroupsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/(niveles)/niveles': {
+      id: '/admin/(niveles)/niveles'
+      path: '/niveles'
+      fullPath: '/admin/niveles'
+      preLoaderRoute: typeof AdminnivelesNivelesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/(tenants)/tenants': {
@@ -508,6 +584,7 @@ interface AdminRouteRouteChildren {
   AdminactivitiesActivitiesRoute: typeof AdminactivitiesActivitiesRoute
   AdmincoursesCoursesRoute: typeof AdmincoursesCoursesRoute
   AdmingroupsGroupsRoute: typeof AdmingroupsGroupsRoute
+  AdminnivelesNivelesRoute: typeof AdminnivelesNivelesRoute
   AdmintenantsTenantsRoute: typeof AdmintenantsTenantsRoute
   AdminusersUsersRoute: typeof AdminusersUsersRoute
 }
@@ -519,6 +596,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminactivitiesActivitiesRoute: AdminactivitiesActivitiesRoute,
   AdmincoursesCoursesRoute: AdmincoursesCoursesRoute,
   AdmingroupsGroupsRoute: AdmingroupsGroupsRoute,
+  AdminnivelesNivelesRoute: AdminnivelesNivelesRoute,
   AdmintenantsTenantsRoute: AdmintenantsTenantsRoute,
   AdminusersUsersRoute: AdminusersUsersRoute,
 }
@@ -551,6 +629,9 @@ const InstructorRouteRouteWithChildren = InstructorRouteRoute._addFileChildren(
 interface StudentRouteRouteChildren {
   StudentActivitiesRoute: typeof StudentActivitiesRoute
   StudentHomeRoute: typeof StudentHomeRoute
+  StudentLogrosRoute: typeof StudentLogrosRoute
+  StudentProfileRoute: typeof StudentProfileRoute
+  StudentRankingRoute: typeof StudentRankingRoute
   StudentCoursesCourseIdRoute: typeof StudentCoursesCourseIdRoute
   StudentExamActivityIdRoute: typeof StudentExamActivityIdRoute
   StudentCoursesIndexRoute: typeof StudentCoursesIndexRoute
@@ -559,6 +640,9 @@ interface StudentRouteRouteChildren {
 const StudentRouteRouteChildren: StudentRouteRouteChildren = {
   StudentActivitiesRoute: StudentActivitiesRoute,
   StudentHomeRoute: StudentHomeRoute,
+  StudentLogrosRoute: StudentLogrosRoute,
+  StudentProfileRoute: StudentProfileRoute,
+  StudentRankingRoute: StudentRankingRoute,
   StudentCoursesCourseIdRoute: StudentCoursesCourseIdRoute,
   StudentExamActivityIdRoute: StudentExamActivityIdRoute,
   StudentCoursesIndexRoute: StudentCoursesIndexRoute,

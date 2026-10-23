@@ -21,6 +21,9 @@ export interface MyProgress {
 	porcentaje: number;
 	/** XP que falta para subir de nivel. */
 	faltan: number;
+	/** Nombre del nivel actual, si la organización le puso uno. */
+	nombreNivel?: string | null;
+	nombreSiguiente?: string | null;
 	actividadesCompletadas: number;
 	racha: {
 		/** Días seguidos con actividad. Ya viene en 0 si la racha se cortó. */
@@ -58,6 +61,14 @@ export interface StudentPending {
 }
 
 export const gamificationService = {
+	/**
+	 * La tabla de posiciones de la organización: solo aprendices, por XP. Se
+	 * reutiliza `RankingEntry`, la misma forma que el ranking por curso.
+	 */
+	async ranking() {
+		return await apiFetch<RankingEntry[]>("/gamification/ranking");
+	},
+
 	/**
 	 * Lo que me falta hacer, solo de mis cursos publicados.
 	 *

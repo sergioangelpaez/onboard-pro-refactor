@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react";
 import { authService } from "#/lib/services/auth";
-import { isAdmin } from "#/lib/utils/auth/session";
+import { isAdmin, rolReal } from "#/lib/utils/auth/session";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -28,7 +28,13 @@ export function NavUser({ user }: { user: User }) {
 
 	if (!user) return null;
 
-	const profilePath = isAdmin(user.role) ? "/admin/profile" : "/student/home";
+	// Cada área tiene su perfil. El instructor todavía no tiene uno propio y
+	// vuelve a su inicio.
+	const profilePath = isAdmin(user.role)
+		? "/admin/profile"
+		: rolReal(user.role) === "student"
+			? "/student/profile"
+			: "/instructor/home";
 
 	async function handleLogout() {
 		try {

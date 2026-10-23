@@ -1,16 +1,16 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, LoaderCircle, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Checkbox } from "#/components/ui/checkbox";
 import { useAllActivities } from "#/hooks/activities/use-all-activities";
 import { useCreateCourse } from "#/hooks/courses/use-create-course";
 import { useCreateLogro } from "#/hooks/logros/use-create-logro";
-import {
-	type CreateCoursePayload,
-	createCourseSchema,
-} from "@/lib/schemas/courses";
+import { groupsService } from "#/lib/services/groups";
+import { queryKeys } from "#/lib/utils/query-keys";
+import { type CourseFormValues, courseFormSchema } from "@/lib/schemas/courses";
 import { cn } from "@/lib/utils/utils";
-import { Checkbox } from "#/components/ui/checkbox";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import {
@@ -33,11 +33,18 @@ import {
 import { Field, FieldError, FieldLabel } from "../../ui/field";
 import { Input } from "../../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import {
+	EstadoSelect,
+	GrupoSelect,
+	InstructorSelect,
+	SIN_GRUPO,
+} from "./course-fields";
 
 export function CreateCourseDialogForm() {
 	const [open, setOpen] = useState(false);
 	const { mutate, isPending } = useCreateCourse();
 	const crearLogro = useCreateLogro();
+	const queryClient = useQueryClient();
 
 	// Logro opcional que se otorga al terminar el curso. Se crea despues del
 	// curso porque necesita su id, y si falla no se deshace el curso: tener el
@@ -50,46 +57,73 @@ export function CreateCourseDialogForm() {
 		defaultValues: {
 			name: "",
 			instructor: "",
-			grupo: "",
-			status: "",
+			// Nace como borrador: se publica cuando ya tiene contenido.
+			status: "Cerrado",
+			grupoId: SIN_GRUPO,
 			actividades: [],
-		} as CreateCoursePayload,
-		validators: { onChange: createCourseSchema },
+		} as CourseFormValues,
+		validators: { onChange: courseFormSchema },
 		onSubmit: ({ value }) =>
-			mutate(value, {
-				onSuccess: async (curso) => {
-					toast.success("Curso creado", {
-						description: `Se creó el curso "${value.name}".`,
-					});
+			mutate(
+				{
+					name: value.name.trim(),
+					instructor: value.instructor,
+					status: value.status,
+					actividades: value.actividades,
+				},
+				{
+					onSuccess: async (curso) => {
+						toast.success("Curso creado", {
+							description: `Se creó el curso "${value.name}".`,
+						});
 
-					if (conLogro && nombreLogro.trim() && curso?.id) {
-						try {
-							await crearLogro.mutateAsync({
-								nombre: nombreLogro.trim(),
-								descripcion: `Se obtiene al terminar ${value.name}.`,
-								categoria: "Progreso",
-								// Terminar este curso: un curso completado, el de aca.
-								tipoCondicion: "cursos_completados",
-								meta: 1,
-								xpRecompensa: 50,
-								cursoId: curso.id,
-							});
-							toast.success(`Logro "${nombreLogro.trim()}" asociado al curso`);
-						} catch (e) {
-							toast.error(
-								`El curso se creó, pero el logro no: ${(e as Error).message}`,
-							);
+						// Asignarlo al grupo es lo que le da el curso a la gente. Va
+						// después porque necesita el id; si falla, el curso igual
+						// queda y se puede asignar desde Grupos.
+						if (value.grupoId !== SIN_GRUPO && curso?.id) {
+							try {
+								await groupsService.addCourses(value.grupoId, [curso.id]);
+								queryClient.invalidateQueries({
+									queryKey: queryKeys.groups.all,
+								});
+							} catch (e) {
+								toast.error(
+									`El curso se creó, pero no se pudo asignar al grupo: ${(e as Error).message}`,
+								);
+							}
 						}
-					}
 
-					handleOpenChange(false);
+						if (conLogro && nombreLogro.trim() && curso?.id) {
+							try {
+								await crearLogro.mutateAsync({
+									nombre: nombreLogro.trim(),
+									descripcion: `Se obtiene al terminar ${value.name}.`,
+									categoria: "Progreso",
+									// Terminar este curso: un curso completado, el de aca.
+									tipoCondicion: "cursos_completados",
+									meta: 1,
+									xpRecompensa: 50,
+									cursoId: curso.id,
+								});
+								toast.success(
+									`Logro "${nombreLogro.trim()}" asociado al curso`,
+								);
+							} catch (e) {
+								toast.error(
+									`El curso se creó, pero el logro no: ${(e as Error).message}`,
+								);
+							}
+						}
+
+						handleOpenChange(false);
+					},
+					onError: (error) => {
+						toast.error("Error al crear el curso", {
+							description: error.message,
+						});
+					},
 				},
-				onError: (error) => {
-					toast.error("Error al crear el curso", {
-						description: error.message,
-					});
-				},
-			}),
+			),
 	});
 
 	function handleOpenChange(next: boolean) {
@@ -152,13 +186,11 @@ export function CreateCourseDialogForm() {
 							return (
 								<Field data-invalid={isInvalid}>
 									<FieldLabel htmlFor="instructor">Instructor</FieldLabel>
-									<Input
+									<InstructorSelect
 										id={field.name}
-										type="email"
-										placeholder="instructor@empresa.com"
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={field.handleChange}
 									/>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
 								</Field>
@@ -166,18 +198,18 @@ export function CreateCourseDialogForm() {
 						}}
 					</form.Field>
 
-					<form.Field name="grupo">
+					<form.Field name="grupoId">
 						{(field) => {
 							const isInvalid =
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor="grupo">Grupo</FieldLabel>
-									<Input
+									<FieldLabel htmlFor="grupoId">Asignar al grupo</FieldLabel>
+									<GrupoSelect
 										id={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={field.handleChange}
 									/>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
 								</Field>
@@ -192,11 +224,11 @@ export function CreateCourseDialogForm() {
 							return (
 								<Field data-invalid={isInvalid}>
 									<FieldLabel htmlFor="status">Estado</FieldLabel>
-									<Input
+									<EstadoSelect
 										id={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={field.handleChange}
 									/>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
 								</Field>

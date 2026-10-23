@@ -44,6 +44,21 @@ export const authService = {
 		window.location.href = "/auth";
 	},
 
+	/**
+	 * Edita mis propios datos. Solo nombre, apellido y teléfono: el correo
+	 * identifica la cuenta y el rol lo cambia un administrador.
+	 */
+	async updateMe(values: {
+		firstname?: string;
+		lastname?: string;
+		phonumber?: string;
+	}) {
+		return await apiFetch<{ message: string }>("/auth/me", {
+			method: "PUT",
+			body: JSON.stringify(values),
+		});
+	},
+
 	/** Changes the password for the current authenticated user. */
 	async changePassword(values: ChangePasswordPayload) {
 		return await apiFetch<GeneralAPIResponse>("/auth/change-password", {

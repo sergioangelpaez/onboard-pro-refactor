@@ -42,6 +42,8 @@ export function useSubmitExam(activityId: string) {
 				queryKey: queryKeys.exams.attempts(activityId),
 			});
 			queryClient.invalidateQueries({ queryKey: queryKeys.gamification.me });
+			// Puede haber desbloqueado logros.
+			queryClient.invalidateQueries({ queryKey: queryKeys.achievements.mine });
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.gamification.pending,
 			});

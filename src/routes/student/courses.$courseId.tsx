@@ -1,14 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
+import { ArrowLeft, ChevronsUpDown, RefreshCw } from "lucide-react";
+import { useState } from "react";
 import { EmptyState } from "#/components/shared/states/empty-state";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
+import { CourseHero } from "#/components/student/course-hero";
 import { progresoDe } from "#/components/student/course-progress";
-import { StudentActivityItem } from "#/components/student/student-activity-item";
+import { CourseRankingCard } from "#/components/student/course-ranking-card";
+import { CourseSection } from "#/components/student/course-section";
 import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { useCourseSections } from "#/hooks/courses/use-course-sections";
 import { useMyCourses } from "#/hooks/courses/use-my-courses";
+import { useCourseRanking } from "#/hooks/gamification/use-course-ranking";
+import { useCurrentUser } from "#/hooks/users/use-current-user";
 
 export const Route = createFileRoute("/student/courses/$courseId")({
 	component: CourseRoute,
@@ -32,8 +36,32 @@ function CourseRoute() {
 	} = useCourseSections(courseId);
 
 	const curso = cursos?.find((c) => c.id === courseId);
-	const { hechas, total, porcentaje } = progresoDe(secciones);
-	const terminado = total > 0 && hechas === total;
+	const { total } = progresoDe(secciones);
+	// La misma consulta que la tarjeta de ranking: comparten cache.
+	const { user } = useCurrentUser();
+	const { data: ranking } = useCourseRanking(courseId, 500);
+	const yo = ranking?.find((p) => p.id === user?.id);
+	const [destacada, setDestacada] = useState<string | null>(null);
+
+	// La sección de la próxima actividad pendiente arranca abierta; el resto,
+	// plegada. Hasta que el aprendiz toque algo, se sigue esa regla.
+	const seccionActual = secciones?.find((s) =>
+		s.actividades.some((a) => !a.completada),
+	)?.id;
+	const [abiertas, setAbiertas] = useState<Set<string> | null>(null);
+	const abiertasEfectivas =
+		abiertas ?? new Set(seccionActual ? [seccionActual] : []);
+	const todasAbiertas =
+		!!secciones?.length && secciones.every((s) => abiertasEfectivas.has(s.id));
+
+	// "Continuar" lleva a una actividad: su sección tiene que estar abierta.
+	function seguir(actividadId: string) {
+		const seccion = secciones?.find((s) =>
+			s.actividades.some((a) => a.id === actividadId),
+		);
+		if (seccion) setAbiertas(new Set(abiertasEfectivas).add(seccion.id));
+		setDestacada(actividadId);
+	}
 
 	return (
 		<div className="app-container space-y-6">
@@ -45,31 +73,21 @@ function CourseRoute() {
 					</Link>
 				</Button>
 				<h1>{curso?.name ?? "Curso"}</h1>
-
-				{secciones && total > 0 && (
-					<div className="max-w-md space-y-1.5">
-						<div
-							role="progressbar"
-							aria-label="Avance en el curso"
-							aria-valuemin={0}
-							aria-valuemax={100}
-							aria-valuenow={porcentaje}
-							className="h-2 overflow-hidden rounded-full bg-muted"
-						>
-							<div
-								className="h-full rounded-full bg-primary transition-all"
-								style={{ width: `${porcentaje}%` }}
-							/>
-						</div>
-						<p className="flex items-center gap-1.5 text-muted-foreground text-sm">
-							{terminado && <CheckCircle2 className="size-4 text-primary" />}
-							{terminado
-								? "¡Terminaste este curso!"
-								: `${hechas} de ${total} actividades · ${porcentaje}%`}
-						</p>
-					</div>
-				)}
 			</div>
+
+			{/* Cómo va en el curso y quién va adelante, lado a lado. */}
+			{secciones && total > 0 && (
+				<div className="grid gap-4 lg:grid-cols-3">
+					<div className="lg:col-span-2">
+						<CourseHero
+							secciones={secciones}
+							xpGanado={yo?.xp ?? (ranking ? 0 : null)}
+							onSeguir={(a) => seguir(a.id)}
+						/>
+					</div>
+					<CourseRankingCard courseId={courseId} />
+				</div>
+			)}
 
 			{isLoading && <LoadingState message="Cargando el curso..." />}
 
@@ -93,32 +111,44 @@ function CourseRoute() {
 				/>
 			)}
 
-			{secciones?.map((seccion) => {
-				const hechasSeccion = seccion.actividades.filter(
-					(a) => a.completada,
-				).length;
-				return (
-					<Card key={seccion.id}>
-						<CardHeader className="flex flex-row items-center justify-between gap-2">
-							<CardTitle className="text-base">{seccion.name}</CardTitle>
-							<span className="shrink-0 text-muted-foreground text-xs">
-								{hechasSeccion}/{seccion.actividades.length}
-							</span>
-						</CardHeader>
-						<CardContent>
-							<ul className="space-y-2">
-								{seccion.actividades.map((actividad) => (
-									<StudentActivityItem
-										key={actividad.id}
-										actividad={actividad}
-										courseId={courseId}
-									/>
-								))}
-							</ul>
-						</CardContent>
-					</Card>
-				);
-			})}
+			{secciones && secciones.length > 0 && (
+				<div className="space-y-3">
+					<div className="flex items-center justify-between gap-2">
+						<h2 className="font-semibold text-lg">Contenido del curso</h2>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() =>
+								setAbiertas(
+									todasAbiertas
+										? new Set()
+										: new Set(secciones.map((s) => s.id)),
+								)
+							}
+						>
+							<ChevronsUpDown />
+							{todasAbiertas ? "Contraer todo" : "Expandir todo"}
+						</Button>
+					</div>
+					{secciones.map((seccion, i) => (
+						<CourseSection
+							key={seccion.id}
+							seccion={seccion}
+							numero={i + 1}
+							courseId={courseId}
+							actual={seccion.id === seccionActual}
+							abierta={abiertasEfectivas.has(seccion.id)}
+							onAbrir={(abierta) => {
+								const nuevas = new Set(abiertasEfectivas);
+								if (abierta) nuevas.add(seccion.id);
+								else nuevas.delete(seccion.id);
+								setAbiertas(nuevas);
+							}}
+							destacada={destacada}
+						/>
+					))}
+				</div>
+			)}
 		</div>
 	);
 }

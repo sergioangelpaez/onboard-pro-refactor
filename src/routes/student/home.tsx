@@ -1,12 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCheck, LibraryBig, RefreshCw } from "lucide-react";
+import {
+	CheckCheck,
+	ChevronRight,
+	Flame,
+	Medal,
+	RefreshCw,
+} from "lucide-react";
 import { ErrorState } from "#/components/shared/states/error-state";
-import { LoadingState } from "#/components/shared/states/loading-state";
-import { LevelCard } from "#/components/student/level-card";
-import { PendingCard } from "#/components/student/pending-card";
-import { StreakCard } from "#/components/student/streak-card";
+import { AchievementsPreview } from "#/components/student/home/achievements-preview";
+import { NextSteps } from "#/components/student/home/next-steps";
+import { ProgressHero } from "#/components/student/home/progress-hero";
+import { StatTile } from "#/components/student/home/stat-tile";
+import { MyCourseCard } from "#/components/student/my-course-card";
 import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import { Skeleton } from "#/components/ui/skeleton";
+import { useMyAchievements } from "#/hooks/achievements/use-my-achievements";
+import { useMyCourses } from "#/hooks/courses/use-my-courses";
+import { useMyPending } from "#/hooks/gamification/use-my-pending";
 import { useMyProgress } from "#/hooks/gamification/use-my-progress";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 
@@ -14,30 +24,41 @@ export const Route = createFileRoute("/student/home")({
 	component: HomeRoute,
 });
 
+/** Cuántos cursos se muestran en el inicio; el resto, en "Mis cursos". */
+const CURSOS_VISIBLES = 3;
+
 /**
- * El inicio del aprendiz: cómo viene su progreso y un acceso directo a lo que
- * le queda por hacer. La racha va primero porque es lo único que se pierde si
- * no entra hoy.
+ * El inicio del aprendiz, de arriba abajo:
+ *
+ *   1. cómo va (nivel, XP, racha)
+ *   2. qué hacer ahora (el siguiente paso y lo pendiente) y sus logros
+ *   3. sus cursos, para entrar directo
+ *
+ * Cada bloque carga por su cuenta: si uno falla, el resto se sigue viendo.
  */
 function HomeRoute() {
 	const { user } = useCurrentUser();
-	const { data, isLoading, error, refetch } = useMyProgress();
+	const progreso = useMyProgress();
+	const pendientes = useMyPending();
+	const logros = useMyAchievements();
+	const cursos = useMyCourses();
+
+	const racha = progreso.data?.racha;
 
 	return (
 		<div className="app-container space-y-6">
-			<div>
-				<h1>{user?.firstname ? `¡Hola, ${user.firstname}!` : "¡Hola!"}</h1>
-				<p className="text-muted-foreground">Así va tu progreso.</p>
-			</div>
+			<ProgressHero
+				nombre={user?.firstname}
+				progreso={progreso.data}
+				pendientes={pendientes.data?.resumen.actividadesPendientes}
+			/>
 
-			{isLoading && <LoadingState message="Cargando tu progreso..." />}
-
-			{!data && error && (
+			{!progreso.data && progreso.error && (
 				<ErrorState
 					title="No se pudo cargar tu progreso"
-					description={error.message}
+					description={progreso.error.message}
 					content={
-						<Button onClick={() => refetch()}>
+						<Button onClick={() => progreso.refetch()}>
 							<RefreshCw />
 							Reintentar
 						</Button>
@@ -45,35 +66,70 @@ function HomeRoute() {
 				/>
 			)}
 
-			{data && (
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-					<StreakCard racha={data.racha} />
-					<LevelCard progreso={data} />
+			<div className="grid gap-4 sm:grid-cols-3">
+				{progreso.isLoading ? (
+					<>
+						<Skeleton className="h-20 rounded-xl" />
+						<Skeleton className="h-20 rounded-xl" />
+						<Skeleton className="h-20 rounded-xl" />
+					</>
+				) : (
+					<>
+						<StatTile
+							tono="naranja"
+							icono={<Flame className="size-6" />}
+							valor={racha?.dias ?? 0}
+							etiqueta={racha?.dias === 1 ? "día de racha" : "días de racha"}
+							detalle={
+								racha?.maxima ? `Tu mejor racha: ${racha.maxima}` : undefined
+							}
+						/>
+						<StatTile
+							tono="verde"
+							icono={<CheckCheck className="size-6" />}
+							valor={progreso.data?.actividadesCompletadas ?? 0}
+							etiqueta="actividades completadas"
+						/>
+						<StatTile
+							tono="violeta"
+							icono={<Medal className="size-6" />}
+							valor={
+								logros.data
+									? `${logros.data.ganados}/${logros.data.total}`
+									: "—"
+							}
+							etiqueta="logros ganados"
+						/>
+					</>
+				)}
+			</div>
 
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2 text-base">
-								<CheckCheck className="size-4" />
-								Actividades completadas
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<p className="font-semibold text-3xl tabular-nums">
-								{data.actividadesCompletadas}
-							</p>
-							<Button asChild variant="outline" className="w-full">
-								<Link to="/student/courses">
-									<LibraryBig />
-									Ver mis cursos
-								</Link>
-							</Button>
-						</CardContent>
-					</Card>
+			<div className="grid gap-4 lg:grid-cols-3">
+				<div className="lg:col-span-2">
+					<NextSteps data={pendientes.data} isLoading={pendientes.isLoading} />
 				</div>
-			)}
+				<AchievementsPreview data={logros.data} isLoading={logros.isLoading} />
+			</div>
 
-			{/* Fuera del bloque de progreso: si ese falla, lo pendiente se sigue viendo. */}
-			<PendingCard />
+			{cursos.data && cursos.data.length > 0 && (
+				<section className="space-y-3">
+					<div className="flex items-center justify-between">
+						<h2 className="font-semibold text-lg">Mis cursos</h2>
+						<Link
+							to="/student/courses"
+							className="flex items-center gap-1 text-primary text-sm hover:underline"
+						>
+							Ver todos
+							<ChevronRight className="size-4" />
+						</Link>
+					</div>
+					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+						{cursos.data.slice(0, CURSOS_VISIBLES).map((c) => (
+							<MyCourseCard key={c.id} course={c} />
+						))}
+					</div>
+				</section>
+			)}
 		</div>
 	);
 }

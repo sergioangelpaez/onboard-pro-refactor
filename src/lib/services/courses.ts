@@ -2,6 +2,7 @@ import type {
 	Course,
 	CreateCoursePayload,
 	Section,
+	UpdateCoursePayload,
 } from "#/lib/schemas/courses";
 import { apiFetch } from "./api-fetch";
 
@@ -26,10 +27,18 @@ export const coursesService = {
 		});
 	},
 
-	async update(id: string, values: CreateCoursePayload) {
-		await Promise.resolve();
-		console.info("[front-only] update course", { id, values });
-		return { message: "Curso actualizado (front-only)" } as GeneralAPIResponse;
+	/**
+	 * Edita el curso. Pasar a "Abierto" es publicarlo: un curso sin
+	 * actividades no se puede publicar y el backend responde 409.
+	 */
+	async update(id: string, values: UpdateCoursePayload) {
+		return await apiFetch<{ message: string; curso: Course }>(
+			`/courses/update/${id}`,
+			{
+				method: "PUT",
+				body: JSON.stringify(values),
+			},
+		);
 	},
 
 	/**

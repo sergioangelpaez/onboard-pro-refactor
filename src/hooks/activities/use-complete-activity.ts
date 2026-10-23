@@ -11,6 +11,8 @@ export function useCompleteActivity() {
 			queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
 			// Completar suma XP y cuenta para la racha: el inicio tiene que reflejarlo.
 			queryClient.invalidateQueries({ queryKey: queryKeys.gamification.me });
+			// Puede haber desbloqueado logros.
+			queryClient.invalidateQueries({ queryKey: queryKeys.achievements.mine });
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.gamification.pending,
 			});
