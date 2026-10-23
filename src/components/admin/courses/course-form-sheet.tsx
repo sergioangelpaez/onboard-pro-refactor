@@ -1,12 +1,17 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useAllActivities } from "#/hooks/activities/use-all-activities";
-import type { Course, CreateCoursePayload } from "#/lib/schemas/courses";
-import { createCourseSchema } from "#/lib/schemas/courses";
+import type {
+	Course,
+	CourseFormValues,
+	UpdateCoursePayload,
+} from "#/lib/schemas/courses";
+import { courseFormSchema } from "#/lib/schemas/courses";
 import { coursesService } from "#/lib/services/courses";
-import { Badge } from "../../ui/badge";
+import { groupsService } from "#/lib/services/groups";
+import { queryKeys } from "#/lib/utils/query-keys";
 import { Button } from "../../ui/button";
 import {
 	Dialog,
@@ -18,59 +23,83 @@ import {
 } from "../../ui/dialog";
 import {
 	Field,
+	FieldDescription,
 	FieldError,
 	FieldLabel,
 } from "../../ui/field";
 import { Input } from "../../ui/input";
-import { ScrollArea } from "../../ui/scroll-area";
+import {
+	EstadoSelect,
+	GrupoSelect,
+	InstructorSelect,
+	SIN_GRUPO,
+} from "./course-fields";
 
 interface CourseFormSheetProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	course?: Course;
+	course: Course;
 }
 
+/**
+ * Editar un curso (HU-028).
+ *
+ * Solo se manda lo que cambió: el backend valida cada campo por separado (un
+ * instructor que no es de la organización, publicar un curso sin actividades)
+ * y un cambio que no se tocó no debería poder fallar.
+ *
+ * Antes este formulario no llamaba al backend: mostraba "Curso actualizado"
+ * sin guardar nada.
+ */
 export function CourseFormSheet({
 	open,
 	onOpenChange,
 	course,
 }: CourseFormSheetProps) {
-	const { data: activities = [] } = useAllActivities();
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const isEdit = !!course;
+	const queryClient = useQueryClient();
+	const [guardando, setGuardando] = useState(false);
 
 	const form = useForm({
 		defaultValues: {
-			name: course?.name ?? "",
-			instructor: course?.instructor ?? "",
-			grupo: course?.status ?? "",
-			status: course?.status ?? "",
-			actividades: course?.actividades ?? [],
-		} as CreateCoursePayload,
-		validators: { onChange: createCourseSchema },
-		onSubmit: ({ value }) => {
-			setIsSubmitting(true);
-			const payload = createCourseSchema.parse(value);
-			const action = isEdit && course
-				? coursesService.update(course.id, payload)
-				: coursesService.create(payload);
+			name: course.name,
+			instructor: course.instructor ?? "",
+			status: course.status === "Abierto" ? "Abierto" : "Cerrado",
+			grupoId: SIN_GRUPO,
+			actividades: [],
+		} as CourseFormValues,
+		validators: { onChange: courseFormSchema },
+		onSubmit: async ({ value }) => {
+			const cambios: UpdateCoursePayload = {};
+			if (value.name.trim() !== course.name) cambios.name = value.name.trim();
+			if (value.instructor !== course.instructor)
+				cambios.instructor = value.instructor;
+			if (value.status !== course.status) cambios.status = value.status;
+			const asignar = value.grupoId !== SIN_GRUPO;
 
-			action
-				.then(() => {
-					toast.success(isEdit ? "Curso actualizado" : "Curso creado", {
-						description: isEdit
-							? `Se actualizó el curso "${value.name}".`
-							: `Se creó el curso "${value.name}".`,
-					});
-					onOpenChange(false);
-				})
-				.catch((error: Error) => {
-					toast.error(
-						isEdit ? "No se pudo actualizar el curso" : "No se pudo crear el curso",
-						{ description: error.message },
-					);
-				})
-				.finally(() => setIsSubmitting(false));
+			if (!Object.keys(cambios).length && !asignar) {
+				toast.info("No cambiaste nada.");
+				return;
+			}
+
+			setGuardando(true);
+			try {
+				if (Object.keys(cambios).length)
+					await coursesService.update(course.id, cambios);
+				if (asignar) await groupsService.addCourses(value.grupoId, [course.id]);
+				toast.success("Curso actualizado", {
+					description: `Se guardaron los cambios de "${value.name.trim()}".`,
+				});
+				queryClient.invalidateQueries({ queryKey: ["courses"] });
+				if (asignar)
+					queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
+				onOpenChange(false);
+			} catch (error) {
+				toast.error("No se pudo actualizar el curso", {
+					description: (error as Error).message,
+				});
+			} finally {
+				setGuardando(false);
+			}
 		},
 	});
 
@@ -83,14 +112,13 @@ export function CourseFormSheet({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>{isEdit ? "Editar curso" : "Crear curso"}</DialogTitle>
+					<DialogTitle>Editar curso</DialogTitle>
 					<DialogDescription>
-						{isEdit
-							? "Modifica los datos de este curso."
-							: "Completa los datos para registrar un nuevo curso."}
+						Modifica los datos de este curso.
 					</DialogDescription>
 				</DialogHeader>
 				<form
+					id={`course-edit-${course.id}`}
 					onSubmit={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
@@ -98,123 +126,80 @@ export function CourseFormSheet({
 					}}
 					className="flex flex-col gap-4"
 				>
-					<ScrollArea className="max-h-[65vh]">
-						<div className="grid gap-4">
-							<form.Field name="name">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Nombre</FieldLabel>
-											<Input
-												id={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											{isInvalid && <FieldError errors={field.state.meta.errors} />}
-										</Field>
-									);
-								}}
-							</form.Field>
+					<form.Field name="name">
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>Nombre</FieldLabel>
+									<Input
+										id={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
+					</form.Field>
 
-							<form.Field name="instructor">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Instructor</FieldLabel>
-											<Input
-												id={field.name}
-												type="email"
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											{isInvalid && <FieldError errors={field.state.meta.errors} />}
-										</Field>
-									);
-								}}
-							</form.Field>
+					<form.Field name="instructor">
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>Instructor</FieldLabel>
+									<InstructorSelect
+										id={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={field.handleChange}
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
+					</form.Field>
 
-							<form.Field name="grupo">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Grupo</FieldLabel>
-											<Input
-												id={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											{isInvalid && <FieldError errors={field.state.meta.errors} />}
-										</Field>
-									);
-								}}
-							</form.Field>
+					<form.Field name="status">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>Estado</FieldLabel>
+								<EstadoSelect
+									id={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={field.handleChange}
+								/>
+								<FieldDescription>
+									Un curso sin actividades no se puede publicar.
+								</FieldDescription>
+							</Field>
+						)}
+					</form.Field>
 
-							<form.Field name="status">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-											<Input
-												id={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											{isInvalid && <FieldError errors={field.state.meta.errors} />}
-										</Field>
-									);
-								}}
-							</form.Field>
-
-							<form.Field name="actividades">
-								{(field) => {
-									const selected = field.state.value;
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									const toggle = (id: string) => {
-										field.handleChange(
-											selected.includes(id)
-												? selected.filter((value) => value !== id)
-												: [...selected, id],
-										);
-									};
-
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel>Actividades</FieldLabel>
-											<div className="flex flex-wrap gap-2">
-												{activities.map((activity) => {
-													const active = selected.includes(activity.id);
-													return (
-														<Badge
-															key={activity.id}
-															variant={active ? "default" : "secondary"}
-															className="cursor-pointer"
-															onClick={() => toggle(activity.id)}
-														>
-															{activity.title}
-														</Badge>
-													);
-												})}
-											</div>
-											{isInvalid && <FieldError errors={field.state.meta.errors} />}
-										</Field>
-									);
-								}}
-							</form.Field>
-						</div>
-					</ScrollArea>
+					<form.Field name="grupoId">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Asignar también a un grupo
+								</FieldLabel>
+								<GrupoSelect
+									id={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={field.handleChange}
+								/>
+								<FieldDescription>
+									Se suma a los grupos que ya lo tienen. Para quitárselo a un
+									grupo, hazlo desde Grupos.
+								</FieldDescription>
+							</Field>
+						)}
+					</form.Field>
 				</form>
 
 				<DialogFooter>
@@ -222,7 +207,7 @@ export function CourseFormSheet({
 						type="button"
 						variant="outline"
 						onClick={() => handleOpenChange(false)}
-						disabled={isSubmitting}
+						disabled={guardando}
 					>
 						Cancelar
 					</Button>
@@ -230,11 +215,11 @@ export function CourseFormSheet({
 						{(canSubmit) => (
 							<Button
 								type="submit"
-								disabled={!canSubmit || isSubmitting}
-								onClick={() => form.handleSubmit()}
+								form={`course-edit-${course.id}`}
+								disabled={!canSubmit || guardando}
 							>
-								{isSubmitting && <LoaderCircle className="animate-spin" />}
-								{isEdit ? "Guardar cambios" : "Crear curso"}
+								{guardando && <LoaderCircle className="animate-spin" />}
+								Guardar cambios
 							</Button>
 						)}
 					</form.Subscribe>

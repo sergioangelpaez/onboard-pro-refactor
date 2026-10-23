@@ -1,4 +1,4 @@
-import { Pencil, Trash } from "lucide-react";
+import { ArchiveRestore, Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import type { Course } from "#/lib/schemas/courses";
 import {
@@ -20,8 +20,11 @@ export function CourseRowActions({ row }: { row: AppRow<Course> }) {
 			onClick: () => setEditOpen(true),
 		},
 		{
-			label: "Eliminar",
-			icon: <Trash />,
+			// El mismo diálogo ofrece archivar (lo recomendado) o eliminar.
+			label: row.original.archivado
+				? "Desarchivar o eliminar"
+				: "Archivar o eliminar",
+			icon: row.original.archivado ? <ArchiveRestore /> : <Trash />,
 			onClick: () => setDeleteOpen(true),
 			variant: "destructive",
 		},

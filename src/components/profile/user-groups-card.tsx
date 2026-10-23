@@ -83,18 +83,22 @@ export function UserGroupsCard({
 							<CardTitle className="text-base">{group.name}</CardTitle>
 							<CardDescription>{group.description}</CardDescription>
 						</CardHeader>
-						<CardFooter>
-							<AvatarGroup>
-								{group.users.map((user) => (
-									<Avatar key={user.id}>
-										<AvatarFallback>
-											{`${user.firstname?.[0] ?? ""}${user.lastname?.[0] ?? ""}`.toUpperCase() ||
-												"?"}
-										</AvatarFallback>
-									</Avatar>
-								))}
-							</AvatarGroup>
-						</CardFooter>
+						{/* `/groups/me` devuelve los grupos sin sus integrantes: sin
+						    este control la tarjeta rompía el perfil entero. */}
+						{group.users?.length > 0 && (
+							<CardFooter>
+								<AvatarGroup>
+									{group.users.map((user) => (
+										<Avatar key={user.id}>
+											<AvatarFallback>
+												{`${user.firstname?.[0] ?? ""}${user.lastname?.[0] ?? ""}`.toUpperCase() ||
+													"?"}
+											</AvatarFallback>
+										</Avatar>
+									))}
+								</AvatarGroup>
+							</CardFooter>
+						)}
 					</Card>
 				))}
 			</CardContent>

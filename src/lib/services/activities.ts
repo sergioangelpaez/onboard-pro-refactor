@@ -1,6 +1,7 @@
 import type {
 	Activity,
 	CreateActivityFormValues,
+	Material,
 	UpdateActivityFormValues,
 } from "../schemas/activities";
 import { apiFetch } from "./api-fetch";
@@ -60,6 +61,33 @@ export const activitiesService = {
 		return await apiFetch<void>(`/activities/${id}`, {
 			method: "DELETE",
 		});
+	},
+
+	/** El material de apoyo de una actividad, con su enlace temporal (HU-038). */
+	async getMaterials(activityId: string) {
+		return await apiFetch<Material[]>(`/activities/${activityId}/materiales`);
+	},
+
+	/**
+	 * Agrega un archivo a la actividad (HU-037). Se suma a los que ya estaban:
+	 * no los reemplaza.
+	 */
+	async addMaterial(activityId: string, file: File) {
+		const body = new FormData();
+		body.append("archivo", file);
+
+		return await apiFetch<{ message: string; materialId: string }>(
+			`/activities/${activityId}/materiales`,
+			{ method: "POST", body },
+		);
+	},
+
+	/** Quita un archivo. Se borra tambien del almacenamiento (HU-039). */
+	async deleteMaterial(materialId: string) {
+		return await apiFetch<{ message: string; nombre: string }>(
+			`/materiales/${materialId}`,
+			{ method: "DELETE" },
+		);
 	},
 
 	async complete(id: string) {

@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteTenant } from "#/hooks/tenants/use-delete-tenant";
 import type { Tenant } from "#/lib/schemas/tenants";
-import { Button } from "../../ui/button";
+import { Button } from "#/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +10,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../../ui/dialog";
+} from "#/components/ui/dialog";
 
 interface TenantDeleteDialogProps {
 	open: boolean;
