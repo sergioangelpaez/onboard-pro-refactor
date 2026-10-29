@@ -52,7 +52,16 @@ export const createActivitySchema = activitySchema
 
 export const createActivityFormSchema = createActivitySchema
 	.omit({ adjunto: true })
-	.extend({ archivo: fileSchema });
+	.extend({ archivo: fileSchema.nullish() })
+	.superRefine((value, ctx) => {
+		if (value.type !== "Examen" && !value.archivo) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["archivo"],
+				message: "Adjunta un archivo",
+			});
+		}
+	});
 
 export const updateActivityFormSchema = createActivitySchema
 	.omit({ adjunto: true, sectionId: true })

@@ -30,6 +30,16 @@ export const createCourseSchema = courseSchema
 export type Course = z.infer<typeof courseSchema>;
 export type CreateCoursePayload = z.infer<typeof createCourseSchema>;
 
+/** Resumen que devuelve `GET /courses/me` para el usuario autenticado. */
+export const assignedCourseSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	description: z.string().nullish(),
+	image: z.string().nullish(),
+});
+
+export type AssignedCourse = z.infer<typeof assignedCourseSchema>;
+
 /**
  * Lo que se completa en los formularios de curso.
  *
@@ -53,7 +63,7 @@ export type CourseFormValues = z.infer<typeof courseFormSchema>;
 
 /** Lo que acepta `PUT /courses/update/:id`: solo se manda lo que cambió. */
 export type UpdateCoursePayload = Partial<
-	Pick<CourseFormValues, "name" | "instructor" | "status">
+	Pick<CourseFormValues, "name" | "status">
 >;
 
 /** Una seccion del curso con las actividades que cuelgan de ella. */

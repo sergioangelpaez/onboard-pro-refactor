@@ -360,14 +360,24 @@ export function ActivityFormSheet({
 									const isInvalid =
 										field.state.meta.isTouched && !field.state.meta.isValid;
 									const file = field.state.value as File | null;
+									const esExamen = form.getFieldValue("type") === "Examen";
 
 									return (
 										<Field data-invalid={isInvalid}>
 											<FieldLabel htmlFor={field.name}>
 												{isEdit
 													? "Reemplazar archivo (opcional)"
-													: "Archivo adjunto"}
+													: esExamen
+														? "Archivo adjunto (opcional)"
+														: "Archivo adjunto"}
 											</FieldLabel>
+											{!isEdit && esExamen && (
+												<FieldDescription>
+													Los exámenes se configuran con preguntas y opciones
+													después de crear la actividad. No necesitas adjuntar
+													un archivo.
+												</FieldDescription>
+											)}
 											{isEdit && !file && activity.adjunto && (
 												<FieldDescription>
 													Archivo actual: {activity.adjunto.split("/").pop()}

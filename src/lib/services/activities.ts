@@ -19,7 +19,7 @@ export const activitiesService = {
 		body.append("description", activity.description);
 		body.append("deliverable", String(activity.deliverable));
 		body.append("sectionId", activity.sectionId);
-		body.append("archivo", activity.archivo);
+		if (activity.archivo) body.append("archivo", activity.archivo);
 
 		return await apiFetch<Activity>("/activities/create", {
 			method: "POST",
