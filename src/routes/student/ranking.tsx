@@ -1,11 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Crown, RefreshCw, Trophy } from "lucide-react";
+import { Building2, Crown, LibraryBig, RefreshCw, Trophy, Users } from "lucide-react";
+import { useState } from "react";
 import { EmptyState } from "#/components/shared/states/empty-state";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
+import { useMyCourses } from "#/hooks/courses/use-my-courses";
+import { useCourseRanking } from "#/hooks/gamification/use-course-ranking";
 import { useRanking } from "#/hooks/gamification/use-ranking";
+import { useMyGroups } from "#/hooks/groups/use-my-groups";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import type { RankingEntry } from "#/lib/services/gamification";
 
@@ -42,9 +53,43 @@ function iniciales(p: RankingEntry) {
  * Arriba el podio, abajo la lista completa con la fila propia resaltada, para
  * encontrarse sin buscar.
  */
+type Alcance = "organizacion" | "curso" | "grupo";
+
+const ALCANCES: { valor: Alcance; texto: string; icono: React.ReactNode }[] = [
+	{ valor: "organizacion", texto: "Organización", icono: <Building2 /> },
+	{ valor: "curso", texto: "Por curso", icono: <LibraryBig /> },
+	{ valor: "grupo", texto: "Por grupo", icono: <Users /> },
+];
+
 function RankingRoute() {
 	const { user } = useCurrentUser();
-	const { data, isLoading, error, refetch } = useRanking();
+	const [alcance, setAlcance] = useState<Alcance>("organizacion");
+	const { data: cursos } = useMyCourses();
+	const { groups: grupos } = useMyGroups();
+	const [cursoElegido, setCursoElegido] = useState<string>();
+	const [grupoElegido, setGrupoElegido] = useState<string>();
+	// Mientras no elija, el primero de la lista.
+	const cursoId = cursoElegido ?? cursos?.[0]?.id;
+	const grupoId = grupoElegido ?? grupos?.[0]?.id;
+
+	const general = useRanking(
+		alcance === "grupo" ? grupoId : undefined,
+		alcance === "organizacion" || (alcance === "grupo" && !!grupoId),
+	);
+	// El de curso solo cuenta el XP ganado en ese curso.
+	const deCurso = useCourseRanking(cursoId ?? "", 500, alcance === "curso" && !!cursoId);
+	const consulta = alcance === "curso" ? deCurso : general;
+	const sinOpciones =
+		(alcance === "curso" && cursos && cursos.length === 0) ||
+		(alcance === "grupo" && grupos && grupos.length === 0);
+	const data = sinOpciones ? [] : consulta.data;
+	const { isLoading, error, refetch } = general;
+	const cargando = alcance === "curso" ? deCurso.isLoading : isLoading;
+	const subtitulo = {
+		organizacion: "Quién lleva más XP en tu organización.",
+		curso: "Solo cuenta el XP ganado en las actividades del curso.",
+		grupo: "Quién lleva más XP entre los integrantes del grupo.",
+	}[alcance];
 	const yo = data?.find((p) => p.id === user?.id);
 	// En el podio el primero va al centro: 2 · 1 · 3.
 	const podio = [data?.[1], data?.[0], data?.[2]];
@@ -54,9 +99,7 @@ function RankingRoute() {
 			<div className="flex flex-wrap items-end justify-between gap-3">
 				<div>
 					<h1>Ranking</h1>
-					<p className="text-muted-foreground">
-						Quién lleva más XP en tu organización.
-					</p>
+					<p className="text-muted-foreground">{subtitulo}</p>
 				</div>
 				{yo && (
 					<p className="rounded-full bg-primary/10 px-4 py-1.5 font-medium text-primary text-sm">
@@ -65,9 +108,64 @@ function RankingRoute() {
 				)}
 			</div>
 
-			{isLoading && <LoadingState message="Cargando el ranking..." />}
+			<div className="flex flex-wrap items-center gap-3">
+				<div
+					role="tablist"
+					aria-label="Ver el ranking de"
+					className="inline-flex rounded-lg border bg-muted/50 p-1"
+				>
+					{ALCANCES.map((a) => (
+						<button
+							key={a.valor}
+							type="button"
+							role="tab"
+							aria-selected={alcance === a.valor}
+							onClick={() => setAlcance(a.valor)}
+							className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-sm transition-colors [&>svg]:size-4 ${
+								alcance === a.valor
+									? "bg-background text-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
+							}`}
+						>
+							{a.icono}
+							{a.texto}
+						</button>
+					))}
+				</div>
 
-			{!data && error && (
+				{alcance === "curso" && cursos && cursos.length > 0 && (
+					<Select value={cursoId} onValueChange={setCursoElegido}>
+						<SelectTrigger className="w-64" aria-label="Curso">
+							<SelectValue placeholder="Elige un curso" />
+						</SelectTrigger>
+						<SelectContent>
+							{cursos.map((c) => (
+								<SelectItem key={c.id} value={c.id}>
+									{c.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
+				{alcance === "grupo" && grupos && grupos.length > 0 && (
+					<Select value={grupoId} onValueChange={setGrupoElegido}>
+						<SelectTrigger className="w-64" aria-label="Grupo">
+							<SelectValue placeholder="Elige un grupo" />
+						</SelectTrigger>
+						<SelectContent>
+							{grupos.map((g) => (
+								<SelectItem key={g.id} value={g.id}>
+									{g.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
+			</div>
+
+			{cargando && <LoadingState message="Cargando el ranking..." />}
+
+			{!data && error && alcance !== "curso" && (
 				<ErrorState
 					title="No se pudo cargar el ranking"
 					description={error.message}
@@ -82,8 +180,18 @@ function RankingRoute() {
 
 			{data && data.length === 0 && (
 				<EmptyState
-					title="Todavía no hay nadie en el ranking"
-					description="Completa actividades para aparecer."
+					title={
+						sinOpciones
+							? alcance === "curso"
+								? "Todavía no tienes cursos"
+								: "Todavía no estás en ningún grupo"
+							: "Todavía no hay nadie en el ranking"
+					}
+					description={
+						sinOpciones
+							? "Cuando te asignen uno vas a poder ver su ranking acá."
+							: "Completa actividades para aparecer."
+					}
 				/>
 			)}
 

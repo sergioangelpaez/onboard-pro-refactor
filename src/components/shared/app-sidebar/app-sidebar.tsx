@@ -1,11 +1,11 @@
 import {
 	BuildingComplex,
 	CircleUser,
+	Inbox,
 	LayoutDashboard,
 	LibraryBig,
 	ListTodo,
 	Medal,
-	Star,
 	Trophy,
 	UserGroup,
 	Users,
@@ -20,6 +20,7 @@ import {
 	SidebarFooter,
 	SidebarHeader,
 	SidebarRail,
+	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -55,10 +56,10 @@ const ACTIVIDADES = {
 	icon: ListTodo,
 	isActive: false,
 };
-const NIVELES = {
-	title: "Niveles",
-	url: "/admin/niveles",
-	icon: Star,
+const ENTREGAS = {
+	title: "Entregas",
+	url: "/admin/entregas",
+	icon: Inbox,
 	isActive: false,
 };
 const LOGROS = {
@@ -92,14 +93,23 @@ const navByRole: Record<
 		CURSOS,
 		GRUPOS,
 		ACTIVIDADES,
+		ENTREGAS,
 		LOGROS,
-		NIVELES,
 	],
-	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS, NIVELES],
+	admin: [
+		RESUMEN,
+		USUARIOS,
+		CURSOS,
+		GRUPOS,
+		ACTIVIDADES,
+		ENTREGAS,
+		LOGROS,
+	],
 	// Su propia area: no comparte pantallas con la administracion de la empresa.
 	instructor: [
 		{ ...RESUMEN, url: "/instructor/home" },
 		{ ...CURSOS, title: "Mis cursos", url: "/instructor/courses" },
+		{ ...ENTREGAS, url: "/instructor/entregas" },
 		{ ...GRUPOS, url: "/instructor/groups" },
 	],
 	student: [
@@ -134,7 +144,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher />
+				{/* Abrir y cerrar la barra desde la barra misma: así no ocupa lugar
+				    arriba del contenido. En el celular se usa el de afuera. */}
+				<div className="flex items-center gap-1 group-data-[collapsible=icon]:flex-col">
+					<div className="min-w-0 flex-1 group-data-[collapsible=icon]:w-full">
+						<TeamSwitcher />
+					</div>
+					<SidebarTrigger className="hidden shrink-0 text-muted-foreground md:inline-flex" />
+				</div>
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={items} />

@@ -65,8 +65,10 @@ export const gamificationService = {
 	 * La tabla de posiciones de la organización: solo aprendices, por XP. Se
 	 * reutiliza `RankingEntry`, la misma forma que el ranking por curso.
 	 */
-	async ranking() {
-		return await apiFetch<RankingEntry[]>("/gamification/ranking");
+	async ranking(grupoId?: string) {
+		return await apiFetch<RankingEntry[]>(
+			`/gamification/ranking${grupoId ? `?grupoId=${encodeURIComponent(grupoId)}` : ""}`,
+		);
 	},
 
 	/**

@@ -14,6 +14,10 @@ export const courseSchema = z.object({
 	archivadoAt: z.string().nullish(),
 	// Solo lo manda el backend cuando hay varias organizaciones a la vista.
 	tenantName: z.string().nullish(),
+	// Solo en "mis cursos" del aprendiz: cuánto lleva hecho.
+	progreso: z
+		.object({ hechas: z.number(), total: z.number(), porcentaje: z.number() })
+		.nullish(),
 });
 
 export const createCourseSchema = courseSchema
@@ -24,6 +28,7 @@ export const createCourseSchema = courseSchema
 		bannerUrl: true,
 		archivado: true,
 		archivadoAt: true,
+		progreso: true,
 	})
 	.partial({ grupo: true });
 
@@ -75,6 +80,7 @@ export const sectionSchema = z.object({
 			orden: z.number().nullish(),
 			xp: z.number().nullish(),
 			// Solo vienen cuando quien pide es un aprendiz.
+			estado: z.enum(["pendiente", "entregada", "completada"]).nullish(),
 			completada: z.boolean().nullish(),
 			entrega: z.enum(["entregado", "aprobada", "rehacer"]).nullish(),
 		}),

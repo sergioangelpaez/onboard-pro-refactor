@@ -19,7 +19,8 @@ function DashboardLayoutComponent() {
 		<SidebarProvider>
 			<AppSidebar />
 			<main className="ml-0 flex min-h-screen min-w-0 flex-1 flex-col transition-all">
-				<SidebarTrigger className="ml-4 mt-4" />
+				{/* En el celular la barra se esconde entera: ahí el botón va afuera. */}
+				<SidebarTrigger className="mt-4 ml-4 md:hidden" />
 				<Outlet />
 			</main>
 		</SidebarProvider>

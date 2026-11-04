@@ -26,10 +26,11 @@ import { Route as StudentRankingRouteImport } from './routes/student/ranking'
 import { Route as AdminachievementsLogrosRouteImport } from './routes/admin/(achievements)/logros'
 import { Route as AdminactivitiesActivitiesRouteImport } from './routes/admin/(activities)/activities'
 import { Route as AdmincoursesCoursesRouteImport } from './routes/admin/(courses)/courses'
+import { Route as AdminentregasEntregasRouteImport } from './routes/admin/(entregas)/entregas'
 import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/groups'
-import { Route as AdminnivelesNivelesRouteImport } from './routes/admin/(niveles)/niveles'
 import { Route as AdmintenantsTenantsRouteImport } from './routes/admin/(tenants)/tenants'
 import { Route as AdminusersUsersRouteImport } from './routes/admin/(users)/users'
+import { Route as InstructorentregasEntregasRouteImport } from './routes/instructor/(entregas)/entregas'
 import { Route as InstructorgroupsGroupsRouteImport } from './routes/instructor/(groups)/groups'
 import { Route as StudentCoursesIndexRouteImport } from './routes/student/courses.index'
 import { Route as StudentCoursesCourseIdRouteImport } from './routes/student/courses.$courseId'
@@ -124,14 +125,14 @@ const AdmincoursesCoursesRoute = AdmincoursesCoursesRouteImport.update({
   path: '/courses',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminentregasEntregasRoute = AdminentregasEntregasRouteImport.update({
+  id: '/(entregas)/entregas',
+  path: '/entregas',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdmingroupsGroupsRoute = AdmingroupsGroupsRouteImport.update({
   id: '/(groups)/groups',
   path: '/groups',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminnivelesNivelesRoute = AdminnivelesNivelesRouteImport.update({
-  id: '/(niveles)/niveles',
-  path: '/niveles',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdmintenantsTenantsRoute = AdmintenantsTenantsRouteImport.update({
@@ -144,6 +145,12 @@ const AdminusersUsersRoute = AdminusersUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const InstructorentregasEntregasRoute =
+  InstructorentregasEntregasRouteImport.update({
+    id: '/(entregas)/entregas',
+    path: '/entregas',
+    getParentRoute: () => InstructorRouteRoute,
+  } as any)
 const InstructorgroupsGroupsRoute = InstructorgroupsGroupsRouteImport.update({
   id: '/(groups)/groups',
   path: '/groups',
@@ -201,10 +208,11 @@ export interface FileRoutesByFullPath {
   '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
+  '/admin/entregas': typeof AdminentregasEntregasRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
-  '/admin/niveles': typeof AdminnivelesNivelesRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
+  '/instructor/entregas': typeof InstructorentregasEntregasRoute
   '/instructor/groups': typeof InstructorgroupsGroupsRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRoute
   '/student/exam/$activityId': typeof StudentExamActivityIdRoute
@@ -231,10 +239,11 @@ export interface FileRoutesByTo {
   '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
+  '/admin/entregas': typeof AdminentregasEntregasRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
-  '/admin/niveles': typeof AdminnivelesNivelesRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
+  '/instructor/entregas': typeof InstructorentregasEntregasRoute
   '/instructor/groups': typeof InstructorgroupsGroupsRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRoute
   '/student/exam/$activityId': typeof StudentExamActivityIdRoute
@@ -262,10 +271,11 @@ export interface FileRoutesById {
   '/admin/(achievements)/logros': typeof AdminachievementsLogrosRoute
   '/admin/(activities)/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/(courses)/courses': typeof AdmincoursesCoursesRoute
+  '/admin/(entregas)/entregas': typeof AdminentregasEntregasRoute
   '/admin/(groups)/groups': typeof AdmingroupsGroupsRoute
-  '/admin/(niveles)/niveles': typeof AdminnivelesNivelesRoute
   '/admin/(tenants)/tenants': typeof AdmintenantsTenantsRoute
   '/admin/(users)/users': typeof AdminusersUsersRoute
+  '/instructor/(entregas)/entregas': typeof InstructorentregasEntregasRoute
   '/instructor/(groups)/groups': typeof InstructorgroupsGroupsRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRoute
   '/student/exam/$activityId': typeof StudentExamActivityIdRoute
@@ -294,10 +304,11 @@ export interface FileRouteTypes {
     | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
+    | '/admin/entregas'
     | '/admin/groups'
-    | '/admin/niveles'
     | '/admin/tenants'
     | '/admin/users'
+    | '/instructor/entregas'
     | '/instructor/groups'
     | '/student/courses/$courseId'
     | '/student/exam/$activityId'
@@ -324,10 +335,11 @@ export interface FileRouteTypes {
     | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
+    | '/admin/entregas'
     | '/admin/groups'
-    | '/admin/niveles'
     | '/admin/tenants'
     | '/admin/users'
+    | '/instructor/entregas'
     | '/instructor/groups'
     | '/student/courses/$courseId'
     | '/student/exam/$activityId'
@@ -354,10 +366,11 @@ export interface FileRouteTypes {
     | '/admin/(achievements)/logros'
     | '/admin/(activities)/activities'
     | '/admin/(courses)/courses'
+    | '/admin/(entregas)/entregas'
     | '/admin/(groups)/groups'
-    | '/admin/(niveles)/niveles'
     | '/admin/(tenants)/tenants'
     | '/admin/(users)/users'
+    | '/instructor/(entregas)/entregas'
     | '/instructor/(groups)/groups'
     | '/student/courses/$courseId'
     | '/student/exam/$activityId'
@@ -497,18 +510,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdmincoursesCoursesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/(entregas)/entregas': {
+      id: '/admin/(entregas)/entregas'
+      path: '/entregas'
+      fullPath: '/admin/entregas'
+      preLoaderRoute: typeof AdminentregasEntregasRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/(groups)/groups': {
       id: '/admin/(groups)/groups'
       path: '/groups'
       fullPath: '/admin/groups'
       preLoaderRoute: typeof AdmingroupsGroupsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/(niveles)/niveles': {
-      id: '/admin/(niveles)/niveles'
-      path: '/niveles'
-      fullPath: '/admin/niveles'
-      preLoaderRoute: typeof AdminnivelesNivelesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/(tenants)/tenants': {
@@ -524,6 +537,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminusersUsersRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/instructor/(entregas)/entregas': {
+      id: '/instructor/(entregas)/entregas'
+      path: '/entregas'
+      fullPath: '/instructor/entregas'
+      preLoaderRoute: typeof InstructorentregasEntregasRouteImport
+      parentRoute: typeof InstructorRouteRoute
     }
     '/instructor/(groups)/groups': {
       id: '/instructor/(groups)/groups'
@@ -583,8 +603,8 @@ interface AdminRouteRouteChildren {
   AdminachievementsLogrosRoute: typeof AdminachievementsLogrosRoute
   AdminactivitiesActivitiesRoute: typeof AdminactivitiesActivitiesRoute
   AdmincoursesCoursesRoute: typeof AdmincoursesCoursesRoute
+  AdminentregasEntregasRoute: typeof AdminentregasEntregasRoute
   AdmingroupsGroupsRoute: typeof AdmingroupsGroupsRoute
-  AdminnivelesNivelesRoute: typeof AdminnivelesNivelesRoute
   AdmintenantsTenantsRoute: typeof AdmintenantsTenantsRoute
   AdminusersUsersRoute: typeof AdminusersUsersRoute
 }
@@ -595,8 +615,8 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminachievementsLogrosRoute: AdminachievementsLogrosRoute,
   AdminactivitiesActivitiesRoute: AdminactivitiesActivitiesRoute,
   AdmincoursesCoursesRoute: AdmincoursesCoursesRoute,
+  AdminentregasEntregasRoute: AdminentregasEntregasRoute,
   AdmingroupsGroupsRoute: AdmingroupsGroupsRoute,
-  AdminnivelesNivelesRoute: AdminnivelesNivelesRoute,
   AdmintenantsTenantsRoute: AdmintenantsTenantsRoute,
   AdminusersUsersRoute: AdminusersUsersRoute,
 }
@@ -607,6 +627,7 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 
 interface InstructorRouteRouteChildren {
   InstructorHomeRoute: typeof InstructorHomeRoute
+  InstructorentregasEntregasRoute: typeof InstructorentregasEntregasRoute
   InstructorgroupsGroupsRoute: typeof InstructorgroupsGroupsRoute
   InstructoractivitiesActivitiesActivityIdRoute: typeof InstructoractivitiesActivitiesActivityIdRoute
   InstructorcoursesCoursesCourseIdRoute: typeof InstructorcoursesCoursesCourseIdRoute
@@ -615,6 +636,7 @@ interface InstructorRouteRouteChildren {
 
 const InstructorRouteRouteChildren: InstructorRouteRouteChildren = {
   InstructorHomeRoute: InstructorHomeRoute,
+  InstructorentregasEntregasRoute: InstructorentregasEntregasRoute,
   InstructorgroupsGroupsRoute: InstructorgroupsGroupsRoute,
   InstructoractivitiesActivitiesActivityIdRoute:
     InstructoractivitiesActivitiesActivityIdRoute,

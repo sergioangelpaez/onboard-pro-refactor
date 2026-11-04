@@ -87,15 +87,26 @@ export function ProgressHero({
 									)}
 								</span>
 							</p>
+							{/* Lo mismo que mide la barra: el avance dentro del nivel, no
+							    el total, que hacía parecer la barra más corta de lo que
+							    decía el número. */}
 							<p className="text-right text-sm">
-								<span className="font-semibold tabular-nums">
-									{progreso.xp}
-								</span>
-								<span className="text-muted-foreground">
-									{progreso.xpSiguienteNivel
-										? ` / ${progreso.xpSiguienteNivel} XP`
-										: " XP"}
-								</span>
+								{progreso.xpSiguienteNivel ? (
+									<>
+										<span className="font-semibold tabular-nums">
+											{Math.max(progreso.xp - progreso.xpNivelActual, 0)}
+										</span>
+										<span className="text-muted-foreground">
+											{" / "}
+											{progreso.xpSiguienteNivel - progreso.xpNivelActual} XP
+											de este nivel
+										</span>
+									</>
+								) : (
+									<span className="font-semibold tabular-nums">
+										{progreso.xp} XP
+									</span>
+								)}
 							</p>
 						</div>
 						<div
@@ -114,7 +125,7 @@ export function ProgressHero({
 						<p className="text-muted-foreground text-xs">
 							{progreso.xpSiguienteNivel === null
 								? "Llegaste al nivel máximo."
-								: `Te faltan ${progreso.faltan} XP para el nivel ${progreso.nivel + 1}${progreso.nombreSiguiente ? ` · ${progreso.nombreSiguiente}` : ""}.`}
+								: `${progreso.xp} XP en total · te faltan ${progreso.faltan} para el nivel ${progreso.nivel + 1}${progreso.nombreSiguiente ? ` · ${progreso.nombreSiguiente}` : ""}.`}
 						</p>
 					</div>
 				)}
