@@ -71,12 +71,11 @@ export function CourseFormSheet({
 		onSubmit: async ({ value }) => {
 			const cambios: UpdateCoursePayload = {};
 			if (value.name.trim() !== course.name) cambios.name = value.name.trim();
-			if (value.instructor !== course.instructor)
-				cambios.instructor = value.instructor;
 			if (value.status !== course.status) cambios.status = value.status;
+			const cambioInstructor = value.instructor !== course.instructor;
 			const asignar = value.grupoId !== SIN_GRUPO;
 
-			if (!Object.keys(cambios).length && !asignar) {
+			if (!Object.keys(cambios).length && !cambioInstructor && !asignar) {
 				toast.info("No cambiaste nada.");
 				return;
 			}
@@ -85,6 +84,11 @@ export function CourseFormSheet({
 			try {
 				if (Object.keys(cambios).length)
 					await coursesService.update(course.id, cambios);
+				if (cambioInstructor)
+					await coursesService.changeInstructor(
+						course.id,
+						value.instructor,
+					);
 				if (asignar) await groupsService.addCourses(value.grupoId, [course.id]);
 				toast.success("Curso actualizado", {
 					description: `Se guardaron los cambios de "${value.name.trim()}".`,

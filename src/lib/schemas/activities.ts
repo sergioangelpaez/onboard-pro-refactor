@@ -55,7 +55,17 @@ export const createActivityFormSchema = createActivitySchema
 	.extend({
 		// El rango depende del tipo: lo valida el campo, que conoce las reglas.
 		xp: z.number().int().min(0, "El XP no puede ser negativo"),
-		archivo: fileSchema,
+		// Un examen se arma con preguntas: el archivo es opcional solo para él.
+		archivo: fileSchema.nullish(),
+	})
+	.superRefine((value, ctx) => {
+		if (value.type !== "Examen" && !value.archivo) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["archivo"],
+				message: "Adjunta un archivo",
+			});
+		}
 	});
 
 export const updateActivityFormSchema = createActivitySchema

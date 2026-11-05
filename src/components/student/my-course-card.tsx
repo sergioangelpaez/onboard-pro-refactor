@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, CheckCircle2, Layers, Star } from "lucide-react";
 import { Card } from "#/components/ui/card";
 import { Skeleton } from "#/components/ui/skeleton";
 import { useCourseSections } from "#/hooks/courses/use-course-sections";
-import type { Course, Section } from "#/lib/schemas/courses";
+import type { AssignedCourse, Section } from "#/lib/schemas/courses";
 import { progresoDe } from "./course-progress";
 
 export type EstadoCurso = "nuevo" | "enCurso" | "terminado" | "vacio";
@@ -65,8 +65,9 @@ function portadaDe(id: string) {
  * qué actividad está completada. Es la misma consulta que usa la pantalla del
  * curso, así que al entrar ya está en cache.
  */
-export function MyCourseCard({ course }: { course: Course }) {
+export function MyCourseCard({ course }: { course: AssignedCourse }) {
 	const { data: secciones, isLoading } = useCourseSections(course.id);
+	const portada = course.bannerUrl ?? course.image;
 	const { hechas, total, porcentaje } = progresoDe(secciones);
 	const estado = ESTADO[estadoDe(secciones)];
 	const actividades = (secciones ?? []).flatMap((s) => s.actividades);
@@ -82,12 +83,12 @@ export function MyCourseCard({ course }: { course: Course }) {
 			<Card className="flex h-full flex-col gap-0 overflow-hidden py-0 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md">
 				{/* Portada */}
 				<div
-					className={`relative h-24 bg-gradient-to-br ${course.bannerUrl ? "" : portadaDe(course.id)}`}
+					className={`relative h-24 bg-gradient-to-br ${portada ? "" : portadaDe(course.id)}`}
 				>
-					{course.bannerUrl ? (
+					{portada ? (
 						<img
-							src={course.bannerUrl}
-							alt=""
+							src={portada}
+							alt={`Portada de ${course.name}`}
 							className="size-full object-cover"
 						/>
 					) : (
@@ -110,6 +111,11 @@ export function MyCourseCard({ course }: { course: Course }) {
 						<h3 className="line-clamp-2 font-semibold leading-snug">
 							{course.name}
 						</h3>
+						{course.description && (
+							<p className="line-clamp-2 text-muted-foreground text-sm">
+								{course.description}
+							</p>
+						)}
 						{isLoading ? (
 							<Skeleton className="h-4 w-40" />
 						) : (

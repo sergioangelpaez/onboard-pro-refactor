@@ -1,4 +1,5 @@
 import type {
+	AssignedCourse,
 	Course,
 	CreateCoursePayload,
 	Section,
@@ -42,6 +43,12 @@ export interface CourseParticipants {
 	total: number;
 }
 
+export interface ChangeInstructorResponse {
+	message: string;
+	anterior: string;
+	instructor: string;
+}
+
 export const coursesService = {
 	/** El instructor, los grupos y los aprendices del curso. */
 	async participants(id: string) {
@@ -66,6 +73,17 @@ export const coursesService = {
 			{
 				method: "PUT",
 				body: JSON.stringify(values),
+			},
+		);
+	},
+
+	/** Cambia el instructor responsable del curso. Solo administradores. */
+	async changeInstructor(id: string, instructor: string) {
+		return await apiFetch<ChangeInstructorResponse>(
+			`/courses/${id}/instructor`,
+			{
+				method: "PUT",
+				body: JSON.stringify({ instructor }),
 			},
 		);
 	},
@@ -103,11 +121,11 @@ export const coursesService = {
 	},
 
 	/**
-	 * Los cursos que me tocan por mis grupos. Para un aprendiz el backend ya
-	 * deja afuera los despublicados.
+	 * Cursos asignados al usuario autenticado. El backend resuelve las
+	 * asignaciones por grupos y deja afuera los cursos no publicados.
 	 */
 	async mine() {
-		return await apiFetch<Course[]>("/courses/me");
+		return await apiFetch<AssignedCourse[]>("/courses/me");
 	},
 
 	async getById(id: string) {
