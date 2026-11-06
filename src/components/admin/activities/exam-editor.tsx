@@ -14,6 +14,7 @@ import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
+import { Switch } from "#/components/ui/switch";
 import { Textarea } from "#/components/ui/textarea";
 import { useExamEditor } from "#/hooks/exams/use-exam";
 import type { EditableExam, SaveExamPayload } from "#/lib/services/exams";
@@ -92,7 +93,7 @@ export function ExamEditor({ activityId }: { activityId: string }) {
 		.join("|");
 	return (
 		<Formulario
-			key={`${version}-${data.tiempoLimite}-${data.intentosPermitidos}-${data.porcentajeAprobacion}`}
+			key={`${version}-${data.tiempoLimite}-${data.intentosPermitidos}-${data.porcentajeAprobacion}-${data.mostrarRespuestas}`}
 			examen={data}
 			guardando={guardar.isPending}
 			onGuardar={(payload) =>
@@ -124,6 +125,9 @@ function Formulario({
 	const [aprobacion, setAprobacion] = useState(
 		String(examen.porcentajeAprobacion),
 	);
+	const [mostrarRespuestas, setMostrarRespuestas] = useState(
+		examen.mostrarRespuestas !== false,
+	);
 	const [preguntas, setPreguntas] = useState<PreguntaBorrador[]>(() =>
 		borradorDe(examen),
 	);
@@ -152,6 +156,7 @@ function Formulario({
 			tiempoLimite: tiempo.trim() ? Number(tiempo) : null,
 			intentosPermitidos: Number(intentos),
 			porcentajeAprobacion: Number(aprobacion),
+			mostrarRespuestas,
 			preguntas: preguntas.map((p) => ({
 				...(p.id ? { id: p.id } : {}),
 				enunciado: p.enunciado,
@@ -223,6 +228,27 @@ function Formulario({
 							}}
 						/>
 					</Campo>
+				</div>
+
+				<div className="flex items-start justify-between gap-4 rounded-md border p-3">
+					<div className="space-y-0.5">
+						<Label htmlFor="mostrar-respuestas">
+							Mostrar las respuestas al terminar
+						</Label>
+						<p className="text-muted-foreground text-xs">
+							Si está activo, cada aprendiz ve qué acertó y qué falló. La
+							respuesta correcta se revela solo si aprobó o ya no le quedan
+							intentos. Si lo apagas, solo ve su nota.
+						</p>
+					</div>
+					<Switch
+						id="mostrar-respuestas"
+						checked={mostrarRespuestas}
+						onCheckedChange={(v) => {
+							setMostrarRespuestas(v);
+							setCambios(true);
+						}}
+					/>
 				</div>
 
 				{preguntas.length === 0 && (

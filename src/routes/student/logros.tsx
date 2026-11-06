@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Gamepad2, Lock, Sparkles, Star, Trophy } from "lucide-react";
 import { EmptyState } from "#/components/shared/states/empty-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
 import { Card, CardContent } from "#/components/ui/card";
 import { useMyAchievements } from "#/hooks/achievements/use-my-achievements";
+import { useMisJuegos } from "#/hooks/exams/use-mis-juegos";
 import type { MiLogro } from "#/lib/services/logros";
 
 export const Route = createFileRoute("/student/logros")({
@@ -38,6 +40,15 @@ function MisLogrosRoute() {
 					<p className="text-muted-foreground">
 						Se desbloquean solos cuando cumples la condición.
 					</p>
+					{data && data.nuevos > 0 && (
+						<p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 px-3 py-1 font-medium text-amber-700 text-sm dark:text-amber-300">
+							<Sparkles className="size-4" />
+							{data.nuevos === 1
+								? "Ganaste 1 logro nuevo"
+								: `Ganaste ${data.nuevos} logros nuevos`}{" "}
+							en las últimas 24 horas
+						</p>
+					)}
 				</div>
 				{data && data.total > 0 && (
 					<div className="w-full max-w-xs space-y-1.5">
@@ -93,14 +104,86 @@ function MisLogrosRoute() {
 					</div>
 				</section>
 			)}
+
+			<MisJuegos />
 		</div>
+	);
+}
+
+/**
+ * El historial de juegos: cada concurso jugado con su mejor marca, cuántas
+ * partidas lleva y el XP que le dio (solo la primera vez que lo ganó).
+ * Si todavía no jugó ninguno, no se muestra.
+ */
+function MisJuegos() {
+	const { data } = useMisJuegos();
+	if (!data || data.juegos === 0) return null;
+
+	return (
+		<section className="space-y-3">
+			<div className="flex flex-wrap items-end justify-between gap-2">
+				<h2 className="flex items-center gap-2 font-semibold text-lg">
+					<Gamepad2 className="size-5" />
+					Mis juegos
+				</h2>
+				<p className="text-muted-foreground text-sm">
+					{data.juegosAprobados} de {data.juegos} ganados · {data.xpGanado} XP
+				</p>
+			</div>
+			<Card>
+				<CardContent className="p-2">
+					<ul>
+						{data.historial.map((j) => (
+							<li key={j.actividadId}>
+								<Link
+									to="/student/exam/$activityId"
+									params={{ activityId: j.actividadId }}
+									search={{ courseId: undefined }}
+									className="flex flex-wrap items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent"
+								>
+									<span
+										className={`flex size-9 shrink-0 items-center justify-center rounded-full ${j.aprobado ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}
+									>
+										{j.aprobado ? <Trophy className="size-4" /> : <Gamepad2 className="size-4" />}
+									</span>
+									<div className="min-w-0 flex-1">
+										<p className="truncate font-medium">{j.titulo}</p>
+										<p className="text-muted-foreground text-xs">
+											{j.partidas} {j.partidas === 1 ? "partida" : "partidas"}
+											{j.ultimaPartidaAt ? ` · última ${fecha(j.ultimaPartidaAt)}` : ""}
+										</p>
+									</div>
+									<div className="text-right">
+										<p className="font-semibold tabular-nums">
+											{j.mejorPorcentaje ?? 0}%
+										</p>
+										<p className="text-muted-foreground text-xs">mejor marca</p>
+									</div>
+									<span className="flex w-24 items-center justify-end gap-1 text-sm tabular-nums">
+										<Star className="size-3.5 fill-amber-400 text-amber-500" />
+										{j.xpGanado}/{j.xpPosible} XP
+									</span>
+								</Link>
+							</li>
+						))}
+					</ul>
+				</CardContent>
+			</Card>
+		</section>
 	);
 }
 
 function Insignia({ logro: l }: { logro: MiLogro }) {
 	const esRanking = l.condicion.tipo === "posicion_ranking";
 	return (
-		<Card className={l.desbloqueado ? "border-violet-500/30" : ""}>
+		<Card
+			className={`relative ${l.nuevo ? "border-amber-400 shadow-md shadow-amber-400/20" : l.desbloqueado ? "border-violet-500/30" : ""}`}
+		>
+			{l.nuevo && (
+				<span className="absolute top-3 right-3 rounded-full bg-amber-400 px-2 py-0.5 font-semibold text-[11px] text-amber-950 shadow-sm">
+					¡Nuevo!
+				</span>
+			)}
 			<CardContent className="flex flex-col items-center gap-2 p-5 text-center">
 				<span
 					className={`relative flex size-16 items-center justify-center rounded-full text-3xl ${

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { celebrar } from "#/components/shared/celebracion";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
 import { ExamResultView } from "#/components/student/exam/exam-result";
@@ -51,6 +52,12 @@ function ExamRoute() {
 
 	const [enCurso, setEnCurso] = useState<StartedAttempt | null>(null);
 	const [resultado, setResultado] = useState<ExamResult | null>(null);
+	// Cada partida de un concurso sortea otras preguntas: el resultado se
+	// muestra sobre las que salieron, no sobre el banco completo.
+	const [ultimaPartida, setUltimaPartida] = useState<
+		StartedAttempt["examen"] | null
+	>(null);
+	const esConcurso = examen.data?.tipo === "Concurso";
 
 	const volver = (
 		<Button asChild variant="outline">
@@ -71,9 +78,17 @@ function ExamRoute() {
 	function empezar() {
 		setResultado(null);
 		iniciar.mutate(undefined, {
-			onSuccess: (r) => setEnCurso(r),
+			onSuccess: (r) => {
+				setEnCurso(r);
+				setUltimaPartida(r.examen);
+			},
 			onError: (e: Error) =>
-				toast.error("No se pudo empezar el examen", { description: e.message }),
+				toast.error(
+					esConcurso
+						? "No se pudo empezar la partida"
+						: "No se pudo empezar el examen",
+					{ description: e.message },
+				),
 		});
 	}
 
@@ -84,6 +99,7 @@ function ExamRoute() {
 			onSuccess: (r) => {
 				setResultado(r);
 				setEnCurso(null);
+				celebrar(r);
 				window.scrollTo({ top: 0, behavior: "smooth" });
 			},
 			onError: (e: Error) => {
@@ -107,7 +123,7 @@ function ExamRoute() {
 		return (
 			<Pagina volver={volver}>
 				<ErrorState
-					title="No se pudo abrir el examen"
+					title="No se pudo abrir la actividad"
 					description={examen.error?.message}
 					content={
 						<Button onClick={() => examen.refetch()}>
@@ -126,7 +142,7 @@ function ExamRoute() {
 		return (
 			<Pagina titulo={ex.titulo} volver={volver}>
 				<ExamResultView
-					examen={ex}
+					examen={{ ...(ultimaPartida ?? ex), tipo: ex.tipo }}
 					resultado={resultado}
 					onReintentar={empezar}
 					acciones={volver}
@@ -152,16 +168,19 @@ function ExamRoute() {
 	const mis = intentos.data;
 	const abierto = mis?.intentos.find((i) => i.estado === "en_curso");
 	const sinPreguntas = ex.preguntas.length === 0;
+	// Un concurso se juega las veces que se quiera, aunque ya se haya ganado.
 	const puedeRendir =
 		!sinPreguntas &&
-		!mis?.aprobado &&
-		((mis?.intentosRestantes ?? 1) > 0 || !!abierto);
+		(esConcurso ||
+			(!mis?.aprobado && ((mis?.intentosRestantes ?? 1) > 0 || !!abierto)));
 
 	return (
 		<Pagina titulo={ex.titulo} volver={volver}>
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-base">Antes de empezar</CardTitle>
+					<CardTitle className="text-base">
+						{esConcurso ? "Cómo se juega" : "Antes de empezar"}
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<ul className="grid gap-3 text-sm sm:grid-cols-2">
@@ -179,12 +198,14 @@ function ExamRoute() {
 							Apruebas con {ex.porcentajeAprobacion}%
 						</Dato>
 						<Dato icono={<Repeat className="size-4" />}>
-							{mis
-								? `${mis.intentosRestantes} de ${mis.intentosPermitidos} ${mis.intentosPermitidos === 1 ? "intento disponible" : "intentos disponibles"}`
-								: `${ex.intentosPermitidos} intentos`}
+							{esConcurso || !mis || mis.intentosPermitidos == null
+								? `Partidas sin límite${mis?.intentosUsados ? ` · llevas ${mis.intentosUsados}` : ""}`
+								: `${mis.intentosRestantes} de ${mis.intentosPermitidos} ${mis.intentosPermitidos === 1 ? "intento disponible" : "intentos disponibles"}`}
 						</Dato>
 						<Dato icono={<Star className="size-4" />}>
-							{ex.xp} XP al aprobar
+							{esConcurso
+								? `Hasta ${ex.xp} XP según tu resultado, solo la primera vez que ganas`
+								: `Hasta ${ex.xp} XP según tu nota`}
 						</Dato>
 					</ul>
 
@@ -199,8 +220,9 @@ function ExamRoute() {
 					{mis?.aprobado && (
 						<p className="flex items-center gap-2 font-medium text-sm">
 							<CircleCheck className="size-4 text-primary" />
-							Ya aprobaste este examen
-							{mis.mejorPorcentaje != null && ` con ${mis.mejorPorcentaje}%`}.
+							{esConcurso
+								? `Ya ganaste este concurso. Tu mejor marca: ${mis.mejorPorcentaje ?? 0}%. Puedes seguir jugando, pero ya no suma XP.`
+								: `Ya aprobaste este examen${mis.mejorPorcentaje != null ? ` con ${mis.mejorPorcentaje}%` : ""}.`}
 						</p>
 					)}
 					{!mis?.aprobado && mis && mis.mejorPorcentaje != null && (
@@ -230,7 +252,15 @@ function ExamRoute() {
 							) : (
 								<Play />
 							)}
-							{abierto ? "Continuar el intento" : "Comenzar"}
+							{abierto
+								? esConcurso
+									? "Continuar la partida"
+									: "Continuar el intento"
+								: esConcurso
+									? mis?.intentosUsados
+										? "Jugar otra vez"
+										: "Jugar"
+									: "Comenzar"}
 						</Button>
 					)}
 				</CardContent>

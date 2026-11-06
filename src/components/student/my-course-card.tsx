@@ -67,6 +67,7 @@ function portadaDe(id: string) {
  */
 export function MyCourseCard({ course }: { course: AssignedCourse }) {
 	const { data: secciones, isLoading } = useCourseSections(course.id);
+	const portada = course.bannerUrl ?? course.image;
 	const { hechas, total, porcentaje } = progresoDe(secciones);
 	const estado = ESTADO[estadoDe(secciones)];
 	const actividades = (secciones ?? []).flatMap((s) => s.actividades);
@@ -82,11 +83,11 @@ export function MyCourseCard({ course }: { course: AssignedCourse }) {
 			<Card className="flex h-full flex-col gap-0 overflow-hidden py-0 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md">
 				{/* Portada */}
 				<div
-					className={`relative h-24 bg-gradient-to-br ${course.image ? "" : portadaDe(course.id)}`}
+					className={`relative h-24 bg-gradient-to-br ${portada ? "" : portadaDe(course.id)}`}
 				>
-					{course.image ? (
+					{portada ? (
 						<img
-							src={course.image}
+							src={portada}
 							alt={`Portada de ${course.name}`}
 							className="size-full object-cover"
 						/>

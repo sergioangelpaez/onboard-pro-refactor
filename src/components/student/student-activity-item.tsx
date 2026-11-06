@@ -1,21 +1,55 @@
+import { useIsMutating } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
 	Check,
 	ChevronDown,
 	CircleCheck,
-	Download,
+	Gamepad2,
 	GraduationCap,
 	LoaderCircle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import { useActivityMaterials } from "#/hooks/activities/use-activity-materials";
 import { useCompleteActivity } from "#/hooks/activities/use-complete-activity";
 import type { SectionActivity } from "#/lib/schemas/courses";
 import { tipoDe } from "./activity-type";
+import { MaterialList } from "./material-list";
 import { MiEntrega } from "./mi-entrega";
+
+/**
+ * El estado de la actividad para el aprendiz: pendiente, entregada (espera
+ * revisión) o completada. Una entrega devuelta para rehacer cuenta como
+ * pendiente, pero conserva su aviso propio.
+ */
+const ESTADO: Record<
+	"pendiente" | "entregada" | "completada",
+	{ texto: string; clase: string }
+> = {
+	pendiente: {
+		texto: "Pendiente",
+		clase:
+			"border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300",
+	},
+	entregada: {
+		texto: "Entregada",
+		clase:
+			"border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300",
+	},
+	completada: {
+		texto: "Completada",
+		clase:
+			"border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
+	},
+};
+
+/** Si el backend todavía no manda `estado`, se deduce de lo que sí manda. */
+function estadoDe(a: SectionActivity): keyof typeof ESTADO {
+	if (a.estado) return a.estado;
+	if (a.completada) return "completada";
+	if (a.entrega === "entregado") return "entregada";
+	return "pendiente";
+}
 
 /** Cómo se ve el estado de una entrega del aprendiz. */
 const ENTREGA: Record<
@@ -61,8 +95,11 @@ export function StudentActivityItem({
 		fila.current?.scrollIntoView({ behavior: "smooth", block: "center" });
 	}, [destacada]);
 	const tipo = tipoDe(actividad.type);
-	const hecha = Boolean(actividad.completada);
-	const entrega = actividad.entrega ? ENTREGA[actividad.entrega] : null;
+	const estado = estadoDe(actividad);
+	const hecha = estado === "completada";
+	// Solo se muestra aparte el aviso de rehacer: lo demás ya lo dice el estado.
+	const entrega =
+		actividad.entrega === "rehacer" ? ENTREGA[actividad.entrega] : null;
 
 	return (
 		<li
@@ -102,7 +139,10 @@ export function StudentActivityItem({
 						{entrega.texto}
 					</Badge>
 				)}
-				<Badge variant="secondary" className="shrink-0">
+				<Badge variant="outline" className={`shrink-0 ${ESTADO[estado].clase}`}>
+					{ESTADO[estado].texto}
+				</Badge>
+				<Badge variant="secondary" className="hidden shrink-0 sm:inline-flex">
 					{tipo.etiqueta}
 				</Badge>
 				{actividad.xp != null && (
@@ -117,7 +157,7 @@ export function StudentActivityItem({
 
 			{abierta && (
 				<div className="space-y-3 border-t bg-muted/30 px-3 py-3">
-					<Materiales activityId={actividad.id} />
+					<MaterialList activityId={actividad.id} />
 					{actividad.type === "Tarea" && actividad.deliverable && (
 						<MiEntrega activityId={actividad.id} />
 					)}
@@ -128,49 +168,14 @@ export function StudentActivityItem({
 	);
 }
 
-/** El material de apoyo, pedido recién al abrir la actividad: los enlaces vencen en una hora. */
-function Materiales({ activityId }: { activityId: string }) {
-	const { data, isLoading, error } = useActivityMaterials(activityId);
-
-	if (isLoading)
-		return (
-			<p className="text-muted-foreground text-sm">Cargando material...</p>
-		);
-	if (error)
-		return (
-			<p className="text-muted-foreground text-sm">
-				No se pudo cargar el material.
-			</p>
-		);
-	if (!data?.length) return null;
-
-	return (
-		<ul className="space-y-1">
-			{data.map((m) => (
-				<li key={m.id}>
-					{m.url ? (
-						<a
-							href={m.url}
-							target="_blank"
-							rel="noreferrer"
-							className="inline-flex items-center gap-1.5 text-primary text-sm hover:underline"
-						>
-							<Download className="size-4" />
-							{m.nombre}
-						</a>
-					) : (
-						<span className="text-muted-foreground text-sm">{m.nombre}</span>
-					)}
-				</li>
-			))}
-		</ul>
-	);
-}
-
 /** Cómo se completa cada tipo, en una línea. Va a la izquierda del botón. */
 function ayudaDe(actividad: SectionActivity) {
+	if (actividad.completada && actividad.type === "Concurso")
+		return "Ya ganaste sus puntos. Puedes seguir jugando para mejorar tu marca.";
 	if (actividad.completada) return "Ya la completaste.";
 	if (actividad.type === "Examen") return "Se completa al aprobar el examen.";
+	if (actividad.type === "Concurso")
+		return "Juega las veces que quieras: los puntos dependen de cómo te vaya y se ganan una sola vez.";
 	if (actividad.type === "Tarea") {
 		if (actividad.entrega === "entregado")
 			return "Tu entrega está en revisión. Se completa cuando la aprueben.";
@@ -199,7 +204,7 @@ function Pie({
 				{actividad.completada && <Check className="size-4 text-primary" />}
 				{ayudaDe(actividad)}
 			</p>
-			{!actividad.completada && (
+			{(!actividad.completada || actividad.type === "Concurso") && (
 				<Accion actividad={actividad} courseId={courseId} />
 			)}
 		</div>
@@ -218,6 +223,21 @@ function Accion({
 	// La tarea se entrega con el formulario de arriba, no con un botón acá.
 	if (actividad.type === "Tarea") return null;
 
+	if (actividad.type === "Concurso") {
+		return (
+			<Button asChild size="sm">
+				<Link
+					to="/student/exam/$activityId"
+					params={{ activityId: actividad.id }}
+					search={{ courseId }}
+				>
+					<Gamepad2 />
+					Jugar
+				</Link>
+			</Button>
+		);
+	}
+
 	if (actividad.type === "Examen") {
 		return (
 			<Button asChild size="sm" variant="outline">
@@ -233,25 +253,20 @@ function Accion({
 		);
 	}
 
-	const enviando = completar.isPending;
+	// Mientras se guarda otra actividad, este botón también espera: dos
+	// guardados a la vez se pisaban en los avisos y en la celebración.
+	const guardandoAlguna =
+		useIsMutating({ mutationKey: ["completar-actividad"] }) > 0;
+	const enviando = completar.isPending || guardandoAlguna;
 	return (
 		<Button
 			size="sm"
 			variant="outline"
 			disabled={enviando}
-			onClick={() =>
-				completar.mutate(actividad.id, {
-					onSuccess: () =>
-						toast.success(`¡Actividad completada! +${actividad.xp ?? 0} XP`),
-					onError: (e: Error) =>
-						toast.error("No se pudo completar la actividad", {
-							description: e.message,
-						}),
-				})
-			}
+			onClick={() => completar.mutate(actividad.id)}
 		>
 			{enviando ? <LoaderCircle className="animate-spin" /> : <Check />}
-			Marcar como completada
+			{enviando ? "Guardando…" : "Marcar como completada"}
 		</Button>
 	);
 }

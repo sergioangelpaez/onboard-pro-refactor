@@ -1,4 +1,11 @@
-import { CircleCheck, CircleX, RotateCcw, Star } from "lucide-react";
+import {
+	CircleCheck,
+	CircleX,
+	EyeOff,
+	Info,
+	RotateCcw,
+	Star,
+} from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import type { Exam, ExamResult as Result } from "#/lib/services/exams";
@@ -23,7 +30,13 @@ export function ExamResultView({
 }) {
 	const { aprobado, porcentaje, porcentajeAprobacion, puntaje, puntajeTotal } =
 		resultado;
-	const porPregunta = new Map(resultado.detalle.map((d) => [d.preguntaId, d]));
+	const esConcurso = examen.tipo === "Concurso";
+	// Sin detalle: quien lo armó no deja ver qué acertó cada uno.
+	const detalle = resultado.detalle;
+	const porPregunta = new Map((detalle ?? []).map((d) => [d.preguntaId, d]));
+	// Un concurso no tiene límite de partidas: null es "sin límite".
+	const puedeReintentar =
+		resultado.intentosRestantes === null || resultado.intentosRestantes > 0;
 
 	return (
 		<div className="space-y-4">
@@ -37,7 +50,11 @@ export function ExamResultView({
 						<CircleX className="size-12 text-destructive" />
 					)}
 					<p className="font-semibold text-xl">
-						{aprobado ? "¡Aprobaste!" : "No aprobaste esta vez"}
+						{aprobado
+							? esConcurso
+								? "¡Ganaste la partida!"
+								: "¡Aprobaste!"
+							: "No aprobaste esta vez"}
 					</p>
 					<p className="font-semibold text-4xl tabular-nums">{porcentaje}%</p>
 					<p className="text-muted-foreground text-sm">
@@ -45,6 +62,12 @@ export function ExamResultView({
 						{porcentajeAprobacion}%
 					</p>
 
+					{resultado.avisoXp && (
+						<p className="flex max-w-md items-start gap-1.5 rounded-md bg-amber-50 px-3 py-2 text-left text-amber-900 text-sm dark:bg-amber-500/10 dark:text-amber-200">
+							<Info className="mt-0.5 size-4 shrink-0" />
+							{resultado.avisoXp}
+						</p>
+					)}
 					{aprobado && resultado.xpAcreditado > 0 && (
 						<p className="flex items-center gap-1.5 font-medium text-sm">
 							<Star className="size-4" />+{resultado.xpAcreditado} XP
@@ -70,7 +93,7 @@ export function ExamResultView({
 							))}
 						</div>
 					)}
-					{!aprobado && (
+					{!aprobado && !esConcurso && resultado.intentosRestantes !== null && (
 						<p className="text-muted-foreground text-sm">
 							{resultado.intentosRestantes > 0
 								? `Te ${resultado.intentosRestantes === 1 ? "queda 1 intento" : `quedan ${resultado.intentosRestantes} intentos`}.`
@@ -79,10 +102,10 @@ export function ExamResultView({
 					)}
 
 					<div className="mt-3 flex flex-wrap justify-center gap-2">
-						{!aprobado && resultado.intentosRestantes > 0 && onReintentar && (
+						{(esConcurso || !aprobado) && puedeReintentar && onReintentar && (
 							<Button onClick={onReintentar}>
 								<RotateCcw />
-								Intentar de nuevo
+								{esConcurso ? "Jugar otra partida" : "Intentar de nuevo"}
 							</Button>
 						)}
 						{acciones}
@@ -90,62 +113,71 @@ export function ExamResultView({
 				</CardContent>
 			</Card>
 
-			{examen.preguntas.map((p, i) => {
-				const d = porPregunta.get(p.id);
-				return (
-					<Card key={p.id}>
-						<CardHeader>
-							<CardTitle className="flex items-start gap-2 font-medium text-base">
-								{d?.correcta ? (
-									<CircleCheck
-										aria-label="Correcta"
-										className="mt-0.5 size-5 shrink-0 text-primary"
-									/>
-								) : (
-									<CircleX
-										aria-label="Incorrecta"
-										className="mt-0.5 size-5 shrink-0 text-destructive"
-									/>
+			{!detalle && (
+				<p className="flex items-center justify-center gap-2 text-muted-foreground text-sm">
+					<EyeOff className="size-4" />
+					Quien armó {esConcurso ? "el concurso" : "el examen"} no muestra las
+					respuestas.
+				</p>
+			)}
+
+			{detalle &&
+				examen.preguntas.map((p, i) => {
+					const d = porPregunta.get(p.id);
+					return (
+						<Card key={p.id}>
+							<CardHeader>
+								<CardTitle className="flex items-start gap-2 font-medium text-base">
+									{d?.correcta ? (
+										<CircleCheck
+											aria-label="Correcta"
+											className="mt-0.5 size-5 shrink-0 text-primary"
+										/>
+									) : (
+										<CircleX
+											aria-label="Incorrecta"
+											className="mt-0.5 size-5 shrink-0 text-destructive"
+										/>
+									)}
+									<span>
+										{i + 1}. {p.enunciado}
+									</span>
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<ul className="space-y-2">
+									{p.opciones.map((o) => {
+										const elegida = d?.opcionId === o.id;
+										const esCorrecta = d?.opcionCorrecta === o.id;
+										let estilo = "";
+										if (esCorrecta) estilo = "border-primary bg-primary/5";
+										else if (elegida && !d?.correcta)
+											estilo = "border-destructive bg-destructive/5";
+										else if (elegida) estilo = "border-primary bg-primary/5";
+										return (
+											<li
+												key={o.id}
+												className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm ${estilo}`}
+											>
+												<span>{o.texto}</span>
+												<span className="shrink-0 text-muted-foreground text-xs">
+													{elegida && "Tu respuesta"}
+													{elegida && esCorrecta && " · "}
+													{esCorrecta && "Correcta"}
+												</span>
+											</li>
+										);
+									})}
+								</ul>
+								{!d?.opcionId && (
+									<p className="mt-2 text-muted-foreground text-xs">
+										La dejaste sin responder.
+									</p>
 								)}
-								<span>
-									{i + 1}. {p.enunciado}
-								</span>
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<ul className="space-y-2">
-								{p.opciones.map((o) => {
-									const elegida = d?.opcionId === o.id;
-									const esCorrecta = d?.opcionCorrecta === o.id;
-									let estilo = "";
-									if (esCorrecta) estilo = "border-primary bg-primary/5";
-									else if (elegida && !d?.correcta)
-										estilo = "border-destructive bg-destructive/5";
-									else if (elegida) estilo = "border-primary bg-primary/5";
-									return (
-										<li
-											key={o.id}
-											className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm ${estilo}`}
-										>
-											<span>{o.texto}</span>
-											<span className="shrink-0 text-muted-foreground text-xs">
-												{elegida && "Tu respuesta"}
-												{elegida && esCorrecta && " · "}
-												{esCorrecta && "Correcta"}
-											</span>
-										</li>
-									);
-								})}
-							</ul>
-							{!d?.opcionId && (
-								<p className="mt-2 text-muted-foreground text-xs">
-									La dejaste sin responder.
-								</p>
-							)}
-						</CardContent>
-					</Card>
-				);
-			})}
+							</CardContent>
+						</Card>
+					);
+				})}
 		</div>
 	);
 }

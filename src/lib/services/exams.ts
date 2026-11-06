@@ -17,12 +17,17 @@ export interface ExamQuestion {
 /** `GET /activities/:id/examen`. Para un aprendiz nunca trae las respuestas. */
 export interface Exam {
 	actividadId: string;
+	/** "Examen" o "Concurso": el concurso usa el mismo motor, con partidas sin límite. */
+	tipo?: "Examen" | "Concurso";
 	titulo: string;
 	xp: number;
 	/** En minutos; null si no tiene límite. */
 	tiempoLimite: number | null;
-	intentosPermitidos: number;
+	/** null: sin límite (los concursos se juegan las veces que se quiera). */
+	intentosPermitidos: number | null;
 	porcentajeAprobacion: number;
+	/** Si quien lo armó deja ver qué acertó cada uno al terminar. */
+	mostrarRespuestas?: boolean;
 	puntajeTotal: number;
 	preguntas: ExamQuestion[];
 }
@@ -43,9 +48,11 @@ export interface ExamAttempt {
 
 /** `GET /activities/:id/examen/intentos`. */
 export interface MyAttempts {
-	intentosPermitidos: number;
+	tipo?: "Examen" | "Concurso";
+	/** null en un concurso: partidas sin límite. */
+	intentosPermitidos: number | null;
 	intentosUsados: number;
-	intentosRestantes: number;
+	intentosRestantes: number | null;
 	aprobado: boolean;
 	mejorPorcentaje: number | null;
 	porcentajeAprobacion: number;
@@ -84,13 +91,39 @@ export interface ExamResult {
 	puntajeTotal: number;
 	porcentaje: number;
 	porcentajeAprobacion: number;
-	intentosRestantes: number;
+	/** null en un concurso: se puede seguir jugando. */
+	intentosRestantes: number | null;
 	xpAcreditado: number;
+	/** Lo que valía el intento. */
+	xpBase?: number;
+	/** Por qué sumó menos de lo esperado (reintento o ya cobrado). */
+	avisoXp?: string | null;
 	xpPendiente: boolean;
 	nivel?: number;
 	subioDeNivel: boolean;
 	logrosDesbloqueados: UnlockedAchievement[];
-	detalle: AnswerResult[];
+	mostrarRespuestas?: boolean;
+	/** null si quien lo armó no deja ver qué acertó cada uno. */
+	detalle: AnswerResult[] | null;
+}
+
+/** Un juego en mi historial (`GET /concursos/mios`). */
+export interface MiJuego {
+	actividadId: string;
+	titulo: string;
+	partidas: number;
+	mejorPorcentaje: number | null;
+	aprobado: boolean;
+	xpGanado: number;
+	xpPosible: number;
+	ultimaPartidaAt: string | null;
+}
+
+export interface MisJuegos {
+	juegos: number;
+	juegosAprobados: number;
+	xpGanado: number;
+	historial: MiJuego[];
 }
 
 /** Lo mismo que `Exam`, visto por quien lo arma: cada opción dice si es la correcta. */
@@ -103,6 +136,7 @@ export interface EditableExam extends Omit<Exam, "preguntas"> {
 /** Lo que recibe `PUT /activities/:id/examen`. Lo que no se manda no se toca. */
 export interface SaveExamPayload {
 	tiempoLimite?: number | null;
+	mostrarRespuestas?: boolean;
 	intentosPermitidos?: number;
 	porcentajeAprobacion?: number;
 	/** La lista entera y en orden: con id se edita, sin id se crea, la que falta se borra. */
@@ -125,6 +159,11 @@ export const examsService = {
 			`/activities/${activityId}/examen`,
 			{ method: "PUT", body: JSON.stringify(payload) },
 		);
+	},
+
+	/** Mi historial de juegos: mejor resultado y partidas de cada concurso. */
+	async misJuegos() {
+		return await apiFetch<MisJuegos>("/concursos/mios");
 	},
 
 	async get(activityId: string) {

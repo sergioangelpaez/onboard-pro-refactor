@@ -1,11 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RefreshCw } from "lucide-react";
+import { LoaderCircle, RefreshCw, Trophy } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AchievementCard } from "#/components/admin/achievements/achievement-card";
 import { CreateAchievementDialogForm } from "#/components/admin/achievements/create-achievement-dialog-form";
 import { EmptyState } from "#/components/shared/states/empty-state";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
 import { Button } from "#/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "#/components/ui/dialog";
+import { useLogroAcciones } from "#/hooks/achievements/use-logro-acciones";
+import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
 import { useAchievements } from "#/hooks/achievements/use-achievements";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
@@ -31,6 +43,11 @@ function LogrosRoute() {
 	const { data: empresas } = useAllTenants(esSuper);
 	const nombreEmpresa = new Map((empresas ?? []).map((e) => [e.id, e.name]));
 
+	// Las medallas de puesto no se dan en tiempo real: se otorgan al cerrar.
+	const hayDeRanking = (data ?? []).some(
+		(l) => l.activo && l.condicion.tipo === "posicion_ranking",
+	);
+
 	const porCategoria = new Map<string, NonNullable<typeof data>>();
 	for (const logro of data ?? []) {
 		const lista = porCategoria.get(logro.categoria) ?? [];
@@ -50,7 +67,10 @@ function LogrosRoute() {
 						</p>
 					)}
 				</div>
-				<CreateAchievementDialogForm />
+				<div className="flex flex-wrap gap-2">
+					{hayDeRanking && <CerrarRanking esSuper={esSuper} />}
+					<CreateAchievementDialogForm />
+				</div>
 			</div>
 
 			{isLoading && <LoadingState message="Cargando los logros..." />}
@@ -93,11 +113,81 @@ function LogrosRoute() {
 										? nombreEmpresa.get(logro.tenantId)
 										: undefined
 								}
+								editable={esSuper || !logro.generico}
 							/>
 						))}
 					</div>
 				</section>
 			))}
 		</div>
+	);
+}
+
+/**
+ * Cerrar el periodo del ranking: otorga las medallas de puesto a quien está
+ * en el lugar ahora mismo. No se dan en tiempo real porque un puesto cambia
+ * cada vez que alguien suma puntos.
+ */
+function CerrarRanking({ esSuper }: { esSuper: boolean }) {
+	const [abierto, setAbierto] = useState(false);
+	const organizacion = useOrganizacionActiva();
+	const { cerrarRanking } = useLogroAcciones();
+	const sinOrganizacion = esSuper && !organizacion;
+
+	function cerrar() {
+		cerrarRanking.mutate(esSuper ? organizacion : null, {
+			onSuccess: (r) => {
+				setAbierto(false);
+				toast.success(r.message, {
+					description: r.otorgados.length
+						? r.otorgados
+								.map((o) => `${o.persona.firstname}: ${o.logro.nombre}`)
+								.join(" · ")
+						: "Nadie nuevo ganó una medalla de puesto.",
+					duration: 8000,
+				});
+			},
+			onError: (e: Error) =>
+				toast.error("No se pudo cerrar el periodo", { description: e.message }),
+		});
+	}
+
+	return (
+		<>
+			<Button variant="outline" onClick={() => setAbierto(true)}>
+				<Trophy />
+				Cerrar periodo del ranking
+			</Button>
+			<Dialog open={abierto} onOpenChange={setAbierto}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>¿Cerrar el periodo del ranking?</DialogTitle>
+						<DialogDescription>
+							Se otorgan las medallas de puesto (por ejemplo, "Top 3") a quien
+							esté en ese lugar ahora mismo. Cada medalla se da una sola vez por
+							persona: cerrar de nuevo no la duplica. Hazlo al final de cada
+							periodo, por ejemplo cada viernes.
+						</DialogDescription>
+					</DialogHeader>
+					{sinOrganizacion && (
+						<p className="text-destructive text-sm">
+							Elige primero una organización en el selector del menú.
+						</p>
+					)}
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setAbierto(false)}>
+							Cancelar
+						</Button>
+						<Button
+							onClick={cerrar}
+							disabled={sinOrganizacion || cerrarRanking.isPending}
+						>
+							{cerrarRanking.isPending && <LoaderCircle className="animate-spin" />}
+							Cerrar y otorgar
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 }

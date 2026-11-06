@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { LoaderCircle, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { VistaPreviaLogro } from "./vista-previa-logro";
 import { useAchievementOptions } from "#/hooks/achievements/use-achievement-options";
 import { useCreateAchievement } from "#/hooks/achievements/use-create-achievement";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
@@ -113,7 +114,7 @@ export function CreateAchievementDialogForm() {
 				</Button>
 			</DialogTrigger>
 
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Crear logro</DialogTitle>
 					<DialogDescription>
@@ -358,6 +359,23 @@ export function CreateAchievementDialogForm() {
 							);
 						}}
 					</form.Field>
+
+					<form.Subscribe
+						selector={(s) =>
+							[s.values.tipoCondicion, s.values.meta, s.values.cursoId] as const
+						}
+					>
+						{([tipoCondicion, meta, cursoId]) => (
+							<VistaPreviaLogro
+								tipoCondicion={tipoCondicion}
+								meta={meta}
+								cursoId={
+									cursoId === TODAS || cursoId === SIN_CURSO ? undefined : cursoId
+								}
+								tenantId={esSuper && cursoId !== TODAS ? organizacion : null}
+							/>
+						)}
+					</form.Subscribe>
 				</form>
 
 				<DialogFooter>
