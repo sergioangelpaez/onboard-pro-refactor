@@ -1,5 +1,10 @@
 import type { AnyFieldApi } from "@tanstack/react-form";
-import { Field, FieldError, FieldLabel } from "#/components/ui/field";
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+} from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
 
 export function PasswordField({
@@ -7,11 +12,14 @@ export function PasswordField({
 	label,
 	autoComplete,
 	labelAction,
+	description,
 }: {
 	field: AnyFieldApi;
 	label: string;
 	autoComplete: string;
 	labelAction?: React.ReactNode;
+	/** Una ayuda corta debajo del campo. */
+	description?: string;
 }) {
 	const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 	return (
@@ -28,6 +36,9 @@ export function PasswordField({
 				onBlur={field.handleBlur}
 				onChange={(e) => field.handleChange(e.target.value)}
 			/>
+			{description && !isInvalid && (
+				<FieldDescription>{description}</FieldDescription>
+			)}
 			{isInvalid && <FieldError errors={field.state.meta.errors} />}
 		</Field>
 	);

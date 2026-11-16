@@ -6,6 +6,7 @@ import { LoadingState } from "../../shared/states/loading-state";
 import { DataTable } from "../../shared/table/data-table";
 import { Button } from "../../ui/button";
 import { groupsColumns } from "./table/groups-columns";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 interface GroupsRouteContentProps {
 	data: Group[] | undefined;
@@ -22,6 +23,8 @@ export function GroupsRouteContent({
 	refetch,
 	onCreate,
 }: GroupsRouteContentProps) {
+	// El superadmin solo consulta: no se le ofrece crear.
+	const soloLectura = useSoloLectura();
 	if (isLoading) return <LoadingState message="Cargando grupos..." />;
 
 	if (!data && error)
@@ -44,10 +47,12 @@ export function GroupsRouteContent({
 				title="Aún no hay grupos"
 				description="Aún no hay grupos para mostrar aquí. Para empezar, crea un nuevo grupo."
 				content={
-					<Button onClick={onCreate}>
-						<Plus />
-						Crear grupo
-					</Button>
+					soloLectura ? undefined : (
+						<Button onClick={onCreate}>
+							<Plus />
+							Crear grupo
+						</Button>
+					)
 				}
 			/>
 		);

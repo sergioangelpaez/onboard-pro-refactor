@@ -8,8 +8,11 @@ import {
 import type { AppRow } from "@/lib/ui/data-table";
 import { CourseDeleteDialog } from "../course-delete-dialog";
 import { CourseFormSheet } from "../course-form-sheet";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 export function CourseRowActions({ row }: { row: AppRow<Course> }) {
+	// El superadmin solo consulta: los cambios los hace el admin.
+	const soloLectura = useSoloLectura();
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 
@@ -29,6 +32,8 @@ export function CourseRowActions({ row }: { row: AppRow<Course> }) {
 			variant: "destructive",
 		},
 	];
+
+	if (soloLectura) return null;
 
 	return (
 		<>

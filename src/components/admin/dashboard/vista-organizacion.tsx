@@ -1,6 +1,4 @@
-import { Link } from "@tanstack/react-router";
 import {
-	ChevronRight,
 	GraduationCap,
 	Inbox,
 	LibraryBig,
@@ -8,7 +6,6 @@ import {
 	UserCheck,
 	UserX,
 } from "lucide-react";
-import { Button } from "#/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -93,19 +90,8 @@ export function VistaOrganizacion({ data }: { data: DashboardOrganizacion }) {
 					icono={<Inbox />}
 					valor={formatear(data.entregasPorRevisar)}
 					etiqueta="entregas por revisar"
-					accion={
-						<Button
-							asChild
-							variant="ghost"
-							size="sm"
-							className="-ml-2 h-7 text-primary"
-						>
-							<Link to="/admin/entregas">
-								Ir a la bandeja
-								<ChevronRight />
-							</Link>
-						</Button>
-					}
+					// Las revisan los instructores: aquí el admin solo ve si se acumulan.
+					detalle="esperando al instructor"
 				/>
 			</div>
 

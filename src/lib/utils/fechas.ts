@@ -44,3 +44,23 @@ export function fechaHora(iso?: string | null) {
 	if (Number.isNaN(d.getTime())) return null;
 	return d.toLocaleString("es", { dateStyle: "medium", timeStyle: "short" });
 }
+
+/**
+ * Para un día suelto ("2026-11-16", sin hora): "hoy", "ayer", "hace 5 días",
+ * "hace 2 semanas" o, pasado un mes, la fecha. Se lee como fecha local: con
+ * new Date("2026-11-16") sería medianoche UTC, que en Colombia es el día
+ * anterior.
+ */
+export function haceCuantoDia(dia?: string | null) {
+	if (!dia) return null;
+	const [a, m, d] = dia.slice(0, 10).split("-").map(Number);
+	if (!a || !m || !d) return null;
+	const fecha = new Date(a, m - 1, d);
+	const hoy = new Date();
+	hoy.setHours(0, 0, 0, 0);
+	const dias = Math.round((hoy.getTime() - fecha.getTime()) / 86_400_000);
+	if (dias <= 0) return "hoy";
+	if (dias < 7) return relativo.format(-dias, "day");
+	if (dias < 30) return relativo.format(-Math.floor(dias / 7), "week");
+	return fechaCorta(fecha.toISOString());
+}

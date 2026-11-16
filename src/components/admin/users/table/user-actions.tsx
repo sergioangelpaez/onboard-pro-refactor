@@ -1,5 +1,6 @@
 import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import {
 	type RowAction,
 	RowActions,
@@ -12,6 +13,8 @@ import { UserFormSheet } from "#/components/admin/users/user-form";
 export function UserRowActions({ row }: { row: AppRow<User> }) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
+	// El superadmin solo consulta: editar o borrar lo hace el admin.
+	const soloLectura = useSoloLectura();
 
 	const actions: RowAction<User>[] = [
 		{
@@ -26,6 +29,8 @@ export function UserRowActions({ row }: { row: AppRow<User> }) {
 			variant: "destructive",
 		},
 	];
+
+	if (soloLectura) return null;
 
 	return (
 		<>

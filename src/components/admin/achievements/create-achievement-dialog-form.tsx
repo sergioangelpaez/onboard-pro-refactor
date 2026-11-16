@@ -61,9 +61,9 @@ export function CreateAchievementDialogForm() {
 	const nombreOrganizacion = esSuper
 		? empresas.find((e) => e.id === organizacion)?.name
 		: user?.tenantName;
-	// El superadmin sin organización elegida solo puede crear genéricos: un
-	// logro de organización o de curso necesita saber de cuál.
-	const soloGenerico = esSuper && !organizacion;
+	// El superadmin solo crea logros genéricos (de toda la plataforma): los de
+	// una organización o de un curso los crea su administrador.
+	const soloGenerico = esSuper;
 	const iconoDeCategoria = new Map(
 		(options?.categorias ?? []).map((c) => [c.nombre, c.icono]),
 	);
@@ -351,7 +351,7 @@ export function CreateAchievementDialogForm() {
 									</Select>
 									<FieldDescription>
 										{soloGenerico
-											? "Para crear un logro de una sola organización, elige primero la organización en el menú."
+											? "Vale para todas las organizaciones. Los logros de una sola organización los crea su administrador."
 											: "Cuenta lo que la persona hace en todos sus cursos."}
 									</FieldDescription>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}

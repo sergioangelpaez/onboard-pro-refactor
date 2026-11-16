@@ -7,6 +7,7 @@ import { LoadingState } from "../../shared/states/loading-state";
 import { DataTable } from "../../shared/table/data-table";
 import { Button } from "../../ui/button";
 import { CreateCourseDialogForm } from "./create-course-dialog-form";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 interface CoursesRouteContentProps {
 	data: Course[] | undefined;
@@ -21,6 +22,8 @@ export function CoursesRouteContent({
 	error,
 	refetch,
 }: CoursesRouteContentProps) {
+	// El superadmin solo consulta: no se le ofrece crear.
+	const soloLectura = useSoloLectura();
 	if (isLoading) return <LoadingState message="Cargando cursos..." />;
 
 	if (!data && error) {
@@ -43,7 +46,7 @@ export function CoursesRouteContent({
 			<EmptyState
 				title="Aún no hay cursos"
 				description="Aún no hay cursos para mostrar aquí. Para empezar, crea un nuevo curso."
-				content={<CreateCourseDialogForm />}
+				content={soloLectura ? undefined : <CreateCourseDialogForm />}
 			/>
 		);
 	}

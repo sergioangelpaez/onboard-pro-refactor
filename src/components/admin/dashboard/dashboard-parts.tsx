@@ -172,14 +172,46 @@ export function BarraPorcentaje({ valor }: { valor: number }) {
 	);
 }
 
-type Metrica = "xp" | "completadas";
+type Metrica = "activos" | "completadas" | "entregas" | "creadas";
 
-const METRICAS: { valor: Metrica; texto: string; unidad: string }[] = [
-	{ valor: "xp", texto: "XP otorgado", unidad: "XP" },
+/**
+ * Qué se puede ver día por día. "activos" no se suma: la misma persona activa
+ * tres días no son tres personas. Por eso su resumen es el promedio diario.
+ */
+const METRICAS: {
+	valor: Metrica;
+	texto: string;
+	singular: string;
+	plural: string;
+	seSuma: boolean;
+}[] = [
+	{
+		valor: "activos",
+		texto: "Usuarios activos",
+		singular: "usuario activo",
+		plural: "usuarios activos",
+		seSuma: false,
+	},
 	{
 		valor: "completadas",
 		texto: "Actividades completadas",
-		unidad: "completadas",
+		singular: "actividad completada",
+		plural: "actividades completadas",
+		seSuma: true,
+	},
+	{
+		valor: "entregas",
+		texto: "Entregas enviadas",
+		singular: "entrega enviada",
+		plural: "entregas enviadas",
+		seSuma: true,
+	},
+	{
+		valor: "creadas",
+		texto: "Actividades creadas",
+		singular: "actividad creada",
+		plural: "actividades creadas",
+		seSuma: true,
 	},
 ];
 
@@ -194,12 +226,12 @@ function diaCorto(iso: string) {
 }
 
 /**
- * La actividad día por día, en barras.
+ * El uso de la plataforma día por día, en barras.
  *
- * XP y actividades completadas tienen escalas muy distintas: en vez de dos
- * ejes en un mismo gráfico (que invita a comparar alturas que no se
- * comparan), se elige cuál ver. Pasar el puntero o tocar una barra muestra
- * el día arriba, donde no tapa nada.
+ * Por defecto muestra cuántas personas distintas la usaron cada día: es lo
+ * que dice si la están usando. Las otras métricas tienen escalas distintas,
+ * así que se elige cuál ver en vez de mezclar ejes. Pasar el puntero o tocar
+ * una barra muestra el día arriba, donde no tapa nada.
  */
 export function GraficoActividad({
 	dias,
@@ -208,21 +240,24 @@ export function GraficoActividad({
 	dias: DiaActividad[];
 	className?: string;
 }) {
-	const [metrica, setMetrica] = useState<Metrica>("xp");
+	const [metrica, setMetrica] = useState<Metrica>("activos");
 	const [activo, setActivo] = useState<number | null>(null);
 	const meta = METRICAS.find((m) => m.valor === metrica) ?? METRICAS[0];
-	const valores = dias.map((d) => d[metrica]);
+	const valores = dias.map((d) => d[metrica] ?? 0);
 	const maximo = Math.max(...valores, 0);
 	const total = valores.reduce((a, b) => a + b, 0);
-	// Un tope redondo para la línea de referencia de arriba.
-	const tope = maximo > 0 ? redondearArriba(maximo) : 1;
+	const promedio = dias.length ? total / dias.length : 0;
+	const tope = topeEje(maximo);
 	const dia = activo !== null ? dias[activo] : null;
+	const nombre = (n: number) => (n === 1 ? meta.singular : meta.plural);
 
 	return (
 		<Card className={className}>
-			<CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-				<div className="space-y-1">
-					<CardTitle className="text-base">Actividad por día</CardTitle>
+			{/* Título y resumen arriba, filtros debajo: en una sola fila no entran
+			    en la columna del panel y el título se aplastaba. */}
+			<CardHeader className="space-y-3">
+				<div className="min-w-0 space-y-1">
+					<CardTitle className="text-base">Uso de la plataforma</CardTitle>
 					<p className="text-muted-foreground text-sm" aria-live="polite">
 						{dia ? (
 							<>
@@ -230,20 +265,35 @@ export function GraficoActividad({
 									{diaCorto(dia.fecha)}
 								</span>
 								{" · "}
-								{formatear(dia.xp)} XP · {formatear(dia.completadas)}{" "}
-								{dia.completadas === 1 ? "completada" : "completadas"}
+								<span className="tabular-nums">
+									{formatear(dia[metrica] ?? 0)}
+								</span>{" "}
+								{nombre(dia[metrica] ?? 0)}
 							</>
-						) : (
+						) : meta.seSuma ? (
 							<>
 								<span className="font-medium text-foreground tabular-nums">
 									{formatear(total)}
 								</span>{" "}
-								{meta.unidad} en el periodo
+								{nombre(total)} en el periodo
+							</>
+						) : (
+							<>
+								Promedio{" "}
+								<span className="font-medium text-foreground tabular-nums">
+									{new Intl.NumberFormat("es", {
+										maximumFractionDigits: 1,
+									}).format(promedio)}
+								</span>{" "}
+								por día · máximo{" "}
+								<span className="font-medium text-foreground tabular-nums">
+									{formatear(maximo)}
+								</span>
 							</>
 						)}
 					</p>
 				</div>
-				<div className="inline-flex shrink-0 self-start rounded-lg border bg-muted/50 p-0.5">
+				<div className="inline-flex max-w-full flex-wrap gap-0.5 rounded-lg border bg-muted/50 p-0.5">
 					{METRICAS.map((m) => (
 						<button
 							key={m.valor}
@@ -288,13 +338,13 @@ export function GraficoActividad({
 								onMouseLeave={() => setActivo(null)}
 							>
 								{dias.map((d, i) => {
-									const v = d[metrica];
+									const v = d[metrica] ?? 0;
 									const alto = (v / tope) * 100;
 									return (
 										<button
 											key={d.fecha}
 											type="button"
-											aria-label={`${diaCorto(d.fecha)}: ${formatear(d.xp)} XP, ${formatear(d.completadas)} completadas`}
+											aria-label={`${diaCorto(d.fecha)}: ${formatear(v)} ${nombre(v)}`}
 											onMouseEnter={() => setActivo(i)}
 											onFocus={() => setActivo(i)}
 											onBlur={() => setActivo(null)}
@@ -330,6 +380,13 @@ export function GraficoActividad({
 			</CardContent>
 		</Card>
 	);
+}
+
+/** El tope del eje: redondo, y par con números chicos para que la mitad sea entera. */
+function topeEje(maximo: number) {
+	if (maximo <= 0) return 2;
+	if (maximo <= 10) return maximo % 2 === 0 ? maximo : maximo + 1;
+	return redondearArriba(maximo);
 }
 
 /** 1.234 → 1,3 k. Para las referencias del eje, donde no entra el número entero. */

@@ -131,7 +131,9 @@ export const usersService = {
 	},
 
 	async getAll() {
-		return await apiFetch<User[]>("/users/get/all", {
+		// La tabla filtra y pagina en el navegador: pide el máximo que da el
+		// backend (200) para no quedarse con los primeros 50 de la organización.
+		return await apiFetch<User[]>("/users/get/all?porPagina=200", {
 			method: "GET",
 		});
 	},

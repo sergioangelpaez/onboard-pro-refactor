@@ -22,6 +22,7 @@ export const Route = createFileRoute("/(auth)/auth")({
 			throw error;
 		}
 
+		if (user.debeCambiarPassword) throw redirect({ to: "/cambiar-password" });
 		throw redirect({ to: getHomeByRole(user.role) });
 	},
 });

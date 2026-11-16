@@ -21,11 +21,17 @@ export interface XpDashboard {
 	otorgadoPeriodoAnterior: number;
 }
 
-/** Un día del gráfico de actividad. */
+/** Un día del gráfico de uso. */
 export interface DiaActividad {
 	fecha: string;
-	xp: number;
+	/** Personas distintas que usaron la plataforma ese día. */
+	activos: number;
 	completadas: number;
+	/** Entregas enviadas. */
+	entregas: number;
+	/** Actividades nuevas en los cursos. */
+	creadas: number;
+	xp: number;
 }
 
 /** El panel del superadmin mirando todas las organizaciones a la vez. */
@@ -38,17 +44,34 @@ export interface DashboardPlataforma {
 	xp: XpDashboard;
 	actividadesCompletadasPeriodo: number;
 	actividadPorDia: DiaActividad[];
-	porOrganizacion: {
-		id: string;
-		nombre: string;
-		activa: boolean;
-		usuarios: number;
-		aprendicesActivos: number;
-		cursosPublicados: number;
-		/** De 0 a 100. */
-		tasaFinalizacion: number;
-		xpPeriodo: number;
-	}[];
+	/** false mientras el backend no registra entradas a la plataforma. */
+	accesosRegistrados?: boolean;
+	porOrganizacion: UsoOrganizacion[];
+}
+
+/** Cómo está usando la plataforma una organización. */
+export interface UsoOrganizacion {
+	id: string;
+	nombre: string;
+	activa: boolean;
+	/** Cuándo se registró la organización. */
+	creada: string | null;
+	usuarios: number;
+	aprendices: number;
+	instructores: number;
+	admins: number;
+	/** Aprendices que hicieron algo en el periodo. */
+	aprendicesActivos: number;
+	cursosPublicados: number;
+	/** Sin contar los archivados. */
+	cursosCreados: number;
+	grupos: number;
+	entregasPorRevisar: number;
+	/** De 0 a 100. */
+	tasaFinalizacion: number;
+	/** Último día en que alguien de la organización hizo algo; null si nunca. */
+	ultimaActividad: string | null;
+	xpPeriodo: number;
 }
 
 /** El panel de una organización: el del admin o el del superadmin parado en una. */
@@ -64,6 +87,8 @@ export interface DashboardOrganizacion {
 	xp: XpDashboard;
 	entregasPorRevisar: number;
 	actividadPorDia: DiaActividad[];
+	/** false mientras el backend no registra entradas a la plataforma. */
+	accesosRegistrados?: boolean;
 	cursosDetalle: {
 		id: string;
 		nombre: string;

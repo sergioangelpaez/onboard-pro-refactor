@@ -105,19 +105,19 @@ function HomeRoute() {
 				)}
 			</div>
 
-			<div className="grid gap-4 lg:grid-cols-3">
-				<div className="lg:col-span-2">
+			{/* items-start: cada tarjeta mide lo que su contenido; sin eso la
+			    columna corta se estira hasta la altura de la larga y queda vacía. */}
+			<div className="grid items-start gap-4 lg:grid-cols-3">
+				<div className="space-y-4 lg:col-span-2">
 					<NextSteps data={pendientes.data} isLoading={pendientes.isLoading} />
-				</div>
-				<div className="space-y-4">
-					<AchievementsPreview
-						data={logros.data}
-						isLoading={logros.isLoading}
-					/>
 					{/* Lo último que sumó, para que el XP no sea un número que sube
 					    solo: la lista completa está en el perfil. */}
 					<UltimasAcreditaciones visibles={4} conNivel={false} />
 				</div>
+				<AchievementsPreview
+					data={logros.data}
+					isLoading={logros.isLoading}
+				/>
 			</div>
 
 			{cursos.data && cursos.data.length > 0 && (
