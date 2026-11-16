@@ -12,6 +12,7 @@ import { NextSteps } from "#/components/student/home/next-steps";
 import { ProgressHero } from "#/components/student/home/progress-hero";
 import { StatTile } from "#/components/student/home/stat-tile";
 import { MyCourseCard } from "#/components/student/my-course-card";
+import { UltimasAcreditaciones } from "#/components/student/ultimas-acreditaciones";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
 import { useMyAchievements } from "#/hooks/achievements/use-my-achievements";
@@ -108,7 +109,15 @@ function HomeRoute() {
 				<div className="lg:col-span-2">
 					<NextSteps data={pendientes.data} isLoading={pendientes.isLoading} />
 				</div>
-				<AchievementsPreview data={logros.data} isLoading={logros.isLoading} />
+				<div className="space-y-4">
+					<AchievementsPreview
+						data={logros.data}
+						isLoading={logros.isLoading}
+					/>
+					{/* Lo último que sumó, para que el XP no sea un número que sube
+					    solo: la lista completa está en el perfil. */}
+					<UltimasAcreditaciones visibles={4} conNivel={false} />
+				</div>
 			</div>
 
 			{cursos.data && cursos.data.length > 0 && (

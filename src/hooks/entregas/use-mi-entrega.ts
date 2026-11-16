@@ -25,6 +25,8 @@ export function useMiEntrega(activityId: string) {
 			});
 			// El estado de la entrega también se muestra en la lista del curso.
 			queryClient.invalidateQueries({ queryKey: ["sections"] });
+			// Y en "Mis entregas" del perfil.
+			queryClient.invalidateQueries({ queryKey: queryKeys.entregas.mias });
 		},
 	});
 

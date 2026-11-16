@@ -25,6 +25,7 @@ export const queryKeys = {
 	},
 	entregas: {
 		bandeja: ["entregas", "bandeja"],
+		mias: ["entregas", "mias"],
 		byActivity: (activityId: string) => ["entregas", activityId],
 		mine: (activityId: string) => ["entregas", activityId, "mine"],
 	},
@@ -33,6 +34,14 @@ export const queryKeys = {
 		me: ["gamification", "me"],
 		pending: ["gamification", "pending"],
 		ranking: ["gamification", "ranking"],
+		movimientos: ["gamification", "me", "movimientos"],
+	},
+	dashboard: {
+		resumen: (tenantId: string | null, dias: number) => [
+			"dashboard",
+			tenantId ?? "plataforma",
+			dias,
+		],
 	},
 	exams: {
 		byActivity: (activityId: string) => ["exams", activityId],

@@ -1,5 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Building2, Crown, LibraryBig, RefreshCw, Trophy, Users } from "lucide-react";
+import {
+	Building2,
+	CalendarRange,
+	Crown,
+	LibraryBig,
+	RefreshCw,
+	Trophy,
+	Users,
+} from "lucide-react";
 import { useState } from "react";
 import { EmptyState } from "#/components/shared/states/empty-state";
 import { ErrorState } from "#/components/shared/states/error-state";
@@ -18,7 +26,10 @@ import { useCourseRanking } from "#/hooks/gamification/use-course-ranking";
 import { useRanking } from "#/hooks/gamification/use-ranking";
 import { useMyGroups } from "#/hooks/groups/use-my-groups";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
-import type { RankingEntry } from "#/lib/services/gamification";
+import type {
+	PeriodoRanking,
+	RankingEntry,
+} from "#/lib/services/gamification";
 
 export const Route = createFileRoute("/student/ranking")({
 	component: RankingRoute,
@@ -47,8 +58,13 @@ function iniciales(p: RankingEntry) {
 }
 
 /**
- * La tabla de posiciones de la organización. Solo aprendices y ordenada por XP:
+ * Las tablas de posiciones del aprendiz. Solo aprendices y ordenadas por XP:
  * el nivel empata mucho, el XP distingue quién va adelante.
+ *
+ * Se abre en "Por curso" (o "Por grupo" si todavía no tiene cursos) y deja la
+ * organización para el final: compararse con toda la empresa mezcla a quien
+ * entró ayer con quien lleva meses y desmotiva más de lo que impulsa. La
+ * comparación útil es entre pares, gente que está haciendo lo mismo.
  *
  * Arriba el podio, abajo la lista completa con la fila propia resaltada, para
  * encontrarse sin buscar.
@@ -56,18 +72,33 @@ function iniciales(p: RankingEntry) {
 type Alcance = "organizacion" | "curso" | "grupo";
 
 const ALCANCES: { valor: Alcance; texto: string; icono: React.ReactNode }[] = [
-	{ valor: "organizacion", texto: "Organización", icono: <Building2 /> },
 	{ valor: "curso", texto: "Por curso", icono: <LibraryBig /> },
 	{ valor: "grupo", texto: "Por grupo", icono: <Users /> },
+	{ valor: "organizacion", texto: "Organización", icono: <Building2 /> },
+];
+
+/**
+ * La ventana de tiempo. "Esta semana" y "Este mes" cuentan solo el XP ganado
+ * en ese lapso, así quien viene trabajando puede ir adelante aunque haya
+ * llegado después (HU-057).
+ */
+const PERIODOS: { valor: PeriodoRanking; texto: string; frase: string }[] = [
+	{ valor: "semana", texto: "Esta semana", frase: "esta semana" },
+	{ valor: "mes", texto: "Este mes", frase: "este mes" },
+	{ valor: "siempre", texto: "Siempre", frase: "desde siempre" },
 ];
 
 function RankingRoute() {
 	const { user } = useCurrentUser();
-	const [alcance, setAlcance] = useState<Alcance>("organizacion");
-	const { data: cursos } = useMyCourses();
+	const [alcanceElegido, setAlcance] = useState<Alcance>();
+	const [periodo, setPeriodo] = useState<PeriodoRanking>("siempre");
+	const { data: cursos, isLoading: cargandoCursos } = useMyCourses();
 	const { groups: grupos } = useMyGroups();
 	const [cursoElegido, setCursoElegido] = useState<string>();
 	const [grupoElegido, setGrupoElegido] = useState<string>();
+	// Hasta que elija, por curso; si no tiene cursos, por grupo.
+	const alcance: Alcance =
+		alcanceElegido ?? (cursos && cursos.length === 0 ? "grupo" : "curso");
 	// Mientras no elija, el primero de la lista.
 	const cursoId = cursoElegido ?? cursos?.[0]?.id;
 	const grupoId = grupoElegido ?? grupos?.[0]?.id;
@@ -75,20 +106,29 @@ function RankingRoute() {
 	const general = useRanking(
 		alcance === "grupo" ? grupoId : undefined,
 		alcance === "organizacion" || (alcance === "grupo" && !!grupoId),
+		periodo,
 	);
 	// El de curso solo cuenta el XP ganado en ese curso.
-	const deCurso = useCourseRanking(cursoId ?? "", 500, alcance === "curso" && !!cursoId);
+	const deCurso = useCourseRanking(
+		cursoId ?? "",
+		500,
+		alcance === "curso" && !!cursoId,
+		periodo,
+	);
 	const consulta = alcance === "curso" ? deCurso : general;
 	const sinOpciones =
 		(alcance === "curso" && cursos && cursos.length === 0) ||
 		(alcance === "grupo" && grupos && grupos.length === 0);
 	const data = sinOpciones ? [] : consulta.data;
-	const { isLoading, error, refetch } = general;
-	const cargando = alcance === "curso" ? deCurso.isLoading : isLoading;
+	const { error, refetch } = consulta;
+	const cargando =
+		consulta.isLoading || (alcance === "curso" && cargandoCursos);
+	const frasePeriodo =
+		PERIODOS.find((p) => p.valor === periodo)?.frase ?? "desde siempre";
 	const subtitulo = {
-		organizacion: "Quién lleva más XP en tu organización.",
-		curso: "Solo cuenta el XP ganado en las actividades del curso.",
-		grupo: "Quién lleva más XP entre los integrantes del grupo.",
+		organizacion: `Quién suma más XP ${frasePeriodo} en toda tu organización.`,
+		curso: `Quién suma más XP ${frasePeriodo} en las actividades del curso.`,
+		grupo: `Quién suma más XP ${frasePeriodo} entre los integrantes del grupo.`,
 	}[alcance];
 	const yo = data?.find((p) => p.id === user?.id);
 	// En el podio el primero va al centro: 2 · 1 · 3.
@@ -112,7 +152,7 @@ function RankingRoute() {
 				<div
 					role="tablist"
 					aria-label="Ver el ranking de"
-					className="inline-flex rounded-lg border bg-muted/50 p-1"
+					className="inline-flex max-w-full overflow-x-auto rounded-lg border bg-muted/50 p-1"
 				>
 					{ALCANCES.map((a) => (
 						<button
@@ -121,7 +161,7 @@ function RankingRoute() {
 							role="tab"
 							aria-selected={alcance === a.valor}
 							onClick={() => setAlcance(a.valor)}
-							className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-sm transition-colors [&>svg]:size-4 ${
+							className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 font-medium text-sm transition-colors [&>svg]:size-4 ${
 								alcance === a.valor
 									? "bg-background text-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -135,7 +175,7 @@ function RankingRoute() {
 
 				{alcance === "curso" && cursos && cursos.length > 0 && (
 					<Select value={cursoId} onValueChange={setCursoElegido}>
-						<SelectTrigger className="w-64" aria-label="Curso">
+						<SelectTrigger className="w-full sm:w-64" aria-label="Curso">
 							<SelectValue placeholder="Elige un curso" />
 						</SelectTrigger>
 						<SelectContent>
@@ -149,7 +189,7 @@ function RankingRoute() {
 				)}
 				{alcance === "grupo" && grupos && grupos.length > 0 && (
 					<Select value={grupoId} onValueChange={setGrupoElegido}>
-						<SelectTrigger className="w-64" aria-label="Grupo">
+						<SelectTrigger className="w-full sm:w-64" aria-label="Grupo">
 							<SelectValue placeholder="Elige un grupo" />
 						</SelectTrigger>
 						<SelectContent>
@@ -161,11 +201,31 @@ function RankingRoute() {
 						</SelectContent>
 					</Select>
 				)}
+
+				<Select
+					value={periodo}
+					onValueChange={(v) => setPeriodo(v as PeriodoRanking)}
+				>
+					<SelectTrigger
+						className="w-full sm:ml-auto sm:w-40"
+						aria-label="Periodo"
+					>
+						<CalendarRange className="size-4 text-muted-foreground" />
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						{PERIODOS.map((p) => (
+							<SelectItem key={p.valor} value={p.valor}>
+								{p.texto}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</div>
 
 			{cargando && <LoadingState message="Cargando el ranking..." />}
 
-			{!data && error && alcance !== "curso" && (
+			{!data && error && (
 				<ErrorState
 					title="No se pudo cargar el ranking"
 					description={error.message}
@@ -185,11 +245,13 @@ function RankingRoute() {
 							? alcance === "curso"
 								? "Todavía no tienes cursos"
 								: "Todavía no estás en ningún grupo"
-							: "Todavía no hay nadie en el ranking"
+							: periodo === "siempre"
+								? "Todavía no hay nadie en el ranking"
+								: `Nadie sumó XP ${frasePeriodo}`
 					}
 					description={
 						sinOpciones
-							? "Cuando te asignen uno vas a poder ver su ranking acá."
+							? "Cuando te asignen uno, aquí podrás ver su ranking."
 							: "Completa actividades para aparecer."
 					}
 				/>
