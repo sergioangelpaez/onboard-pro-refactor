@@ -55,7 +55,6 @@ const EXTENSIONES = ".csv,.xlsx";
 const ROLES: Record<string, string> = {
 	student: "Aprendiz",
 	instructor: "Instructor",
-	admin: "Administrador",
 };
 
 /**
@@ -174,8 +173,9 @@ export function ImportUsersDialog({
 							<div className="min-w-0 flex-1 text-sm">
 								<p className="font-medium">1. Descarga la plantilla</p>
 								<p className="text-muted-foreground">
-									Columnas: nombre, apellido, correo, rol (student, instructor o
-									admin), teléfono y grupo. Teléfono y grupo son opcionales.
+									Columnas: nombre, apellido, correo, rol (aprendiz o instructor;
+									si va vacío queda como aprendiz), teléfono y grupo. Teléfono y
+									grupo son opcionales.
 								</p>
 							</div>
 							<Button
