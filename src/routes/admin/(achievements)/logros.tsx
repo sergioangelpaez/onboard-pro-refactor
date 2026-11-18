@@ -17,7 +17,7 @@ import {
 	DialogTitle,
 } from "#/components/ui/dialog";
 import { useLogroAcciones } from "#/hooks/achievements/use-logro-acciones";
-import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import { useAchievements } from "#/hooks/achievements/use-achievements";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
@@ -40,6 +40,7 @@ function LogrosRoute() {
 	// es cada logro.
 	const { user } = useCurrentUser();
 	const esSuper = rolReal(user?.role) === "superadmin";
+	const soloLectura = useSoloLectura();
 	const { data: empresas } = useAllTenants(esSuper);
 	const nombreEmpresa = new Map((empresas ?? []).map((e) => [e.id, e.name]));
 
@@ -68,7 +69,8 @@ function LogrosRoute() {
 					)}
 				</div>
 				<div className="flex flex-wrap gap-2">
-					{hayDeRanking && <CerrarRanking esSuper={esSuper} />}
+					{/* Cerrar el periodo es de cada organización: el superadmin no lo hace. */}
+					{hayDeRanking && !soloLectura && <CerrarRanking />}
 					<CreateAchievementDialogForm />
 				</div>
 			</div>
@@ -113,7 +115,9 @@ function LogrosRoute() {
 										? nombreEmpresa.get(logro.tenantId)
 										: undefined
 								}
-								editable={esSuper || !logro.generico}
+								// El superadmin edita solo los genéricos (de la plataforma);
+								// el admin, solo los de su organización.
+								editable={esSuper ? logro.generico : !logro.generico}
 							/>
 						))}
 					</div>
@@ -128,14 +132,12 @@ function LogrosRoute() {
  * en el lugar ahora mismo. No se dan en tiempo real porque un puesto cambia
  * cada vez que alguien suma puntos.
  */
-function CerrarRanking({ esSuper }: { esSuper: boolean }) {
+function CerrarRanking() {
 	const [abierto, setAbierto] = useState(false);
-	const organizacion = useOrganizacionActiva();
 	const { cerrarRanking } = useLogroAcciones();
-	const sinOrganizacion = esSuper && !organizacion;
 
 	function cerrar() {
-		cerrarRanking.mutate(esSuper ? organizacion : null, {
+		cerrarRanking.mutate(null, {
 			onSuccess: (r) => {
 				setAbierto(false);
 				toast.success(r.message, {
@@ -169,18 +171,13 @@ function CerrarRanking({ esSuper }: { esSuper: boolean }) {
 							periodo, por ejemplo cada viernes.
 						</DialogDescription>
 					</DialogHeader>
-					{sinOrganizacion && (
-						<p className="text-destructive text-sm">
-							Elige primero una organización en el selector del menú.
-						</p>
-					)}
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setAbierto(false)}>
 							Cancelar
 						</Button>
 						<Button
 							onClick={cerrar}
-							disabled={sinOrganizacion || cerrarRanking.isPending}
+							disabled={cerrarRanking.isPending}
 						>
 							{cerrarRanking.isPending && <LoaderCircle className="animate-spin" />}
 							Cerrar y otorgar

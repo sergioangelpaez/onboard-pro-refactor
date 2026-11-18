@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 import { SidebarProgress } from "#/components/student/sidebar-progress";
+import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import { type RolReal, rolReal } from "#/lib/utils/auth/session";
 import {
@@ -58,7 +59,7 @@ const ACTIVIDADES = {
 };
 const ENTREGAS = {
 	title: "Entregas",
-	url: "/admin/entregas",
+	url: "/instructor/entregas",
 	icon: Inbox,
 	isActive: false,
 };
@@ -93,18 +94,9 @@ const navByRole: Record<
 		CURSOS,
 		GRUPOS,
 		ACTIVIDADES,
-		ENTREGAS,
 		LOGROS,
 	],
-	admin: [
-		RESUMEN,
-		USUARIOS,
-		CURSOS,
-		GRUPOS,
-		ACTIVIDADES,
-		ENTREGAS,
-		LOGROS,
-	],
+	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS],
 	// Su propia area: no comparte pantallas con la administracion de la empresa.
 	instructor: [
 		{ ...RESUMEN, url: "/instructor/home" },
@@ -135,11 +127,15 @@ const navByRole: Record<
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useCurrentUser();
+	const organizacion = useOrganizacionActiva();
 
 	if (!user) return null;
 
-	// "superadmin" y "admin" se normalizan a "admin", así que comparten menú.
-	const items = navByRole[rolReal(user.role)];
+	// Organizaciones es de la plataforma: el superadmin la ve solo cuando no
+	// está parado en ninguna empresa.
+	const items = navByRole[rolReal(user.role)].filter(
+		(i) => !(organizacion && i.url === "/admin/tenants"),
+	);
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

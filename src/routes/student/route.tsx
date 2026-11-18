@@ -12,6 +12,7 @@ export const Route = createFileRoute("/student")({
 	beforeLoad: async ({ context }) => {
 		const user = await getCurrentUser(context.queryClient);
 		if (!user) throw redirect({ to: "/auth" });
+		if (user.debeCambiarPassword) throw redirect({ to: "/cambiar-password" });
 		if (areaDe(user.role) !== "/student")
 			throw redirect({ to: getHomeByRole(user.role) });
 		return { user };

@@ -7,6 +7,7 @@ import { Button } from "#/components/ui/button";
 import { useAllGroups } from "#/hooks/groups/use-all-groups";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import { puedeGestionarGrupos } from "#/lib/utils/roles";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 export const Route = createFileRoute("/admin/(groups)/groups")({
 	component: GroupsRoute,
@@ -17,7 +18,9 @@ function GroupsRoute() {
 	const { data, isLoading, error, refetch } = useAllGroups();
 	const { user } = useCurrentUser();
 	// Crear un grupo y mover integrantes tambien lo puede el instructor.
-	const puedeGestionar = puedeGestionarGrupos(user?.role);
+	// El superadmin solo consulta.
+	const soloLectura = useSoloLectura();
+	const puedeGestionar = puedeGestionarGrupos(user?.role) && !soloLectura;
 
 	return (
 		<div className="app-container">

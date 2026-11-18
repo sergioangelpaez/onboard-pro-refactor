@@ -53,7 +53,7 @@ export type AssignedCourse = z.infer<typeof assignedCourseSchema>;
 /**
  * Lo que se completa en los formularios de curso.
  *
- * `grupoId` no es un campo del curso: es el grupo al que se le asigna al
+ * `grupoIds` no es un campo del curso: son los grupos a los que se le asigna al
  * guardar (la relación grupo↔curso, que es lo que da acceso a la gente). La
  * columna `grupo` del curso es de texto y no asigna nada, por eso no se usa.
  */
@@ -65,7 +65,7 @@ export const courseFormSchema = z.object({
 		.max(50, "Máximo 50 caracteres"),
 	instructor: z.email("Elige quién dicta el curso"),
 	status: z.enum(["Abierto", "Cerrado"], "Elige el estado"),
-	grupoId: z.string(),
+	grupoIds: z.array(z.string()),
 	actividades: z.array(z.string()),
 });
 

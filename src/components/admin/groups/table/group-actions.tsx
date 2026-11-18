@@ -9,8 +9,11 @@ import type { AppRow } from "@/lib/ui/data-table";
 import { GroupAddCoursesDialog } from "#/components/admin/groups/group-add-courses-dialog";
 import { GroupDeleteDialog } from "#/components/admin/groups/group-delete-dialog";
 import { GroupFormSheet } from "#/components/admin/groups/groups-form";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 export function GroupRowActions({ row }: { row: AppRow<Group> }) {
+	// El superadmin solo consulta: los cambios los hace el admin.
+	const soloLectura = useSoloLectura();
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 	const [addCoursesOpen, setAddCoursesOpen] = useState(false);
@@ -33,6 +36,8 @@ export function GroupRowActions({ row }: { row: AppRow<Group> }) {
 			variant: "destructive",
 		},
 	];
+
+	if (soloLectura) return null;
 
 	return (
 		<>

@@ -26,7 +26,7 @@ function HomeRoute() {
 			<div className="mb-6">
 				<h1>Mis cursos</h1>
 				<p className="text-muted-foreground text-sm">
-					Accedé a tus cursos y mirá quién va adelante en cada uno.
+					Accede a tus cursos y mira quién va adelante en cada uno.
 				</p>
 			</div>
 

@@ -14,6 +14,7 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as InstructorRouteRouteImport } from './routes/instructor/route'
 import { Route as StudentRouteRouteImport } from './routes/student/route'
 import { Route as authAuthRouteImport } from './routes/(auth)/auth'
+import { Route as authCambiarPasswordRouteImport } from './routes/(auth)/cambiar-password'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as AdminHomeRouteImport } from './routes/admin/home'
 import { Route as AdminProfileRouteImport } from './routes/admin/profile'
@@ -26,7 +27,6 @@ import { Route as StudentRankingRouteImport } from './routes/student/ranking'
 import { Route as AdminachievementsLogrosRouteImport } from './routes/admin/(achievements)/logros'
 import { Route as AdminactivitiesActivitiesRouteImport } from './routes/admin/(activities)/activities'
 import { Route as AdmincoursesCoursesRouteImport } from './routes/admin/(courses)/courses'
-import { Route as AdminentregasEntregasRouteImport } from './routes/admin/(entregas)/entregas'
 import { Route as AdmingroupsGroupsRouteImport } from './routes/admin/(groups)/groups'
 import { Route as AdmintenantsTenantsRouteImport } from './routes/admin/(tenants)/tenants'
 import { Route as AdminusersUsersRouteImport } from './routes/admin/(users)/users'
@@ -62,6 +62,11 @@ const StudentRouteRoute = StudentRouteRouteImport.update({
 const authAuthRoute = authAuthRouteImport.update({
   id: '/(auth)/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authCambiarPasswordRoute = authCambiarPasswordRouteImport.update({
+  id: '/(auth)/cambiar-password',
+  path: '/cambiar-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authResetPasswordRoute = authResetPasswordRouteImport.update({
@@ -123,11 +128,6 @@ const AdminactivitiesActivitiesRoute =
 const AdmincoursesCoursesRoute = AdmincoursesCoursesRouteImport.update({
   id: '/(courses)/courses',
   path: '/courses',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminentregasEntregasRoute = AdminentregasEntregasRouteImport.update({
-  id: '/(entregas)/entregas',
-  path: '/entregas',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdmingroupsGroupsRoute = AdmingroupsGroupsRouteImport.update({
@@ -196,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/instructor': typeof InstructorRouteRouteWithChildren
   '/student': typeof StudentRouteRouteWithChildren
   '/auth': typeof authAuthRoute
+  '/cambiar-password': typeof authCambiarPasswordRoute
   '/reset-password': typeof authResetPasswordRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -208,7 +209,6 @@ export interface FileRoutesByFullPath {
   '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
-  '/admin/entregas': typeof AdminentregasEntregasRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
@@ -227,6 +227,7 @@ export interface FileRoutesByTo {
   '/instructor': typeof InstructorRouteRouteWithChildren
   '/student': typeof StudentRouteRouteWithChildren
   '/auth': typeof authAuthRoute
+  '/cambiar-password': typeof authCambiarPasswordRoute
   '/reset-password': typeof authResetPasswordRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -239,7 +240,6 @@ export interface FileRoutesByTo {
   '/admin/logros': typeof AdminachievementsLogrosRoute
   '/admin/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/courses': typeof AdmincoursesCoursesRoute
-  '/admin/entregas': typeof AdminentregasEntregasRoute
   '/admin/groups': typeof AdmingroupsGroupsRoute
   '/admin/tenants': typeof AdmintenantsTenantsRoute
   '/admin/users': typeof AdminusersUsersRoute
@@ -259,6 +259,7 @@ export interface FileRoutesById {
   '/instructor': typeof InstructorRouteRouteWithChildren
   '/student': typeof StudentRouteRouteWithChildren
   '/(auth)/auth': typeof authAuthRoute
+  '/(auth)/cambiar-password': typeof authCambiarPasswordRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -271,7 +272,6 @@ export interface FileRoutesById {
   '/admin/(achievements)/logros': typeof AdminachievementsLogrosRoute
   '/admin/(activities)/activities': typeof AdminactivitiesActivitiesRoute
   '/admin/(courses)/courses': typeof AdmincoursesCoursesRoute
-  '/admin/(entregas)/entregas': typeof AdminentregasEntregasRoute
   '/admin/(groups)/groups': typeof AdmingroupsGroupsRoute
   '/admin/(tenants)/tenants': typeof AdmintenantsTenantsRoute
   '/admin/(users)/users': typeof AdminusersUsersRoute
@@ -292,6 +292,7 @@ export interface FileRouteTypes {
     | '/instructor'
     | '/student'
     | '/auth'
+    | '/cambiar-password'
     | '/reset-password'
     | '/admin/home'
     | '/admin/profile'
@@ -304,7 +305,6 @@ export interface FileRouteTypes {
     | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
-    | '/admin/entregas'
     | '/admin/groups'
     | '/admin/tenants'
     | '/admin/users'
@@ -323,6 +323,7 @@ export interface FileRouteTypes {
     | '/instructor'
     | '/student'
     | '/auth'
+    | '/cambiar-password'
     | '/reset-password'
     | '/admin/home'
     | '/admin/profile'
@@ -335,7 +336,6 @@ export interface FileRouteTypes {
     | '/admin/logros'
     | '/admin/activities'
     | '/admin/courses'
-    | '/admin/entregas'
     | '/admin/groups'
     | '/admin/tenants'
     | '/admin/users'
@@ -354,6 +354,7 @@ export interface FileRouteTypes {
     | '/instructor'
     | '/student'
     | '/(auth)/auth'
+    | '/(auth)/cambiar-password'
     | '/(auth)/reset-password'
     | '/admin/home'
     | '/admin/profile'
@@ -366,7 +367,6 @@ export interface FileRouteTypes {
     | '/admin/(achievements)/logros'
     | '/admin/(activities)/activities'
     | '/admin/(courses)/courses'
-    | '/admin/(entregas)/entregas'
     | '/admin/(groups)/groups'
     | '/admin/(tenants)/tenants'
     | '/admin/(users)/users'
@@ -386,6 +386,7 @@ export interface RootRouteChildren {
   InstructorRouteRoute: typeof InstructorRouteRouteWithChildren
   StudentRouteRoute: typeof StudentRouteRouteWithChildren
   authAuthRoute: typeof authAuthRoute
+  authCambiarPasswordRoute: typeof authCambiarPasswordRoute
   authResetPasswordRoute: typeof authResetPasswordRoute
 }
 
@@ -424,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof authAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/cambiar-password': {
+      id: '/(auth)/cambiar-password'
+      path: '/cambiar-password'
+      fullPath: '/cambiar-password'
+      preLoaderRoute: typeof authCambiarPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/reset-password': {
@@ -508,13 +516,6 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/admin/courses'
       preLoaderRoute: typeof AdmincoursesCoursesRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/(entregas)/entregas': {
-      id: '/admin/(entregas)/entregas'
-      path: '/entregas'
-      fullPath: '/admin/entregas'
-      preLoaderRoute: typeof AdminentregasEntregasRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/(groups)/groups': {
@@ -603,7 +604,6 @@ interface AdminRouteRouteChildren {
   AdminachievementsLogrosRoute: typeof AdminachievementsLogrosRoute
   AdminactivitiesActivitiesRoute: typeof AdminactivitiesActivitiesRoute
   AdmincoursesCoursesRoute: typeof AdmincoursesCoursesRoute
-  AdminentregasEntregasRoute: typeof AdminentregasEntregasRoute
   AdmingroupsGroupsRoute: typeof AdmingroupsGroupsRoute
   AdmintenantsTenantsRoute: typeof AdmintenantsTenantsRoute
   AdminusersUsersRoute: typeof AdminusersUsersRoute
@@ -615,7 +615,6 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminachievementsLogrosRoute: AdminachievementsLogrosRoute,
   AdminactivitiesActivitiesRoute: AdminactivitiesActivitiesRoute,
   AdmincoursesCoursesRoute: AdmincoursesCoursesRoute,
-  AdminentregasEntregasRoute: AdminentregasEntregasRoute,
   AdmingroupsGroupsRoute: AdmingroupsGroupsRoute,
   AdmintenantsTenantsRoute: AdmintenantsTenantsRoute,
   AdminusersUsersRoute: AdminusersUsersRoute,
@@ -680,6 +679,7 @@ const rootRouteChildren: RootRouteChildren = {
   InstructorRouteRoute: InstructorRouteRouteWithChildren,
   StudentRouteRoute: StudentRouteRouteWithChildren,
   authAuthRoute: authAuthRoute,
+  authCambiarPasswordRoute: authCambiarPasswordRoute,
   authResetPasswordRoute: authResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

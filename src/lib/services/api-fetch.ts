@@ -22,6 +22,14 @@ async function mensajeDe(res: Response, porDefecto: string) {
 	}
 }
 
+async function codigoDe(res: Response) {
+	try {
+		return (await res.clone().json())?.codigo as string | undefined;
+	} catch {
+		return undefined;
+	}
+}
+
 export async function apiFetch<T>(
 	path: string,
 	options: ApiFetchOptions = {},
@@ -46,6 +54,18 @@ export async function apiFetch<T>(
 		// ("Ya existe un logro con ese nombre"). Sin esto el usuario veía
 		// "Request failed: 409" y no sabía qué corregir.
 		const mensaje = await mensajeDe(res, `Request failed: ${res.status}`);
+
+		// Contraseña temporal sin cambiar: el backend no deja hacer nada más.
+		// Los guards ya llevan a la pantalla de cambio; esto cubre una sesión
+		// que quedó abierta en otra pestaña.
+		if (
+			res.status === 403 &&
+			(await codigoDe(res)) === "CAMBIO_PASSWORD_REQUERIDO" &&
+			typeof window !== "undefined" &&
+			window.location.pathname !== "/cambiar-password"
+		) {
+			window.location.href = "/cambiar-password";
+		}
 
 		if (res.status === 401) throw new InvalidCredentialsError(mensaje);
 		if (res.status === 403) throw new UnauthorizedError(mensaje);

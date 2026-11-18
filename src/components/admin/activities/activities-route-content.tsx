@@ -6,6 +6,7 @@ import { LoadingState } from "../../shared/states/loading-state";
 import { DataTable } from "../../shared/table/data-table";
 import { Button } from "../../ui/button";
 import { activitiesColumns } from "./table/activities-columns";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 interface ActivitiesRouteContentProps {
 	data: Activity[] | undefined;
@@ -22,6 +23,8 @@ export function ActivitiesRouteContent({
 	refetch,
 	onCreate,
 }: ActivitiesRouteContentProps) {
+	// El superadmin solo consulta: no se le ofrece crear.
+	const soloLectura = useSoloLectura();
 	if (isLoading) return <LoadingState message="Cargando actividades..." />;
 
 	if (!data && error) {
@@ -45,10 +48,12 @@ export function ActivitiesRouteContent({
 				title="Aún no hay actividades"
 				description="Aún no hay actividades para mostrar aquí. Para empezar, crea una nueva actividad."
 				content={
-					<Button onClick={onCreate}>
-						<Plus />
-						Crear actividad
-					</Button>
+					soloLectura ? undefined : (
+						<Button onClick={onCreate}>
+							<Plus />
+							Crear actividad
+						</Button>
+					)
 				}
 			/>
 		);

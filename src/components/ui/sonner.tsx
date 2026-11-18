@@ -5,16 +5,22 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react"
-import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
-
+  // La app no tiene modo oscuro (no hay ThemeProvider de next-themes): con
+  // "system", un Windows en oscuro hacía que Sonner pintara la descripción en
+  // gris claro sobre la tarjeta blanca y casi no se leía.
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme="light"
       className="toaster group"
+      toastOptions={{
+        classNames: {
+          title: "font-medium!",
+          description: "text-muted-foreground!",
+        },
+      }}
       icons={{
         success: <CircleCheckIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,
