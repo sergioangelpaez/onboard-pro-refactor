@@ -7,13 +7,11 @@ import {
 	Pencil,
 	Phone,
 	Sparkles,
-	Star,
 	Trash,
 	Trophy,
 	UsersRound,
 } from "lucide-react";
 import { useState } from "react";
-import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -27,6 +25,7 @@ import {
 import { Skeleton } from "#/components/ui/skeleton";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useAllGroups } from "#/hooks/groups/use-all-groups";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import type { User } from "#/lib/schemas/users";
 import { haceCuantoDia } from "#/lib/utils/fechas";
 import { ETIQUETA_ESTADO, etiquetaRol, varianteEstado } from "./etiquetas";
@@ -138,7 +137,6 @@ function Detalle({ user }: { user: User }) {
 										: undefined
 								}
 							/>
-							<Stat icono={<Star />} valor={user.average} etiqueta="promedio" />
 						</div>
 					</Seccion>
 				)}

@@ -6,10 +6,6 @@ import { CourseRowActions } from "./table/course-actions";
 const columnHelper = createAppColumnHelper<Course>();
 
 export const coursesColumns = columnHelper.columns([
-	columnHelper.accessor("id", {
-		header: "ID",
-		cell: (info) => info.getValue(),
-	}),
 	columnHelper.accessor("name", {
 		header: "Nombre",
 		cell: (info) => info.getValue(),
