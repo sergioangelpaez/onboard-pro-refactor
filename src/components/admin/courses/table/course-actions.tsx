@@ -1,5 +1,6 @@
 import { ArchiveRestore, Pencil, Trash } from "lucide-react";
 import { useState } from "react";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import type { Course } from "#/lib/schemas/courses";
 import {
 	type RowAction,
@@ -8,7 +9,6 @@ import {
 import type { AppRow } from "@/lib/ui/data-table";
 import { CourseDeleteDialog } from "../course-delete-dialog";
 import { CourseFormSheet } from "../course-form-sheet";
-import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 export function CourseRowActions({ row }: { row: AppRow<Course> }) {
 	// El superadmin solo consulta: los cambios los hace el admin.

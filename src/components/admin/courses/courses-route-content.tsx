@@ -1,13 +1,13 @@
 import { RefreshCw } from "lucide-react";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import type { Course } from "#/lib/schemas/courses";
-import { coursesColumns } from "./courses-columns";
 import { EmptyState } from "../../shared/states/empty-state";
 import { ErrorState } from "../../shared/states/error-state";
 import { LoadingState } from "../../shared/states/loading-state";
 import { DataTable } from "../../shared/table/data-table";
 import { Button } from "../../ui/button";
+import { coursesColumns } from "./courses-columns";
 import { CreateCourseDialogForm } from "./create-course-dialog-form";
-import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 interface CoursesRouteContentProps {
 	data: Course[] | undefined;

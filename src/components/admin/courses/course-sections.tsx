@@ -6,9 +6,9 @@ import {
 	Paperclip,
 	PencilLine,
 } from "lucide-react";
-import type { Section, SectionActivity } from "#/lib/schemas/courses";
 import { Badge } from "#/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import type { Section, SectionActivity } from "#/lib/schemas/courses";
 
 /** Cada tipo de actividad con su icono, para distinguirlas de un vistazo. */
 const TIPOS: Record<string, { icono: React.ReactNode; etiqueta: string }> = {

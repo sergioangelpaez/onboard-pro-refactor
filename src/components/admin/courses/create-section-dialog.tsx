@@ -1,7 +1,6 @@
 import { FolderPlus, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCreateSection } from "#/hooks/courses/use-create-section";
 import { Button } from "#/components/ui/button";
 import {
 	Dialog,
@@ -14,6 +13,7 @@ import {
 } from "#/components/ui/dialog";
 import { Field, FieldLabel } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
+import { useCreateSection } from "#/hooks/courses/use-create-section";
 
 /**
  * Crear una seccion del curso (HU-032).
