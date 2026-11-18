@@ -6,7 +6,32 @@ import type {
 } from "../schemas/activities";
 import { apiFetch } from "./api-fetch";
 
+/** Lo que vuelve al completar una actividad: el XP, el nivel y lo que se ganó. */
+export interface ResultadoXp {
+	message?: string;
+	xpGanado?: number;
+	xpBase?: number;
+	/** Si sumó menos de lo que vale (por ejemplo, un reintento), el motivo. */
+	avisoXp?: string | null;
+	nivel?: number;
+	nombreNivel?: string | null;
+	subioDeNivel?: boolean;
+	logrosDesbloqueados?: {
+		id: string;
+		nombre: string;
+		icono: string;
+		xpRecompensa: number;
+	}[];
+}
+
 export const activitiesService = {
+	/** El mínimo, el recomendado y el máximo de XP de cada tipo. */
+	async reglasXp() {
+		return await apiFetch<
+			Record<string, { minimo: number; recomendado: number; maximo: number }>
+		>("/activities/reglas-xp");
+	},
+
 	async getAll() {
 		return await apiFetch<Activity[]>("/activities/get/all");
 	},
@@ -19,7 +44,8 @@ export const activitiesService = {
 		body.append("description", activity.description);
 		body.append("deliverable", String(activity.deliverable));
 		body.append("sectionId", activity.sectionId);
-		body.append("archivo", activity.archivo);
+		body.append("xp", String(activity.xp));
+		if (activity.archivo) body.append("archivo", activity.archivo);
 
 		return await apiFetch<Activity>("/activities/create", {
 			method: "POST",
@@ -91,7 +117,7 @@ export const activitiesService = {
 	},
 
 	async complete(id: string) {
-		return await apiFetch<void>(`/gamification/activities/${id}/completar`, {
+		return await apiFetch<ResultadoXp>(`/gamification/activities/${id}/completar`, {
 			method: "POST",
 		});
 	},

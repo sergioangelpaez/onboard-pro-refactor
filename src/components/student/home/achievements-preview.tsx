@@ -28,7 +28,7 @@ export function AchievementsPreview({
 		.slice(0, 2);
 
 	return (
-		<Card className="h-full">
+		<Card>
 			<CardHeader className="flex flex-row items-center justify-between gap-2">
 				<CardTitle className="flex items-center gap-2 text-base">
 					<Medal className="size-4" />

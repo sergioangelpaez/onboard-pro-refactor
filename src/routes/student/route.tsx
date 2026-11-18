@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "#/components/shared/app-sidebar/app-sidebar";
+import { Celebracion } from "#/components/shared/celebracion";
 import { SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
 import {
 	areaDe,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/student")({
 	beforeLoad: async ({ context }) => {
 		const user = await getCurrentUser(context.queryClient);
 		if (!user) throw redirect({ to: "/auth" });
+		if (user.debeCambiarPassword) throw redirect({ to: "/cambiar-password" });
 		if (areaDe(user.role) !== "/student")
 			throw redirect({ to: getHomeByRole(user.role) });
 		return { user };
@@ -23,9 +25,11 @@ function RouteComponent() {
 		<SidebarProvider>
 			<AppSidebar />
 			<main className="ml-0 flex min-h-screen min-w-0 flex-1 flex-col transition-all">
-				<SidebarTrigger className="ml-4 mt-4" />
+				{/* En el celular la barra se esconde entera: ahí el botón va afuera. */}
+				<SidebarTrigger className="mt-4 ml-4 md:hidden" />
 				<Outlet />
 			</main>
+			<Celebracion />
 		</SidebarProvider>
 	);
 }

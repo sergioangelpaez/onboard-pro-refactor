@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type z from "zod";
 import { useCreateActivity } from "#/hooks/activities/use-create-activity";
+import { useReglasXp } from "#/hooks/activities/use-reglas-xp";
 import { useUpdateActivity } from "#/hooks/activities/use-update-activity";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
 import { useCourseSections } from "#/hooks/sections/use-course-sections";
@@ -14,6 +15,7 @@ import {
 	createActivityFormSchema,
 	updateActivityFormSchema,
 } from "#/lib/schemas/activities";
+import { rangoDe } from "#/lib/utils/reglas-xp";
 import { Attachment } from "@/components/ui/attachment";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -72,6 +74,7 @@ export function ActivityFormSheet({
 	const [courseId, setCourseId] = useState(defaultCourseId ?? "");
 	const courses = useAllCourses();
 	const sections = useCourseSections(courseId);
+	const reglas = useReglasXp();
 
 	const form = useForm({
 		defaultValues: {
@@ -81,7 +84,7 @@ export function ActivityFormSheet({
 			description: activity?.description ?? "",
 			deliverable: activity?.deliverable ?? false,
 			sectionId: activity?.sectionId ?? defaultSectionId ?? "",
-			xp: activity?.xp ?? 0,
+			xp: activity?.xp ?? rangoDe(activity?.type ?? "Recurso").recomendado,
 			archivo: null as unknown as File,
 		} as ActivityFormValues,
 		validators: {
@@ -279,9 +282,21 @@ export function ActivityFormSheet({
 											<FieldLabel htmlFor={field.name}>Tipo</FieldLabel>
 											<Select
 												value={field.state.value}
-												onValueChange={
-													field.handleChange as (value: ActivityType) => void
-												}
+												onValueChange={(valor: ActivityType) => {
+													// Si el XP era el recomendado del tipo anterior (o
+													// no entra en el rango nuevo), pasa al del nuevo.
+													const anterior = rangoDe(field.state.value, reglas);
+													const nuevo = rangoDe(valor, reglas);
+													const xp = form.getFieldValue("xp");
+													if (
+														xp === anterior.recomendado ||
+														xp < nuevo.minimo ||
+														xp > nuevo.maximo
+													) {
+														form.setFieldValue("xp", nuevo.recomendado);
+													}
+													field.handleChange(valor);
+												}}
 											>
 												<SelectTrigger
 													id={field.name}
@@ -305,32 +320,69 @@ export function ActivityFormSheet({
 								}}
 							</form.Field>
 
-							{isEdit && (
-								<form.Field name="xp">
-									{(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid;
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>XP</FieldLabel>
+							<form.Field
+								name="xp"
+								validators={{
+									onChangeListenTo: ["type"],
+									onChange: ({ value, fieldApi }) => {
+										const r = rangoDe(
+											fieldApi.form.getFieldValue("type"),
+											reglas,
+										);
+										return Number.isInteger(value) &&
+											value >= r.minimo &&
+											value <= r.maximo
+											? undefined
+											: `Tiene que estar entre ${r.minimo} y ${r.maximo} XP`;
+									},
+								}}
+							>
+								{(field) => {
+									const rango = rangoDe(form.getFieldValue("type"), reglas);
+									const errores = field.state.meta.errors.filter(Boolean);
+									const isInvalid = errores.length > 0;
+									return (
+										<Field data-invalid={isInvalid}>
+											<FieldLabel htmlFor={field.name}>XP que otorga</FieldLabel>
+											<div className="flex items-center gap-2">
 												<Input
 													id={field.name}
 													type="number"
-													min={0}
-													value={field.state.value}
+													min={rango.minimo}
+													max={rango.maximo}
+													step={1}
+													className="w-28"
+													value={Number.isNaN(field.state.value) ? "" : field.state.value}
 													onBlur={field.handleBlur}
 													onChange={(e) =>
-														field.handleChange(Number(e.target.value))
+														field.handleChange(e.target.valueAsNumber)
 													}
 												/>
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
+												{field.state.value !== rango.recomendado && (
+													<Button
+														type="button"
+														variant="ghost"
+														size="sm"
+														onClick={() => field.handleChange(rango.recomendado)}
+													>
+														Usar recomendado ({rango.recomendado})
+													</Button>
 												)}
-											</Field>
-										);
-									}}
-								</form.Field>
-							)}
+											</div>
+											<FieldDescription>
+												Entre {rango.minimo} y {rango.maximo} XP · recomendado{" "}
+												{rango.recomendado}. Los niveles siguen una curva fija:
+												el rango mantiene el progreso parejo entre cursos.
+											</FieldDescription>
+											{isInvalid && (
+												<p className="text-destructive text-sm">
+													{String(errores[0])}
+												</p>
+											)}
+										</Field>
+									);
+								}}
+							</form.Field>
 
 							<form.Field name="description">
 								{(field) => {
@@ -360,14 +412,24 @@ export function ActivityFormSheet({
 									const isInvalid =
 										field.state.meta.isTouched && !field.state.meta.isValid;
 									const file = field.state.value as File | null;
+									const esExamen = form.getFieldValue("type") === "Examen";
 
 									return (
 										<Field data-invalid={isInvalid}>
 											<FieldLabel htmlFor={field.name}>
 												{isEdit
 													? "Reemplazar archivo (opcional)"
-													: "Archivo adjunto"}
+													: esExamen
+														? "Archivo adjunto (opcional)"
+														: "Archivo adjunto"}
 											</FieldLabel>
+											{!isEdit && esExamen && (
+												<FieldDescription>
+													Los exámenes se configuran con preguntas y opciones
+													después de crear la actividad. No necesitas adjuntar
+													un archivo.
+												</FieldDescription>
+											)}
 											{isEdit && !file && activity.adjunto && (
 												<FieldDescription>
 													Archivo actual: {activity.adjunto.split("/").pop()}

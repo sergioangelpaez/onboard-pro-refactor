@@ -35,9 +35,8 @@ import { Input } from "../../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import {
 	EstadoSelect,
-	GrupoSelect,
+	GruposMultiSelect,
 	InstructorSelect,
-	SIN_GRUPO,
 } from "./course-fields";
 
 export function CreateCourseDialogForm() {
@@ -59,7 +58,7 @@ export function CreateCourseDialogForm() {
 			instructor: "",
 			// Nace como borrador: se publica cuando ya tiene contenido.
 			status: "Cerrado",
-			grupoId: SIN_GRUPO,
+			grupoIds: [],
 			actividades: [],
 		} as CourseFormValues,
 		validators: { onChange: courseFormSchema },
@@ -77,20 +76,22 @@ export function CreateCourseDialogForm() {
 							description: `Se creó el curso "${value.name}".`,
 						});
 
-						// Asignarlo al grupo es lo que le da el curso a la gente. Va
+						// Asignarlo a los grupos es lo que le da el curso a la gente. Va
 						// después porque necesita el id; si falla, el curso igual
 						// queda y se puede asignar desde Grupos.
-						if (value.grupoId !== SIN_GRUPO && curso?.id) {
-							try {
-								await groupsService.addCourses(value.grupoId, [curso.id]);
-								queryClient.invalidateQueries({
-									queryKey: queryKeys.groups.all,
-								});
-							} catch (e) {
+						if (value.grupoIds.length && curso?.id) {
+							const fallos = (
+								await Promise.allSettled(
+									value.grupoIds.map((g) =>
+										groupsService.addCourses(g, [curso.id]),
+									),
+								)
+							).filter((r) => r.status === "rejected");
+							queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
+							if (fallos.length)
 								toast.error(
-									`El curso se creó, pero no se pudo asignar al grupo: ${(e as Error).message}`,
+									`El curso se creó, pero no se pudo asignar a ${fallos.length} ${fallos.length === 1 ? "grupo" : "grupos"}.`,
 								);
-							}
 						}
 
 						if (conLogro && nombreLogro.trim() && curso?.id) {
@@ -198,14 +199,14 @@ export function CreateCourseDialogForm() {
 						}}
 					</form.Field>
 
-					<form.Field name="grupoId">
+					<form.Field name="grupoIds">
 						{(field) => {
 							const isInvalid =
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor="grupoId">Asignar al grupo</FieldLabel>
-									<GrupoSelect
+									<FieldLabel htmlFor="grupoIds">Asignar a grupos</FieldLabel>
+									<GruposMultiSelect
 										id={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}

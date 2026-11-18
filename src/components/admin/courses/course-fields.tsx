@@ -1,6 +1,18 @@
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useAllGroups } from "#/hooks/groups/use-all-groups";
 import { useAllUsers } from "#/hooks/users/use-all-users";
+import { cn } from "@/lib/utils/utils";
+import { Button } from "../../ui/button";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "../../ui/command";
 import { Input } from "../../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -73,6 +85,110 @@ export function GrupoSelect({ id, value, onChange, onBlur }: CampoProps) {
 				))}
 			</SelectContent>
 		</Select>
+	);
+}
+
+/**
+ * Los grupos a los que se asigna el curso: uno, varios o ninguno. Asignar es
+ * lo que le da el curso a la gente (relación grupo↔curso). Con `cursoId`, los
+ * grupos que ya lo tienen salen marcados y bloqueados: quitárselo a un grupo
+ * se hace desde Grupos.
+ */
+export function GruposMultiSelect({
+	id,
+	value,
+	onChange,
+	onBlur,
+	cursoId,
+}: {
+	id: string;
+	value: string[];
+	onChange: (value: string[]) => void;
+	onBlur?: () => void;
+	cursoId?: string;
+}) {
+	const { data: grupos = [], isLoading } = useAllGroups();
+	const yaAsignados = new Set(
+		cursoId
+			? grupos
+					.filter((g) =>
+						((g as { courses?: { id: string }[] }).courses ?? []).some(
+							(c) => c.id === cursoId,
+						),
+					)
+					.map((g) => g.id)
+			: [],
+	);
+	const toggle = (gid: string) =>
+		onChange(
+			value.includes(gid) ? value.filter((v) => v !== gid) : [...value, gid],
+		);
+	const nuevos = value.length;
+	const texto = isLoading
+		? "Cargando grupos..."
+		: nuevos > 0
+			? `${nuevos} ${nuevos === 1 ? "grupo seleccionado" : "grupos seleccionados"}`
+			: yaAsignados.size > 0
+				? `Asignado a ${yaAsignados.size} ${yaAsignados.size === 1 ? "grupo" : "grupos"} · agregar más`
+				: "Elige uno o varios grupos";
+	return (
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button
+					id={id}
+					type="button"
+					variant="outline"
+					role="combobox"
+					className="justify-between font-normal"
+					onBlur={onBlur}
+					disabled={isLoading}
+				>
+					<span className="truncate">{texto}</span>
+					<ChevronsUpDown className="opacity-50" />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent
+				className="w-(--radix-popover-trigger-width) p-0"
+				align="start"
+			>
+				<Command>
+					<CommandInput placeholder="Buscar grupo..." />
+					<CommandList>
+						<CommandEmpty>No hay grupos con ese nombre.</CommandEmpty>
+						<CommandGroup>
+							{grupos.map((g) => {
+								const asignado = yaAsignados.has(g.id);
+								const marcado = asignado || value.includes(g.id);
+								return (
+									<CommandItem
+										key={g.id}
+										value={g.id}
+										keywords={[g.name]}
+										disabled={asignado}
+										onSelect={() => !asignado && toggle(g.id)}
+									>
+										<Check
+											className={cn(
+												"mr-2 size-4",
+												marcado ? "opacity-100" : "opacity-0",
+											)}
+										/>
+										<span className="truncate">{g.name}</span>
+										<span className="ml-auto pl-2 text-muted-foreground text-xs">
+											{asignado
+												? "ya asignado"
+												: g.users?.length
+													? `${g.users.length} personas`
+													: ""}
+										</span>
+									</CommandItem>
+								);
+							})}
+						</CommandGroup>
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
 	);
 }
 

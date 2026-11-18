@@ -5,6 +5,7 @@ import { CoursesRouteContent } from "#/components/admin/courses/courses-route-co
 import { CreateCourseDialogForm } from "#/components/admin/courses/create-course-dialog-form";
 import { Button } from "#/components/ui/button";
 import { useAllCourses } from "#/hooks/courses/use-all-courses";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 export const Route = createFileRoute("/admin/(courses)/courses")({
 	component: CoursesRoute,
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/admin/(courses)/courses")({
  */
 function CoursesRoute() {
 	const [verArchivados, setVerArchivados] = useState(false);
+	const soloLectura = useSoloLectura();
 	const { data, isLoading, error, refetch } = useAllCourses(
 		verArchivados ? "solo" : undefined,
 	);
@@ -29,7 +31,7 @@ function CoursesRoute() {
 						{verArchivados ? <ArrowLeft /> : <Archive />}
 						{verArchivados ? "Volver al catálogo" : "Ver archivados"}
 					</Button>
-					{!verArchivados && <CreateCourseDialogForm />}
+					{!verArchivados && !soloLectura && <CreateCourseDialogForm />}
 				</div>
 			</div>
 

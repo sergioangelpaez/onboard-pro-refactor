@@ -2,13 +2,80 @@ import type { Entrega } from "../schemas/entregas";
 import { apiFetch } from "./api-fetch";
 import { ApiError } from "./errors";
 
-/** Lo que devuelve `GET /activities/:id/mi-entrega`. */
-export type MiEntrega = Omit<Entrega, "aprendiz" | "estado"> & {
+/** Quién revisó una entrega. Solo el nombre: el aprendiz no necesita más. */
+export interface Revisor {
+	firstname: string;
+	lastname: string;
+}
+
+/**
+ * Lo que devuelve `GET /activities/:id/mi-entrega`.
+ *
+ * `revisadoPor`, `revisadoAt` y `xpObtenido` llegan en null mientras la
+ * entrega espera revisión: no hay a quién nombrar ni XP que mostrar todavía.
+ */
+export type MiEntrega = Omit<Entrega, "aprendiz" | "estado" | "revisadoPor"> & {
 	id: string;
 	estado: "entregado" | "aprobada" | "rehacer";
+	revisadoPor?: Revisor | null;
+	xpObtenido?: number | null;
 };
 
+/** Una de mis entregas en `GET /entregas/mias`, con su actividad y su curso. */
+export interface EntregaPropia {
+	id: string;
+	actividad: { id: string; titulo: string };
+	curso: { id: string; nombre: string };
+	estado: "entregado" | "aprobada" | "rehacer";
+	entregadoAt: string | null;
+	feedback: string | null;
+	revisadoAt: string | null;
+	revisadoPor: Revisor | null;
+	xpObtenido: number | null;
+}
+
+export type EstadoBandeja = "entregado" | "rehacer" | "aprobada" | "todas";
+
+/** Una entrega en la bandeja de quien corrige, con su actividad y su curso. */
+export type EntregaDeBandeja = Omit<Entrega, "id" | "estado"> & {
+	id: string;
+	estado: "entregado" | "aprobada" | "rehacer";
+	actividad: { id: string; titulo: string };
+	curso: { id: string; nombre: string };
+};
+
+/** `GET /entregas`. */
+export interface Bandeja {
+	contadores: {
+		porRevisar: number;
+		rehacer: number;
+		aprobadas: number;
+		total: number;
+	};
+	entregas: EntregaDeBandeja[];
+}
+
 export const entregasService = {
+	/**
+	 * Mi bandeja: las entregas de los cursos que dicto (o de toda la
+	 * organización, si soy administrador). Los contadores salen siempre
+	 * completos, sin importar el filtro.
+	 */
+	async bandeja(params: {
+		estado?: EstadoBandeja;
+		orden?: "antiguas" | "recientes";
+		cursoId?: string;
+		tenantId?: string | null;
+	} = {}) {
+		const query = new URLSearchParams();
+		if (params.estado) query.set("estado", params.estado);
+		if (params.orden) query.set("orden", params.orden);
+		if (params.cursoId) query.set("cursoId", params.cursoId);
+		if (params.tenantId) query.set("tenantId", params.tenantId);
+		const qs = query.toString();
+		return await apiFetch<Bandeja>(`/entregas${qs ? `?${qs}` : ""}`);
+	},
+
 	/**
 	 * Mi entrega de una actividad, o null si todavía no entregué.
 	 *
@@ -22,6 +89,15 @@ export const entregasService = {
 			if (error instanceof ApiError && error.status === 404) return null;
 			throw error;
 		}
+	},
+
+	/**
+	 * Todas mis entregas, de todos mis cursos (HU-049). Es lo que ve el
+	 * aprendiz en su perfil para seguir qué le revisaron y qué le dijeron sin
+	 * tener que abrir actividad por actividad.
+	 */
+	async mias() {
+		return await apiFetch<EntregaPropia[]>("/entregas/mias");
 	},
 
 	/**

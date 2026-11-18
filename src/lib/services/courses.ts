@@ -1,4 +1,5 @@
 import type {
+	AssignedCourse,
 	Course,
 	CreateCoursePayload,
 	Section,
@@ -18,7 +19,42 @@ export interface CourseImpact {
 	actividadesCompletadas: number;
 }
 
+/** `GET /courses/:id/participantes`: quiénes están en el curso. */
+export interface CourseParticipants {
+	curso: { id: string; nombre: string };
+	instructor: {
+		id: string | null;
+		email: string;
+		firstname: string | null;
+		lastname: string | null;
+		role: string;
+		/** null si no cargó un número. */
+		telefono?: string | null;
+	} | null;
+	grupos: { id: string; nombre: string }[];
+	/** El correo solo llega a quien administra o dicta el curso. */
+	aprendices: {
+		id: string;
+		firstname: string;
+		lastname: string;
+		level: number;
+		email?: string;
+	}[];
+	total: number;
+}
+
+export interface ChangeInstructorResponse {
+	message: string;
+	anterior: string;
+	instructor: string;
+}
+
 export const coursesService = {
+	/** El instructor, los grupos y los aprendices del curso. */
+	async participants(id: string) {
+		return await apiFetch<CourseParticipants>(`/courses/${id}/participantes`);
+	},
+
 	async create(values: CreateCoursePayload) {
 		// Devuelve el curso con su id, que hace falta para colgarle cosas.
 		return await apiFetch<Course>("/courses/create", {
@@ -37,6 +73,17 @@ export const coursesService = {
 			{
 				method: "PUT",
 				body: JSON.stringify(values),
+			},
+		);
+	},
+
+	/** Cambia el instructor responsable del curso. Solo administradores. */
+	async changeInstructor(id: string, instructor: string) {
+		return await apiFetch<ChangeInstructorResponse>(
+			`/courses/${id}/instructor`,
+			{
+				method: "PUT",
+				body: JSON.stringify({ instructor }),
 			},
 		);
 	},
@@ -74,11 +121,11 @@ export const coursesService = {
 	},
 
 	/**
-	 * Los cursos que me tocan por mis grupos. Para un aprendiz el backend ya
-	 * deja afuera los despublicados.
+	 * Cursos asignados al usuario autenticado. El backend resuelve las
+	 * asignaciones por grupos y deja afuera los cursos no publicados.
 	 */
 	async mine() {
-		return await apiFetch<Course[]>("/courses/me");
+		return await apiFetch<AssignedCourse[]>("/courses/me");
 	},
 
 	async getById(id: string) {

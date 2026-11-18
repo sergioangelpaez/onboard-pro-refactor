@@ -59,12 +59,21 @@ export const authService = {
 		});
 	},
 
-	/** Changes the password for the current authenticated user. */
+	/**
+	 * Cambia la contraseña de la sesión actual. El backend devuelve un token
+	 * nuevo: si la contraseña era temporal, el anterior quedaba restringido a
+	 * cambiarla, así que se reemplaza.
+	 */
 	async changePassword(values: ChangePasswordPayload) {
-		return await apiFetch<GeneralAPIResponse>("/auth/change-password", {
-			method: "POST",
-			body: JSON.stringify(values),
-		});
+		const response = await apiFetch<{ message: string; token?: string }>(
+			"/auth/change-password",
+			{
+				method: "POST",
+				body: JSON.stringify(values),
+			},
+		);
+		if (response.token) tokenStorage.set(response.token);
+		return response;
 	},
 
 	/** Initiates the forgot password process by sending a reset link to the user's email. */

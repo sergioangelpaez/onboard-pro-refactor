@@ -5,6 +5,7 @@ import { ActivitiesRouteContent } from "#/components/admin/activities/activities
 import { ActivityFormSheet } from "#/components/admin/activities/activity-form";
 import { useAllActivities } from "#/hooks/activities/use-all-activities";
 import { Button } from "@/components/ui/button";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 
 export const Route = createFileRoute("/admin/(activities)/activities")({
 	component: RouteComponent,
@@ -12,16 +13,19 @@ export const Route = createFileRoute("/admin/(activities)/activities")({
 
 function RouteComponent() {
 	const [open, setOpen] = useState(false);
+	const soloLectura = useSoloLectura();
 	const { data, isLoading, error, refetch } = useAllActivities();
 
 	return (
 		<div className="app-container">
 			<div className="mb-4 flex items-center justify-between">
 				<h1>Actividades</h1>
-				<Button onClick={() => setOpen(true)}>
-					<Plus />
-					Crear actividad
-				</Button>
+				{!soloLectura && (
+					<Button onClick={() => setOpen(true)}>
+						<Plus />
+						Crear actividad
+					</Button>
+				)}
 			</div>
 
 			<ActivitiesRouteContent

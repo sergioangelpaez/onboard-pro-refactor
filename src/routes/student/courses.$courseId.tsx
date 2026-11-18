@@ -5,6 +5,7 @@ import { EmptyState } from "#/components/shared/states/empty-state";
 import { ErrorState } from "#/components/shared/states/error-state";
 import { LoadingState } from "#/components/shared/states/loading-state";
 import { CourseHero } from "#/components/student/course-hero";
+import { CoursePeople } from "#/components/student/course-people";
 import { progresoDe } from "#/components/student/course-progress";
 import { CourseRankingCard } from "#/components/student/course-ranking-card";
 import { CourseSection } from "#/components/student/course-section";
@@ -73,12 +74,13 @@ function CourseRoute() {
 					</Link>
 				</Button>
 				<h1>{curso?.name ?? "Curso"}</h1>
+				<CoursePeople courseId={courseId} />
 			</div>
 
 			{/* Cómo va en el curso y quién va adelante, lado a lado. */}
 			{secciones && total > 0 && (
 				<div className="grid gap-4 lg:grid-cols-3">
-					<div className="lg:col-span-2">
+					<div className="lg:col-span-2 [&>*]:h-full">
 						<CourseHero
 							secciones={secciones}
 							xpGanado={yo?.xp ?? (ranking ? 0 : null)}

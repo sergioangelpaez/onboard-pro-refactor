@@ -2,6 +2,7 @@ import { Globe, Target } from "lucide-react";
 import { Badge } from "#/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import type { Logro } from "#/lib/services/logros";
+import { AchievementActions } from "./achievement-actions";
 
 /**
  * Un logro del catálogo.
@@ -14,9 +15,12 @@ export function AchievementCard({
 	logro,
 	curso,
 	organizacion,
+	editable = true,
 }: {
 	logro: Logro;
 	curso?: string;
+	/** Un logro genérico solo lo toca el superadmin. */
+	editable?: boolean;
 	/** Solo se pasa cuando hace falta distinguir organizaciones (superadmin). */
 	organizacion?: string;
 }) {
@@ -47,6 +51,7 @@ export function AchievementCard({
 						{!logro.activo && <Badge variant="outline">Inactivo</Badge>}
 					</div>
 				</div>
+				{editable && <AchievementActions logro={logro} />}
 			</CardHeader>
 
 			<CardContent className="space-y-2 text-sm">

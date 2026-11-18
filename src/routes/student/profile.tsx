@@ -14,6 +14,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ChangePasswordDialogForm } from "#/components/auth/change-password-dialog-form";
 import { UserGroupsCard } from "#/components/profile/user-groups-card";
+import { MisEntregasCard } from "#/components/student/mis-entregas-card";
+import { UltimasAcreditaciones } from "#/components/student/ultimas-acreditaciones";
 import { Avatar, AvatarFallback } from "#/components/ui/avatar";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
@@ -39,8 +41,8 @@ export const Route = createFileRoute("/student/profile")({
 });
 
 /**
- * El perfil del aprendiz: sus datos, la seguridad de su cuenta, sus grupos y
- * un resumen de su progreso. Antes "Perfil" en el menú lo mandaba al inicio
+ * El perfil del aprendiz: sus datos, la seguridad de su cuenta, sus grupos,
+ * de dónde salió su XP y cómo van sus entregas. Antes "Perfil" en el menú lo mandaba al inicio
  * porque esta página no existía.
  */
 function PerfilRoute() {
@@ -152,6 +154,9 @@ function PerfilRoute() {
 					isError={grupos.isError}
 					refetch={grupos.refetch}
 				/>
+
+				<UltimasAcreditaciones />
+				<MisEntregasCard />
 			</div>
 
 			<EditarDatos user={user} open={editando} onOpenChange={setEditando} />

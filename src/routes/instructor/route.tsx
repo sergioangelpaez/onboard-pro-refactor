@@ -7,6 +7,7 @@ export const Route = createFileRoute("/instructor")({
 	beforeLoad: async ({ context }) => {
 		const user = await getCurrentUser(context.queryClient);
 		if (!user) throw redirect({ to: "/auth" });
+		if (user.debeCambiarPassword) throw redirect({ to: "/cambiar-password" });
 		if (rolReal(user.role) !== "instructor")
 			throw redirect({ to: "/auth" });
 		return { user };
@@ -19,7 +20,8 @@ function InstructorLayout() {
 		<SidebarProvider>
 			<AppSidebar />
 			<main className="ml-0 flex min-h-screen min-w-0 flex-1 flex-col transition-all">
-				<SidebarTrigger className="ml-4 mt-4" />
+				{/* En el celular la barra se esconde entera: ahí el botón va afuera. */}
+				<SidebarTrigger className="mt-4 ml-4 md:hidden" />
 				<Outlet />
 			</main>
 		</SidebarProvider>

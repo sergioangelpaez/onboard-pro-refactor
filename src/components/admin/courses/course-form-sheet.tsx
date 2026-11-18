@@ -30,9 +30,8 @@ import {
 import { Input } from "../../ui/input";
 import {
 	EstadoSelect,
-	GrupoSelect,
+	GruposMultiSelect,
 	InstructorSelect,
-	SIN_GRUPO,
 } from "./course-fields";
 
 interface CourseFormSheetProps {
@@ -64,19 +63,18 @@ export function CourseFormSheet({
 			name: course.name,
 			instructor: course.instructor ?? "",
 			status: course.status === "Abierto" ? "Abierto" : "Cerrado",
-			grupoId: SIN_GRUPO,
+			grupoIds: [],
 			actividades: [],
 		} as CourseFormValues,
 		validators: { onChange: courseFormSchema },
 		onSubmit: async ({ value }) => {
 			const cambios: UpdateCoursePayload = {};
 			if (value.name.trim() !== course.name) cambios.name = value.name.trim();
-			if (value.instructor !== course.instructor)
-				cambios.instructor = value.instructor;
 			if (value.status !== course.status) cambios.status = value.status;
-			const asignar = value.grupoId !== SIN_GRUPO;
+			const cambioInstructor = value.instructor !== course.instructor;
+			const asignar = value.grupoIds.length > 0;
 
-			if (!Object.keys(cambios).length && !asignar) {
+			if (!Object.keys(cambios).length && !cambioInstructor && !asignar) {
 				toast.info("No cambiaste nada.");
 				return;
 			}
@@ -85,7 +83,12 @@ export function CourseFormSheet({
 			try {
 				if (Object.keys(cambios).length)
 					await coursesService.update(course.id, cambios);
-				if (asignar) await groupsService.addCourses(value.grupoId, [course.id]);
+				if (cambioInstructor)
+					await coursesService.changeInstructor(course.id, value.instructor);
+				if (asignar)
+					await Promise.all(
+						value.grupoIds.map((g) => groupsService.addCourses(g, [course.id])),
+					);
 				toast.success("Curso actualizado", {
 					description: `Se guardaron los cambios de "${value.name.trim()}".`,
 				});
@@ -181,21 +184,22 @@ export function CourseFormSheet({
 						)}
 					</form.Field>
 
-					<form.Field name="grupoId">
+					<form.Field name="grupoIds">
 						{(field) => (
 							<Field>
 								<FieldLabel htmlFor={field.name}>
-									Asignar también a un grupo
+									Asignar a más grupos
 								</FieldLabel>
-								<GrupoSelect
+								<GruposMultiSelect
 									id={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
 									onChange={field.handleChange}
+									cursoId={course.id}
 								/>
 								<FieldDescription>
-									Se suma a los grupos que ya lo tienen. Para quitárselo a un
-									grupo, hazlo desde Grupos.
+									Los grupos que ya lo tienen aparecen marcados. Para quitárselo
+									a un grupo, hazlo desde Grupos.
 								</FieldDescription>
 							</Field>
 						)}

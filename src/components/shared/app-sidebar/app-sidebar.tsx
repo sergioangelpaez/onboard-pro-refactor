@@ -1,17 +1,18 @@
 import {
 	BuildingComplex,
 	CircleUser,
+	Inbox,
 	LayoutDashboard,
 	LibraryBig,
 	ListTodo,
 	Medal,
-	Star,
 	Trophy,
 	UserGroup,
 	Users,
 } from "lucide-react";
 import type * as React from "react";
 import { SidebarProgress } from "#/components/student/sidebar-progress";
+import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
 import { useCurrentUser } from "#/hooks/users/use-current-user";
 import { type RolReal, rolReal } from "#/lib/utils/auth/session";
 import {
@@ -20,6 +21,7 @@ import {
 	SidebarFooter,
 	SidebarHeader,
 	SidebarRail,
+	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -55,10 +57,10 @@ const ACTIVIDADES = {
 	icon: ListTodo,
 	isActive: false,
 };
-const NIVELES = {
-	title: "Niveles",
-	url: "/admin/niveles",
-	icon: Star,
+const ENTREGAS = {
+	title: "Entregas",
+	url: "/instructor/entregas",
+	icon: Inbox,
 	isActive: false,
 };
 const LOGROS = {
@@ -93,13 +95,13 @@ const navByRole: Record<
 		GRUPOS,
 		ACTIVIDADES,
 		LOGROS,
-		NIVELES,
 	],
-	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS, NIVELES],
+	admin: [RESUMEN, USUARIOS, CURSOS, GRUPOS, ACTIVIDADES, LOGROS],
 	// Su propia area: no comparte pantallas con la administracion de la empresa.
 	instructor: [
 		{ ...RESUMEN, url: "/instructor/home" },
 		{ ...CURSOS, title: "Mis cursos", url: "/instructor/courses" },
+		{ ...ENTREGAS, url: "/instructor/entregas" },
 		{ ...GRUPOS, url: "/instructor/groups" },
 	],
 	student: [
@@ -125,16 +127,27 @@ const navByRole: Record<
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useCurrentUser();
+	const organizacion = useOrganizacionActiva();
 
 	if (!user) return null;
 
-	// "superadmin" y "admin" se normalizan a "admin", así que comparten menú.
-	const items = navByRole[rolReal(user.role)];
+	// Organizaciones es de la plataforma: el superadmin la ve solo cuando no
+	// está parado en ninguna empresa.
+	const items = navByRole[rolReal(user.role)].filter(
+		(i) => !(organizacion && i.url === "/admin/tenants"),
+	);
 
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher />
+				{/* Abrir y cerrar la barra desde la barra misma: así no ocupa lugar
+				    arriba del contenido. En el celular se usa el de afuera. */}
+				<div className="flex items-center gap-1 group-data-[collapsible=icon]:flex-col">
+					<div className="min-w-0 flex-1 group-data-[collapsible=icon]:w-full">
+						<TeamSwitcher />
+					</div>
+					<SidebarTrigger className="hidden shrink-0 text-muted-foreground md:inline-flex" />
+				</div>
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={items} />

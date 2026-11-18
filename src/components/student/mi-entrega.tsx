@@ -3,6 +3,7 @@ import {
 	LoaderCircle,
 	MessageSquare,
 	Paperclip,
+	Sparkles,
 	Upload,
 } from "lucide-react";
 import { useRef, useState } from "react";
@@ -15,6 +16,7 @@ import {
 	type MiEntrega as Entrega,
 	entregasService,
 } from "#/lib/services/entregas";
+import { haceCuanto } from "#/lib/utils/fechas";
 
 /** El mismo tope que aplica el backend al recibir el archivo. */
 const MAX_BYTES = 50 * 1024 * 1024;
@@ -159,19 +161,54 @@ function Detalle({ entrega }: { entrega: Entrega }) {
 				</Button>
 			)}
 
-			{entrega.feedback && (
-				<div className="mt-2 space-y-1 rounded-md bg-muted/60 p-3">
-					<p className="flex items-center gap-1.5 font-medium text-xs">
-						<MessageSquare className="size-3.5" />
-						Comentario de quien revisó
-						{entrega.revisadoAt && (
-							<span className="font-normal text-muted-foreground">
-								· {fecha(entrega.revisadoAt)}
-							</span>
-						)}
-					</p>
-					<p className="whitespace-pre-line text-sm">{entrega.feedback}</p>
-				</div>
+			{entrega.estado !== "entregado" && <Revision entrega={entrega} />}
+		</div>
+	);
+}
+
+/**
+ * Lo que dijo quien revisó, quién fue, cuándo y cuánto XP dejó (HU-049).
+ *
+ * Solo aparece con la entrega ya revisada: mientras espera, el backend manda
+ * esos datos en null y no hay nada que contar. El nombre de quien revisó
+ * importa porque es a quien preguntarle si algo de la devolución no se
+ * entiende.
+ */
+function Revision({ entrega }: { entrega: Entrega }) {
+	const aprobada = entrega.estado === "aprobada";
+	const revisor = entrega.revisadoPor
+		? `${entrega.revisadoPor.firstname} ${entrega.revisadoPor.lastname}`.trim()
+		: null;
+	const xp = entrega.xpObtenido ?? 0;
+
+	return (
+		<div
+			className={`mt-2 space-y-2 rounded-md border p-3 ${
+				aprobada ? "border-emerald-500/30 bg-emerald-500/5" : "bg-muted/60"
+			}`}
+		>
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<p className="flex items-center gap-1.5 font-medium text-xs">
+					<MessageSquare className="size-3.5" />
+					Comentario de {revisor ?? "quien revisó"}
+				</p>
+				{aprobada && xp > 0 && (
+					<span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-700 text-xs tabular-nums dark:text-emerald-300">
+						<Sparkles className="size-3" />+{xp} XP
+					</span>
+				)}
+			</div>
+			{entrega.feedback ? (
+				<p className="whitespace-pre-line text-sm">{entrega.feedback}</p>
+			) : (
+				<p className="text-muted-foreground text-sm italic">
+					Sin comentarios.
+				</p>
+			)}
+			{entrega.revisadoAt && (
+				<p className="text-muted-foreground text-xs">
+					Revisada {haceCuanto(entrega.revisadoAt)} · {fecha(entrega.revisadoAt)}
+				</p>
 			)}
 		</div>
 	);

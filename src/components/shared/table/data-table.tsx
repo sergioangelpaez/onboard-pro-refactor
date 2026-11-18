@@ -94,7 +94,7 @@ export function DataTable<TData extends RowData>({
 			<Input
 				value={table.state.globalFilter ?? ""}
 				onChange={(e) => table.setGlobalFilter(String(e.target.value))}
-				placeholder="Search..."
+				placeholder="Buscar..."
 			/>
 			<div className="overflow-x-auto rounded-md border">
 				<Table>

@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { TenantFormSheet } from "#/components/admin/tenants/tenants-form";
 import { TenantsRouteContent } from "#/components/admin/tenants/tenants-route-content";
 import { Button } from "#/components/ui/button";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
+import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
 
 export const Route = createFileRoute("/admin/(tenants)/tenants")({
 	component: TenantsRoute,
@@ -13,6 +14,11 @@ export const Route = createFileRoute("/admin/(tenants)/tenants")({
 function TenantsRoute() {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const { data, isLoading, error, refetch } = useAllTenants();
+	const organizacion = useOrganizacionActiva();
+
+	// Dentro de una empresa, Organizaciones no está en el menú: si se elige
+	// una estando acá, se pasa al resumen de esa empresa.
+	if (organizacion) return <Navigate to="/admin/home" />;
 
 	return (
 		<div className="app-container">

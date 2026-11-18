@@ -9,6 +9,28 @@ export interface RankingEntry {
 	posicion: number;
 }
 
+/**
+ * La ventana de tiempo de un ranking. Con "semana" o "mes" el `xp` de cada
+ * fila es solo lo ganado en ese periodo: así quien entró hace poco puede ir
+ * adelante si viene trabajando, en vez de competir con meses de ventaja.
+ */
+export type PeriodoRanking = "semana" | "mes" | "siempre";
+
+/** Una acreditación de XP: cuánto, por qué y de dónde salió (HU-056). */
+export interface MovimientoXp {
+	id: string;
+	xp: number;
+	motivo: string;
+	origen: {
+		tipo: "actividad" | "logro";
+		id: string;
+		titulo: string;
+		/** null en los logros, que no pertenecen a un curso. */
+		curso: { id: string; nombre: string } | null;
+	};
+	fecha: string;
+}
+
 /** Lo que devuelve `GET /gamification/me`: el progreso de quien inició sesión. */
 export interface MyProgress {
 	xp: number;
@@ -65,8 +87,22 @@ export const gamificationService = {
 	 * La tabla de posiciones de la organización: solo aprendices, por XP. Se
 	 * reutiliza `RankingEntry`, la misma forma que el ranking por curso.
 	 */
-	async ranking() {
-		return await apiFetch<RankingEntry[]>("/gamification/ranking");
+	async ranking(grupoId?: string, periodo: PeriodoRanking = "siempre") {
+		const query = new URLSearchParams({ periodo });
+		if (grupoId) query.set("grupoId", grupoId);
+		return await apiFetch<RankingEntry[]>(`/gamification/ranking?${query}`);
+	},
+
+	/**
+	 * Mis últimas acreditaciones de XP, de la más nueva a la más vieja.
+	 *
+	 * Es la respuesta a "¿de dónde salió este XP?": sin esto el aprendiz solo
+	 * ve un número que sube.
+	 */
+	async movimientos(limite = 20) {
+		return await apiFetch<{ movimientos: MovimientoXp[] }>(
+			`/gamification/me/movimientos?limite=${limite}`,
+		);
 	},
 
 	/**
@@ -98,9 +134,13 @@ export const gamificationService = {
 	 * Es distinto del ranking general: solo cuenta el XP que salio de las
 	 * actividades de ese curso.
 	 */
-	async courseRanking(courseId: string, limite = 3) {
+	async courseRanking(
+		courseId: string,
+		limite = 3,
+		periodo: PeriodoRanking = "siempre",
+	) {
 		return await apiFetch<RankingEntry[]>(
-			`/gamification/courses/${courseId}/ranking?limite=${limite}`,
+			`/gamification/courses/${courseId}/ranking?limite=${limite}&periodo=${periodo}`,
 		);
 	},
 };

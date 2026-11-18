@@ -1,7 +1,11 @@
 import { useForm } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
+import { useOrganizacionActiva } from "#/hooks/tenants/use-organizacion-activa";
 import { useCreateUser } from "#/hooks/users/use-create-user";
+import { useSoloLectura } from "#/hooks/users/use-solo-lectura";
 import { useUpdateUser } from "#/hooks/users/use-update-user";
 import {
 	type CreateUserPayload,
@@ -30,23 +34,25 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "#/components/ui/sheet";
+import { ETIQUETA_ROL } from "./etiquetas";
 
-type Status = "Active" | "Inactive" | "Pending" | "Suspended";
+// El backend solo acepta estos dos estados.
+type Status = "Active" | "Inactive";
 
-type Role = "student" | "admin" | "instructor" | "superadmin";
+type Role = "student" | "admin" | "instructor";
 
-const ROLE_OPTIONS: { value: Role; label: string }[] = [
-	{ value: "student", label: "Estudiante" },
-	{ value: "admin", label: "Administrador" },
-	{ value: "instructor", label: "Instructor" },
-	{ value: "superadmin", label: "Super Administrador" },
-];
+// Lo que puede asignar el administrador de una organización. Superadmin no
+// está: es de la plataforma y no se crea desde aquí.
+const ROLE_OPTIONS: { value: Role; label: string }[] = (
+	["student", "instructor", "admin"] as const
+).map((value) => ({ value, label: ETIQUETA_ROL[value] }));
+
+// El superadministrador solo da de alta al administrador de la organización.
+const ROLE_OPTIONS_SUPER = ROLE_OPTIONS.filter((r) => r.value === "admin");
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
 	{ value: "Active", label: "Activo" },
 	{ value: "Inactive", label: "Inactivo" },
-	{ value: "Pending", label: "Pendiente" },
-	{ value: "Suspended", label: "Suspendido" },
 ];
 
 interface UserFormSheetProps {
@@ -64,6 +70,18 @@ export function UserFormSheet({
 	const createUser = useCreateUser();
 	const updateUser = useUpdateUser();
 	const isPending = createUser.isPending || updateUser.isPending;
+	const esSuper = useSoloLectura();
+	const organizacion = useOrganizacionActiva();
+	const roles = esSuper ? ROLE_OPTIONS_SUPER : ROLE_OPTIONS;
+	// El superadmin no pertenece a ninguna organización: elige en cuál crea al
+	// administrador. Arranca con la que tenga activa en el menú, si hay una.
+	const pideOrganizacion = esSuper && !isEdit;
+	const organizaciones = useAllTenants(pideOrganizacion);
+	const [orgElegida, setOrgElegida] = useState<string>(organizacion ?? "");
+	useEffect(() => {
+		if (open) setOrgElegida(organizacion ?? "");
+	}, [open, organizacion]);
+	const faltaOrganizacion = pideOrganizacion && !orgElegida;
 
 	const form = useForm({
 		defaultValues: {
@@ -71,13 +89,8 @@ export function UserFormSheet({
 			firstname: user?.firstname ?? "",
 			lastname: user?.lastname ?? "",
 			phonumber: user?.phonumber ?? "",
-			role: user?.role ?? "student",
+			role: esSuper ? "admin" : ((user?.role as Role | undefined) ?? "student"),
 			status: user?.status ?? "Active",
-			level: user?.level ?? 0,
-			xp: user?.xp ?? 0,
-			streak: user?.streak ?? 0,
-			average: user?.average ?? 0,
-			missions: user?.missions ?? "",
 		} as UpdateUserPayload | CreateUserPayload,
 		validators: { onChange: isEdit ? updateUserSchema : userPayloadSchema },
 		onSubmit: ({ value }) => {
@@ -101,7 +114,13 @@ export function UserFormSheet({
 					options,
 				);
 			} else {
-				createUser.mutate(value as CreateUserPayload, options);
+				createUser.mutate(
+					{
+						...(value as CreateUserPayload),
+						...(pideOrganizacion ? { tenantId: orgElegida } : {}),
+					},
+					options,
+				);
 			}
 		},
 	});
@@ -119,7 +138,9 @@ export function UserFormSheet({
 					<SheetDescription>
 						{isEdit
 							? "Modifica los datos del usuario."
-							: "Completa los datos para registrar un nuevo usuario."}
+							: esSuper
+								? "Registra al administrador de la organización: desde su cuenta se gestiona el resto."
+								: "Completa los datos para registrar un nuevo usuario."}
 					</SheetDescription>
 				</SheetHeader>
 
@@ -133,6 +154,32 @@ export function UserFormSheet({
 				>
 					<ScrollArea className="min-h-0 flex-1 [&_[data-radix-scroll-area-viewport]>div]:block!">
 						<div className="grid gap-3">
+							{pideOrganizacion && (
+								<Field data-invalid={faltaOrganizacion}>
+									<FieldLabel htmlFor="organizacion">Organización</FieldLabel>
+									<Select value={orgElegida} onValueChange={setOrgElegida}>
+										<SelectTrigger id="organizacion">
+											<SelectValue
+												placeholder={
+													organizaciones.isLoading
+														? "Cargando organizaciones..."
+														: "Selecciona la organización"
+												}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											{(organizaciones.data ?? [])
+												.filter((o) => o.active !== false)
+												.map((o) => (
+													<SelectItem key={o.id} value={o.id}>
+														{o.name}
+													</SelectItem>
+												))}
+										</SelectContent>
+									</Select>
+								</Field>
+							)}
+
 							<form.Field name="firstname">
 								{(field) => {
 									const isInvalid =
@@ -187,7 +234,7 @@ export function UserFormSheet({
 												id={field.name}
 												type="email"
 												autoComplete="off"
-												placeholder="juan@ucentral.edu.co"
+												placeholder="juan.perez@empresa.com"
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onChange={(e) => field.handleChange(e.target.value)}
@@ -228,8 +275,9 @@ export function UserFormSheet({
 									{(field) => (
 										<PasswordField
 											field={field}
-											label="Contraseña"
+											label="Contraseña temporal"
 											autoComplete="new-password"
+											description="La persona tendrá que cambiarla en su primer ingreso."
 										/>
 									)}
 								</form.Field>
@@ -244,7 +292,9 @@ export function UserFormSheet({
 											<FieldLabel htmlFor={field.name}>Rol</FieldLabel>
 											<Select
 												value={field.state.value}
-												onValueChange={field.handleChange}
+												onValueChange={(v) => field.handleChange(v as Role)}
+												// Con una sola opción no hay nada que elegir.
+												disabled={roles.length === 1}
 											>
 												<SelectTrigger
 													id={field.name}
@@ -253,7 +303,7 @@ export function UserFormSheet({
 													<SelectValue placeholder="Selecciona un rol" />
 												</SelectTrigger>
 												<SelectContent>
-													{ROLE_OPTIONS.map((role) => (
+													{roles.map((role) => (
 														<SelectItem key={role.value} value={role.value}>
 															{role.label}
 														</SelectItem>
@@ -308,139 +358,14 @@ export function UserFormSheet({
 								</form.Field>
 							)}
 
-							<div className="grid grid-cols-2 grid-rows-auto gap-4">
-								<form.Field name="xp">
-									{(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid;
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>
-													Experiencia
-												</FieldLabel>
-												<Input
-													id={field.name}
-													type="number"
-													min={0}
-													placeholder="0"
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) =>
-														field.handleChange(e.target.valueAsNumber || 0)
-													}
-												/>
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
-												)}
-											</Field>
-										);
-									}}
-								</form.Field>
-
-								<form.Field name="level">
-									{(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid;
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>Nivel</FieldLabel>
-												<Input
-													id={field.name}
-													type="number"
-													min={0}
-													placeholder="0"
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) =>
-														field.handleChange(e.target.valueAsNumber || 0)
-													}
-												/>
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
-												)}
-											</Field>
-										);
-									}}
-								</form.Field>
-
-								<form.Field name="streak">
-									{(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid;
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>Racha</FieldLabel>
-												<Input
-													id={field.name}
-													type="number"
-													min={0}
-													placeholder="0"
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) =>
-														field.handleChange(e.target.valueAsNumber || 0)
-													}
-												/>
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
-												)}
-											</Field>
-										);
-									}}
-								</form.Field>
-
-								<form.Field name="average">
-									{(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid;
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>Promedio</FieldLabel>
-												<Input
-													id={field.name}
-													type="number"
-													min={0}
-													placeholder="0"
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) =>
-														field.handleChange(e.target.valueAsNumber || 0)
-													}
-												/>
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
-												)}
-											</Field>
-										);
-									}}
-								</form.Field>
-
-								<form.Field name="missions">
-									{(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid;
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>Misiones</FieldLabel>
-												<Input
-													id={field.name}
-													min={0}
-													placeholder="0"
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) => field.handleChange(e.target.value)}
-												/>
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
-												)}
-											</Field>
-										);
-									}}
-								</form.Field>
-							</div>
 						</div>
 					</ScrollArea>
 
+					{faltaOrganizacion && (
+						<p className="text-muted-foreground text-sm">
+							Elige la organización del administrador.
+						</p>
+					)}
 					<SheetFooter className="px-0">
 						<Button
 							type="button"
@@ -452,7 +377,10 @@ export function UserFormSheet({
 						</Button>
 						<form.Subscribe selector={(s) => s.canSubmit}>
 							{(canSubmit) => (
-								<Button type="submit" disabled={!canSubmit || isPending}>
+								<Button
+									type="submit"
+									disabled={!canSubmit || isPending || faltaOrganizacion}
+								>
 									{isPending && <LoaderCircle className="animate-spin" />}
 									{isEdit ? "Actualizar usuario" : "Crear usuario"}
 								</Button>

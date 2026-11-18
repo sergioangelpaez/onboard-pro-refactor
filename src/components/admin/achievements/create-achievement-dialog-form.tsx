@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { LoaderCircle, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { VistaPreviaLogro } from "./vista-previa-logro";
 import { useAchievementOptions } from "#/hooks/achievements/use-achievement-options";
 import { useCreateAchievement } from "#/hooks/achievements/use-create-achievement";
 import { useAllTenants } from "#/hooks/tenants/use-all-tenants";
@@ -60,9 +61,9 @@ export function CreateAchievementDialogForm() {
 	const nombreOrganizacion = esSuper
 		? empresas.find((e) => e.id === organizacion)?.name
 		: user?.tenantName;
-	// El superadmin sin organización elegida solo puede crear genéricos: un
-	// logro de organización o de curso necesita saber de cuál.
-	const soloGenerico = esSuper && !organizacion;
+	// El superadmin solo crea logros genéricos (de toda la plataforma): los de
+	// una organización o de un curso los crea su administrador.
+	const soloGenerico = esSuper;
 	const iconoDeCategoria = new Map(
 		(options?.categorias ?? []).map((c) => [c.nombre, c.icono]),
 	);
@@ -113,7 +114,7 @@ export function CreateAchievementDialogForm() {
 				</Button>
 			</DialogTrigger>
 
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Crear logro</DialogTitle>
 					<DialogDescription>
@@ -350,7 +351,7 @@ export function CreateAchievementDialogForm() {
 									</Select>
 									<FieldDescription>
 										{soloGenerico
-											? "Para crear un logro de una sola organización, elige primero la organización en el menú."
+											? "Vale para todas las organizaciones. Los logros de una sola organización los crea su administrador."
 											: "Cuenta lo que la persona hace en todos sus cursos."}
 									</FieldDescription>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -358,6 +359,23 @@ export function CreateAchievementDialogForm() {
 							);
 						}}
 					</form.Field>
+
+					<form.Subscribe
+						selector={(s) =>
+							[s.values.tipoCondicion, s.values.meta, s.values.cursoId] as const
+						}
+					>
+						{([tipoCondicion, meta, cursoId]) => (
+							<VistaPreviaLogro
+								tipoCondicion={tipoCondicion}
+								meta={meta}
+								cursoId={
+									cursoId === TODAS || cursoId === SIN_CURSO ? undefined : cursoId
+								}
+								tenantId={esSuper && cursoId !== TODAS ? organizacion : null}
+							/>
+						)}
+					</form.Subscribe>
 				</form>
 
 				<DialogFooter>
