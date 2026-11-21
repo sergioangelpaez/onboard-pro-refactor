@@ -1,6 +1,9 @@
 import { Check, ChevronsUpDown } from "lucide-react";
+import { Checkbox } from "#/components/ui/checkbox";
 import { useAllGroups } from "#/hooks/groups/use-all-groups";
 import { useAllUsers } from "#/hooks/users/use-all-users";
+import { useCurrentUser } from "#/hooks/users/use-current-user";
+import { rolReal } from "#/lib/utils/auth/session";
 import { cn } from "@/lib/utils/utils";
 import { Button } from "../../ui/button";
 import {
@@ -11,6 +14,7 @@ import {
 	CommandItem,
 	CommandList,
 } from "../../ui/command";
+import { Field, FieldDescription, FieldLabel } from "../../ui/field";
 import { Input } from "../../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import {
@@ -20,6 +24,40 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../../ui/select";
+
+/**
+ * "Para toda la organización": el curso lo tienen todos los aprendices de la
+ * organización, estén o no en un grupo. Solo lo decide el administrador, así
+ * que a los demás roles no se les muestra.
+ */
+export function ParaTodosCampo({
+	id,
+	value,
+	onChange,
+}: {
+	id: string;
+	value: boolean;
+	onChange: (value: boolean) => void;
+}) {
+	const { user } = useCurrentUser();
+	if (rolReal(user?.role) !== "admin") return null;
+	return (
+		<Field orientation="horizontal" className="items-start">
+			<Checkbox
+				id={id}
+				checked={value}
+				onCheckedChange={(v: boolean | string) => onChange(v === true)}
+			/>
+			<div className="grid gap-1">
+				<FieldLabel htmlFor={id}>Para toda la organización</FieldLabel>
+				<FieldDescription>
+					Todos los aprendices de la organización tendrán este curso, también
+					los que se registren después.
+				</FieldDescription>
+			</div>
+		</Field>
+	);
+}
 
 /** Valor del selector de grupo que significa "no asignarlo todavía". */
 export const SIN_GRUPO = "ninguno";

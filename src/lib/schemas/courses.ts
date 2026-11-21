@@ -14,6 +14,8 @@ export const courseSchema = z.object({
 	archivadoAt: z.string().nullish(),
 	// Solo lo manda el backend cuando hay varias organizaciones a la vista.
 	tenantName: z.string().nullish(),
+	// Para toda la organización: lo tienen todos sus aprendices, sin grupos.
+	paraTodos: z.boolean().nullish(),
 	// Solo en "mis cursos" del aprendiz: cuánto lleva hecho.
 	progreso: z
 		.object({ hechas: z.number(), total: z.number(), porcentaje: z.number() })
@@ -66,6 +68,7 @@ export const courseFormSchema = z.object({
 	instructor: z.email("Elige quién dicta el curso"),
 	status: z.enum(["Abierto", "Cerrado"], "Elige el estado"),
 	grupoIds: z.array(z.string()),
+	paraTodos: z.boolean(),
 	actividades: z.array(z.string()),
 });
 
@@ -73,7 +76,7 @@ export type CourseFormValues = z.infer<typeof courseFormSchema>;
 
 /** Lo que acepta `PUT /courses/update/:id`: solo se manda lo que cambió. */
 export type UpdateCoursePayload = Partial<
-	Pick<CourseFormValues, "name" | "status">
+	Pick<CourseFormValues, "name" | "status" | "paraTodos">
 >;
 
 /** Una seccion del curso con las actividades que cuelgan de ella. */

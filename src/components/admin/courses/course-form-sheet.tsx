@@ -32,6 +32,7 @@ import {
 	EstadoSelect,
 	GruposMultiSelect,
 	InstructorSelect,
+	ParaTodosCampo,
 } from "./course-fields";
 
 interface CourseFormSheetProps {
@@ -64,6 +65,7 @@ export function CourseFormSheet({
 			instructor: course.instructor ?? "",
 			status: course.status === "Abierto" ? "Abierto" : "Cerrado",
 			grupoIds: [],
+			paraTodos: Boolean(course.paraTodos),
 			actividades: [],
 		} as CourseFormValues,
 		validators: { onChange: courseFormSchema },
@@ -71,6 +73,8 @@ export function CourseFormSheet({
 			const cambios: UpdateCoursePayload = {};
 			if (value.name.trim() !== course.name) cambios.name = value.name.trim();
 			if (value.status !== course.status) cambios.status = value.status;
+			if (value.paraTodos !== Boolean(course.paraTodos))
+				cambios.paraTodos = value.paraTodos;
 			const cambioInstructor = value.instructor !== course.instructor;
 			const asignar = value.grupoIds.length > 0;
 
@@ -181,6 +185,16 @@ export function CourseFormSheet({
 									Un curso sin actividades no se puede publicar.
 								</FieldDescription>
 							</Field>
+						)}
+					</form.Field>
+
+					<form.Field name="paraTodos">
+						{(field) => (
+							<ParaTodosCampo
+								id={field.name}
+								value={field.state.value}
+								onChange={field.handleChange}
+							/>
 						)}
 					</form.Field>
 

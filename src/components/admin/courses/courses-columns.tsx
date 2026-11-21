@@ -8,7 +8,14 @@ const columnHelper = createAppColumnHelper<Course>();
 export const coursesColumns = columnHelper.columns([
 	columnHelper.accessor("name", {
 		header: "Nombre",
-		cell: (info) => info.getValue(),
+		cell: ({ row, getValue }) => (
+			<span className="flex flex-wrap items-center gap-2">
+				{getValue()}
+				{row.original.paraTodos && (
+					<Badge variant="secondary">Toda la organización</Badge>
+				)}
+			</span>
+		),
 	}),
 	columnHelper.accessor("instructor", {
 		header: "Instructor",

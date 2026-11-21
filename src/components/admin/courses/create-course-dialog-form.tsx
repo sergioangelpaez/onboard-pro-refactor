@@ -37,6 +37,7 @@ import {
 	EstadoSelect,
 	GruposMultiSelect,
 	InstructorSelect,
+	ParaTodosCampo,
 } from "./course-fields";
 
 export function CreateCourseDialogForm() {
@@ -59,6 +60,7 @@ export function CreateCourseDialogForm() {
 			// Nace como borrador: se publica cuando ya tiene contenido.
 			status: "Cerrado",
 			grupoIds: [],
+			paraTodos: false,
 			actividades: [],
 		} as CourseFormValues,
 		validators: { onChange: courseFormSchema },
@@ -69,6 +71,7 @@ export function CreateCourseDialogForm() {
 					instructor: value.instructor,
 					status: value.status,
 					actividades: value.actividades,
+					...(value.paraTodos ? { paraTodos: true } : {}),
 				},
 				{
 					onSuccess: async (curso) => {
@@ -216,6 +219,16 @@ export function CreateCourseDialogForm() {
 								</Field>
 							);
 						}}
+					</form.Field>
+
+					<form.Field name="paraTodos">
+						{(field) => (
+							<ParaTodosCampo
+								id={field.name}
+								value={field.state.value}
+								onChange={field.handleChange}
+							/>
+						)}
 					</form.Field>
 
 					<form.Field name="status">
